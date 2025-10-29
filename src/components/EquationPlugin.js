@@ -1,5 +1,6 @@
 // EquationPlugin.js
-import { Plugin, ButtonView } from 'ckeditor5'
+import { Plugin, ButtonView } from 'ckeditor5';
+
 
 export default class EquationPlugin extends Plugin {
     init() {

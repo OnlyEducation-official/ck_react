@@ -15,9 +15,9 @@ function EqEditorModal({ isOpen, onClose, onInsert }) {
     if (!isOpen) return null;
 
     const handleInsert = () => {
-        const imgSrc = document.getElementById('output').src;
-        if (imgSrc) {
-            onInsert(imgSrc);
+        const latexContent = document.getElementById('latexInput')?.textContent || '';
+        if (latexContent.trim()) {
+            onInsert(latexContent.trim());
         }
         onClose();
     };
@@ -37,7 +37,7 @@ function EqEditorModal({ isOpen, onClose, onInsert }) {
                         <img id="output" alt="Equation output" />
                     </div>
                 </div>
-                <button onClick={handleInsert} style={{ marginRight: 10 }}>Insert Equation</button>
+                <button onClick={handleInsert} style={{ marginRight: 10 }}>Insert LaTeX</button>
                 <button onClick={onClose}>Cancel</button>
             </div>
         </div>
