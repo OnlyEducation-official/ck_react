@@ -1,5 +1,5 @@
 // src/MainEditor.jsx
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
     ClassicEditor,
@@ -17,19 +17,18 @@ import 'ckeditor5/ckeditor5.css';
 
 function MainEditor() {
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalKey, setModalKey] = useState(0); // Force modal remount
     const [editorInstance, setEditorInstance] = useState(null);
-    const currentLatexRef = useRef('');
-    const editingElementRef = useRef(null);
+    const [currentLatex, setCurrentLatex] = useState('');
+    const [editingElement, setEditingElement] = useState(null);
 
     const handleInsertOrUpdateEquation = useCallback(
         (latexString) => {
             if (!editorInstance) return;
 
             editorInstance.model.change((writer) => {
-                if (editingElementRef.current) {
+                if (editingElement) {
                     // Update existing equation
-                    writer.setAttribute('latex', latexString, editingElementRef.current);
+                    writer.setAttribute('latex', latexString, editingElement);
                 } else {
                     // Insert new equation
                     const position =
@@ -42,24 +41,16 @@ function MainEditor() {
             });
 
             // Reset editing state
-            editingElementRef.current = null;
-            currentLatexRef.current = '';
+            setEditingElement(null);
+            setCurrentLatex('');
         },
-        [editorInstance]
+        [editorInstance, editingElement]
     );
 
     const handleModalClose = useCallback(() => {
         setModalOpen(false);
-        currentLatexRef.current = '';
-        editingElementRef.current = null;
-    }, []);
-
-    const handleOpenEditor = useCallback((data) => {
-        // Set the latex and model element for editing
-        currentLatexRef.current = data?.latex || '';
-        editingElementRef.current = data?.modelElement || null;
-        setModalKey(prev => prev + 1); // Force remount
-        setModalOpen(true);
+        setCurrentLatex('');
+        setEditingElement(null);
     }, []);
 
     return (
@@ -102,20 +93,20 @@ function MainEditor() {
                 onReady={(editor) => {
                     setEditorInstance(editor);
                     editor.on('openEqEditor', (evt, data) => {
-                        handleOpenEditor(data);
+                        // Set the latex and model element for editing
+                        setCurrentLatex(data?.latex || '');
+                        setEditingElement(data?.modelElement || null);
+                        setModalOpen(true);
                     });
                 }}
             />
-            {modalOpen && (
-                <EqEditorModal
-                    key={modalKey.length + 1}
-                    isOpen={modalOpen}
-                    onClose={handleModalClose}
-                    onInsert={handleInsertOrUpdateEquation}
-                    initialLatex={currentLatexRef.current}
-                    isEditing={!!editingElementRef.current}
-                />
-            )}
+            <EqEditorModal
+                isOpen={modalOpen}
+                onClose={handleModalClose}
+                onInsert={handleInsertOrUpdateEquation}
+                initialLatex={currentLatex}
+                isEditing={!!editingElement}
+            />
         </>
     );
 }

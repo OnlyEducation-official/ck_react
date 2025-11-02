@@ -51,19 +51,45 @@ export default class KaTeXRenderPlugin extends Plugin {
             },
         });
 
-        // --- 2.5. Listen for attribute changes and trigger re-render
-        editor.model.document.on('change:data', () => {
-            const changes = editor.model.document.differ.getChanges();
+        // --- 2b. Listen for attribute changes and trigger re-render
+        editor.conversion.for('editingDowncast').add(dispatcher => {
+            dispatcher.on('attribute:latex:mathBlock', (evt, data, conversionApi) => {
+                const { writer, mapper } = conversionApi;
+                const modelElement = data.item;
 
-            for (const change of changes) {
-                if (change.type === 'attribute' && change.attributeKey === 'latex') {
-                    // Force re-render by triggering conversion
-                    const item = change.range.start.nodeAfter || change.range.start.nodeBefore;
-                    if (item && item.is('element', 'mathBlock')) {
-                        editor.editing.reconvertItem(item);
-                    }
+                // Get the view element
+                const viewElement = mapper.toViewElement(modelElement);
+                if (!viewElement) return;
+
+                // Find the container and raw element
+                const container = viewElement;
+                const rawElement = container.getChild(0);
+
+                if (rawElement) {
+                    // Re-render the raw element with new latex
+                    const newLatex = data.attributeNewValue || '';
+                    const newHtml = renderLatexWithKatex(newLatex);
+
+                    writer.remove(rawElement);
+
+                    const newRaw = writer.createRawElement(
+                        'span',
+                        { class: 'katex-render' },
+                        (domElement) => {
+                            domElement.innerHTML = newHtml;
+                            domElement.style.cursor = 'pointer';
+                            domElement.addEventListener('click', () => {
+                                editor.fire('openEqEditor', {
+                                    latex: newLatex,
+                                    modelElement: modelElement
+                                });
+                            });
+                        }
+                    );
+
+                    writer.insert(writer.createPositionAt(container, 0), newRaw);
                 }
-            }
+            });
         });
 
         // --- 3. Downcast for data (model → saved HTML)
