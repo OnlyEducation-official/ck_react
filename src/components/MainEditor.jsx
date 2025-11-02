@@ -1,5 +1,5 @@
 // src/MainEditor.jsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import {
     ClassicEditor,
@@ -17,22 +17,50 @@ import 'ckeditor5/ckeditor5.css';
 
 function MainEditor() {
     const [modalOpen, setModalOpen] = useState(false);
+    const [modalKey, setModalKey] = useState(0); // Force modal remount
     const [editorInstance, setEditorInstance] = useState(null);
+    const currentLatexRef = useRef('');
+    const editingElementRef = useRef(null);
 
-    const handleInsertEquation = useCallback(
+    const handleInsertOrUpdateEquation = useCallback(
         (latexString) => {
             if (!editorInstance) return;
+
             editorInstance.model.change((writer) => {
-                const position =
-                    editorInstance.model.document.selection.getFirstPosition();
-                const element = writer.createElement('mathBlock', {
-                    latex: latexString,
-                });
-                editorInstance.model.insertContent(element, position);
+                if (editingElementRef.current) {
+                    // Update existing equation
+                    writer.setAttribute('latex', latexString, editingElementRef.current);
+                } else {
+                    // Insert new equation
+                    const position =
+                        editorInstance.model.document.selection.getFirstPosition();
+                    const element = writer.createElement('mathBlock', {
+                        latex: latexString,
+                    });
+                    editorInstance.model.insertContent(element, position);
+                }
             });
+
+            // Reset editing state
+            editingElementRef.current = null;
+            currentLatexRef.current = '';
         },
         [editorInstance]
     );
+
+    const handleModalClose = useCallback(() => {
+        setModalOpen(false);
+        currentLatexRef.current = '';
+        editingElementRef.current = null;
+    }, []);
+
+    const handleOpenEditor = useCallback((data) => {
+        // Set the latex and model element for editing
+        currentLatexRef.current = data?.latex || '';
+        editingElementRef.current = data?.modelElement || null;
+        setModalKey(prev => prev + 1); // Force remount
+        setModalOpen(true);
+    }, []);
 
     return (
         <>
@@ -48,7 +76,7 @@ function MainEditor() {
                         TimestampPlugin,
                         EquationPlugin,
                         GeneralHtmlSupport,
-                        KaTeXRenderPlugin, // ✅ Math renderer
+                        KaTeXRenderPlugin,
                     ],
                     toolbar: [
                         'undo',
@@ -73,14 +101,21 @@ function MainEditor() {
                 }}
                 onReady={(editor) => {
                     setEditorInstance(editor);
-                    editor.on('openEqEditor', () => setModalOpen(true));
+                    editor.on('openEqEditor', (evt, data) => {
+                        handleOpenEditor(data);
+                    });
                 }}
             />
-            <EqEditorModal
-                isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
-                onInsert={handleInsertEquation}
-            />
+            {modalOpen && (
+                <EqEditorModal
+                    key={modalKey.length + 1}
+                    isOpen={modalOpen}
+                    onClose={handleModalClose}
+                    onInsert={handleInsertOrUpdateEquation}
+                    initialLatex={currentLatexRef.current}
+                    isEditing={!!editingElementRef.current}
+                />
+            )}
         </>
     );
 }
