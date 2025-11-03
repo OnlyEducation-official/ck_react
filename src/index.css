@@ -66,3 +66,40 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+/* .katex-block {
+  display: block;
+  margin: 10px 0;
+} */
+
+/* .math-block {
+  display: block;
+  text-align: center;
+  margin: 12px 0;
+} */
+
+* {
+  box-sizing: border-box;
+  /* margin: 0;
+  padding: 0; */
+  font-family: sans-serif;
+  font-weight: 400;
+}
+
+.math-block {
+  display: block;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.math-inline {
+  display: inline-block;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+/* Stronger selector + covers both classes */
+.my-editor .ck-editor__editable_inline,
+.my-editor .ck-content {
+  min-height: 5em !important;
+}
