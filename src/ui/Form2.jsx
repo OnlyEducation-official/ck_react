@@ -3,11 +3,13 @@ import MainEditor from '../components/MainEditor'
 import QuestionCard from './QuestionCard'
 import SelectComponent from './SelectComponent';
 import { Box, Button, Container, Grid } from '@mui/material';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CheckBox from './CheckBox';
 
-export default function QuestionPreview() {
-    const { control, setValue, watch, handleSubmit } = useForm({
+export default function QuestionPreview2() {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const { control, setValue, watch, handleSubmit, reset } = useForm({
         defaultValues: {
             question_title: '',
             explanation: '',
@@ -21,7 +23,7 @@ export default function QuestionPreview() {
 
         }
     });
-    console.log('watch', watch())
+    // console.log('watch', watch())
 
     const { fields, append } = useFieldArray({
         control,
@@ -38,8 +40,8 @@ export default function QuestionPreview() {
         //     data: data
         // };
         // console.log('payload: ', payload);
-        const response = fetch('https://admin.onlyeducation.co.in/api/t-questions', {
-            method: 'POST',
+        const response = fetch('https://admin.onlyeducation.co.in/api/t-questions/245', {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer 396dcb5c356426f8c3ce8303bcdc6feb5ecb1fd4aa4aaa59e42e1c7f82b6385cf4107d023cc58cfd61294adb023993a8e58e0aad8759fbf44fc020c1ac02f492c9d42d1f7dc12fc05c8144fbe80f06850c79d4b823241c83c5e153b03d1f8d0316fb9dec1a531c0df061e1f242bab549f17f715b900ba9546f6a6351fdd7dfa8'
@@ -49,17 +51,38 @@ export default function QuestionPreview() {
         console.log('response', response);
     }
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch('https://admin.onlyeducation.co.in/api/t-questions/245?populate[options]=true');
+                const { data } = await response.json();
+                console.log('data: ', data);
+
+                reset(data.attributes);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (isLoading) return <div>Loading...</div>;
+
     return (
         <Container maxWidth='xl' >
             <Box component={'form'} onSubmit={handleSubmit(onSubmitt)}>
                 <div className='flex flex-col gap-4 py-12'>
                     <div>
                         <h1 className='text-xl'>{`1) Question title`}</h1>
-                        <MainEditor docId={'question_title'} onChange={handleEditorChange} />
+                        <MainEditor docId={'question_title'} initialHTML={watch('question_title')} onChange={handleEditorChange} />
                     </div>
                     <div>
                         <h2 className='text-xl'>{`2) Question Explaination`}</h2>
-                        <MainEditor docId={'explanation'} onChange={handleEditorChange} />
+                        <MainEditor docId={'explanation'} initialHTML={watch('explanation')} onChange={handleEditorChange} />
                     </div>
                     <Grid container spacing={2}>
                         {fields.map((field, index) => (
@@ -80,7 +103,7 @@ export default function QuestionPreview() {
                                 <Button variant={watch(`options.${index}.is_correct`) === true ? 'contained' : 'outlined'}>False</Button>
                             </Box> */}
                                 <h2 className='text-xl'>Option</h2>
-                                <MainEditor docId={`options.${index}.option`} onChange={handleEditorChange} />
+                                <MainEditor docId={`options.${index}.option`} initialHTML={watch(`options.${index}.option`)} onChange={handleEditorChange} />
                             </Grid>
 
                         ))}
