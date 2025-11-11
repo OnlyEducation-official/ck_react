@@ -17,6 +17,7 @@
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
     "@tailwindcss/vite": "^4.1.16",
+    "@wiris/mathtype-ckeditor5": "^8.14.0",
     "ckeditor5": "^47.1.0",
     "katex": "^0.16.25",
     "react": "^19.1.1",

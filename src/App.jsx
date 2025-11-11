@@ -47,6 +47,7 @@ import QuestionPreview from "./ui/Form";
 import QuestionPreview2 from "./ui/Form2";
 import ResponsiveAppBar from './ui/Header';
 import DrawerAppBar from './ui/Header1';
+import Index from './addQeustion/Index';
 
 
 function App() {
@@ -60,7 +61,8 @@ function App() {
       </nav> */}
 
       <Routes>
-        <Route path="/" element={<QuestionPreview />} />
+        <Route path="/:id" element={<Index />} />
+        <Route path="/q" element={<QuestionPreview />} />
         <Route path="/edit/:id" element={<QuestionPreview2 />} />
         <Route path="/listing" element={<GetAllList />} />
       </Routes>
