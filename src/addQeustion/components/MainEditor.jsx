@@ -28,8 +28,7 @@ function MainEditor() {
         className="my-editor"
         config={{
           // Your license key here
-          licenseKey:
-            "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NjM5NDIzOTksImp0aSI6IjY3NGFhYTJiLTNmNmQtNDhiYi05YjhjLWU0OWIwZTY4NGNlNyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6IjgwNWMyYzAxIn0.andZKBtk2kyMsx53jk3RIaBV0ZhZ0CUEipALkY5u00UWPA4ZkRLRNYJY0f4FfIlNbYCEd34Yi6ZmywI81_H7qw",
+          licenseKey: import.meta.env.VITE_CKEDITOR,
           plugins: [Essentials, Paragraph, Bold, MathType],
           toolbar: [
             "undo",
@@ -38,7 +37,7 @@ function MainEditor() {
             "bold",
             "MathType",
             "insertInlineFormula", // Inline equation editor
-            "insertBlockFormula", 
+            "insertBlockFormula",
             // 'ChemType',
           ],
 
@@ -50,6 +49,9 @@ function MainEditor() {
           console.log("Editor data:", data);
         }}
       />
+        <pre>
+          {JSON.stringify(editorData, null, 2)}
+          </pre>
     </>
   );
 }
