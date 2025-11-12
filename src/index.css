@@ -78,7 +78,7 @@ button:focus-visible {
   margin: 12px 0;
 } */
 
-@import "tailwindcss";
+/* @import "tailwindcss"; */
 
 * {
   box-sizing: border-box;

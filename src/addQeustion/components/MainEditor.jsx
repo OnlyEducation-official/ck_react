@@ -17,8 +17,7 @@ import "ckeditor5/ckeditor5.css";
 import MathType from "@wiris/mathtype-ckeditor5/dist/index.js";
 
 function MainEditor() {
-  const [editorData, setEditorData] = useState(
-    "<p>Type text and insert equations inline or as blocks.</p>"
+  const [editorData, setEditorData] = useState(null
   );
   console.log("editorData: ", editorData);
   return (
@@ -36,8 +35,8 @@ function MainEditor() {
             "|",
             "bold",
             "MathType",
-            "insertInlineFormula", // Inline equation editor
-            "insertBlockFormula",
+            // "insertInlineFormula", // Inline equation editor
+            // "insertBlockFormula",
             // 'ChemType',
           ],
 
