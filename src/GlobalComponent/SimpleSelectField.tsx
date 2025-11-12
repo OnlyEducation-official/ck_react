@@ -53,7 +53,7 @@ const SimpleSelectField = <T extends FieldValues>({
             {...field}
             label={label}
             value={field.value ?? ""}
-            onChange={(e) => field.onChange(e.target.value)}
+            onChange={(e) => field.onChange(Number(e.target.value))}
           >
             {placeholder && (
               <MenuItem value="" disabled>
