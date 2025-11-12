@@ -24,7 +24,6 @@ function MainEditor() {
     const [editorData, setEditorData] = useState('<p>Type text and insert equations inline or as blocks.</p>');
     console.log('editorData: ', editorData);
 
-
     return (
         <>
             <CKEditor
@@ -33,7 +32,7 @@ function MainEditor() {
                 config={{
                     // Your license key here
                     licenseKey:
-                        'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3OTI4ODYzOTksImp0aSI6ImY5YTk2MjNlLWY1ZTYtNDFjMy1hM2E3LWVlNDViNzFiNTNjYiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCIsIkUyUCIsIkUyVyJdLCJyZW1vdmVGZWF0dXJlcyI6WyJQQiIsIlJGIiwiU0NIIiwiVENQIiwiVEwiLCJUQ1IiLCJJUiIsIlNVQSIsIkI2NEEiLCJMUCIsIkhFIiwiUkVEIiwiUEZPIiwiV0MiLCJGQVIiLCJCS00iLCJGUEgiLCJNUkUiXSwidmMiOiIwZDRjZGIxZiJ9.GHN-RNSERoAQtrrnPex160lxVDMsbmQ7NtQ_hrn_VLpISdp2U85FRKPAg81sPOBIa2B6yKPPe-O9dHwDRD91HQ',
+                        'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NjM5NDIzOTksImp0aSI6ImZjZDk1ZmIxLTI5NjUtNDFkNy04YTkwLWMyNGJiNWEwNTQ3OSIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6ImU5ZGFkODM1In0.Bp6ywOhDzf4Ltf8tylcPS_2zQOGEJ35tKQ7xQ4rzpSaO4r6tzhW4ND_qi0OOdJywWsby3DixnnBUlKk2LLwrsw',
                     plugins: [
                         Essentials,
                         Paragraph,
@@ -46,7 +45,7 @@ function MainEditor() {
                         '|',
                         'bold',
                         'MathType',
-                        // 'ChemType',
+                        'ChemType',
                     ],
 
                     data: '<p>Type text and insert equations inline or as blocks.</p>',
