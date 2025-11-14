@@ -19,19 +19,19 @@ export type Option = {
   label: string;
 };
 
-interface SimpleSelectFieldProps<T extends FieldValues> {
+interface GlobalSelectFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
-  label: string;
+  label?: string;
   options: Option[];
   placeholder?: string;
   disabled?: boolean;
   fullWidth?: boolean;
-  rules?: RegisterOptions; // ✅ support validation rules
-  isOptionEqualToValue?: (a: Option, b: Option) => boolean; // ✅ optional prop
+  rules?: RegisterOptions;
+  isOptionEqualToValue?: (a: Option, b: Option) => boolean;
 }
 
-const SimpleSelectField = <T extends FieldValues>({
+const GlobalSelectField = <T extends FieldValues>({
   name,
   control,
   label,
@@ -39,19 +39,23 @@ const SimpleSelectField = <T extends FieldValues>({
   placeholder,
   disabled = false,
   fullWidth = true,
-  rules,
-}: SimpleSelectFieldProps<T>) => {
+}: GlobalSelectFieldProps<T>) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <FormControl fullWidth={fullWidth} error={!!fieldState.error} disabled={disabled}>
-          <InputLabel>{label}</InputLabel>
+        <FormControl
+          fullWidth={fullWidth}
+          error={!!fieldState.error}
+          disabled={disabled}
+        >
+          {label && <InputLabel>{label}</InputLabel>}
 
           <Select
             {...field}
             label={label}
+            displayEmpty
             value={field.value ?? ""}
             onChange={(e) => field.onChange(Number(e.target.value))}
           >
@@ -61,7 +65,7 @@ const SimpleSelectField = <T extends FieldValues>({
               </MenuItem>
             )}
 
-            {options?.map((opt) => (
+            {options.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -77,4 +81,4 @@ const SimpleSelectField = <T extends FieldValues>({
   );
 };
 
-export default SimpleSelectField;
+export default GlobalSelectField;
