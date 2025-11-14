@@ -15,13 +15,6 @@ interface OptionFieldArrayProps<T extends FieldValues> {
   watch: UseFormWatch<T>;
 }
 
-const optionLabelOptions = [
-  { label: "A", value: "A" },
-  { label: "B", value: "B" },
-  { label: "C", value: "C" },
-  { label: "D", value: "D" },
-];
-
 const OptionsFieldArray = <T extends FieldValues>({
   control,
   setValue,
@@ -63,14 +56,14 @@ const OptionsFieldArray = <T extends FieldValues>({
           >
             <Box fontWeight={600}>Option {index + 1}</Box>
 
-            <SimpleSelectField
+            {/* <SimpleSelectField
               // name typed as any to allow string path
               name={`options.${index}.option_label` as any}
               control={control}
               label="Option Label"
               options={optionLabelOptions}
               placeholder="Select label"
-            />
+            /> */}
 
             <FormControlLabel
               control={

@@ -5,7 +5,7 @@ import { TextField } from "@mui/material";
 interface SimpleTextFieldProps {
   name: string;
   control: Control<any>;
-  label: string;
+  label?: string;
   type?: "text" | "number" | "password" | "email" | "textarea";
   placeholder?: string;
   disabled?: boolean;
@@ -36,6 +36,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
       rules={rules}
       render={({ field, fieldState }) => (
         <TextField
+          // size="small"
           {...field}
           fullWidth={fullWidth}
           type={type === "textarea" ? "text" : type}

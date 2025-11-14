@@ -27,98 +27,92 @@ export default function FormStructure({
     return (
         <Grid
             container
+            spacing={3}
             sx={{ marginBlockStart: 10, paddingInline: 3 }}
         >
-            <Grid size={12}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                        subject tag
-                    </Typography>
-                    <SimpleSelectField
-                        name="subject_tag"
-                        control={control}
-                        label="Select Subject"
-                        options={
-                            dummySubject.map((s) => ({
-                                value: s.id.toString(),
-                                label: s.title,
-                            })) as Option[]
-                        }
-                        rules={{ required: "Please select a subject" }}
-                    />
-                </Box>
+            <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle1">
+                    Select subject
+                </Typography>
+                <SimpleSelectField
+                    name="subject_tag"
+                    control={control}
+                    // label="Select Subject"
+                    options={
+                        subjectTagData?.map((subject) => ({
+                            value: subject.id,
+                            label: subject.attributes.name,
+                        })) as Option[]
+                    }
+                    rules={{ required: "Please select a subject" }}
+                />
             </Grid>
-            <Grid size={12}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 {/* <SimpleSelectField /> */}
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                    test series topic
+                <Typography variant="subtitle1">
+                    Test series topic
                 </Typography>
                 <SimpleSelectField
                     name="test_series_topic"
                     control={control}
-                    label="Test Series Topic"
+                    // label="Test Series Topic"
                     options={
-                        dummyTopics.map((s) => ({
-                            value: s.id.toString(),
-                            label: s.title,
+                        topicTagData?.map((topic) => ({
+                            value: topic.id,
+                            label: topic.attributes.name,
                         })) as Option[]
                     }
                     rules={{ required: "Please select a Topic" }}
                 />
             </Grid>
-            <Grid size={12}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 {/* <SimpleSelectField /> */}
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                    marks
+                <Typography variant="subtitle1">
+                    Marks
                 </Typography>
                 <SimpleTextField
                     name="marks"
                     control={control}
-                    label="Marks"
+                    // label="Marks"
                     type="number"
                     placeholder="Enter marks"
                     rules={{ min: { value: 1, message: "Marks must be at least 1" } }}
                 />
             </Grid>
-            <Grid size={12}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 {/* <SimpleSelectField /> */}
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                    difficulty
+                <Typography variant="subtitle1">
+                    Difficulty
                 </Typography>
                 <SimpleSelectField
                     name="difficulty"
                     control={control}
-                    label="Test Series Topic"
+                    // label="Test Series Topic"
                     options={difficultyOptions}
                     rules={{ required: "Please select a Topic" }}
                 />
             </Grid>
-            <Grid size={12}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-                        Question Title
-                    </Typography>
-                </Box>
-                {/* <MainEditor
-          name="question_title"
-          value={watch("question_title")}
-          setValue={setValue}
-          watch={watch}
-        /> */}
+            <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle1">
+                    Question Title
+                </Typography>
+                <MainEditor
+                    name="question_title"
+                    value={watch("question_title")}
+                    setValue={setValue}
+                    watch={watch}
+                />
             </Grid>
-            <Grid size={12}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <Typography
-                        variant="h5"
-                        className="text-xl"
-                    >{`2) Question Explaination`}</Typography>
-                    <MainEditor
-                        name="explanation"
-                        value={watch("explanation")}
-                        setValue={setValue}
-                        watch={watch}
-                    />
-                </Box>
+            <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle1">
+                    Explaination
+                </Typography>
+                <MainEditor
+                    name="explanation"
+                    value={watch("explanation")}
+                    setValue={setValue}
+                    watch={watch}
+                />
             </Grid>
             <Grid size={12}>
                 <OptionsFieldArray

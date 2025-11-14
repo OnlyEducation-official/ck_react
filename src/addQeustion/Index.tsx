@@ -36,12 +36,6 @@ export default function Index() {
   });
   console.log("errors: ", errors);
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "options",
-  });
-
-  console.log("watch: ", watch());
   const onSubmitt = async (data: any) => {
     console.log("submit", data);
     // const payload = {

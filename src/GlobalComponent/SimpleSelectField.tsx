@@ -22,7 +22,7 @@ export type Option = {
 interface SimpleSelectFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
-  label: string;
+  label?: string;
   options: Option[];
   placeholder?: string;
   disabled?: boolean;
@@ -47,21 +47,19 @@ const SimpleSelectField = <T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <FormControl fullWidth={fullWidth} error={!!fieldState.error} disabled={disabled}>
-          <InputLabel>{label}</InputLabel>
+          {label && (<InputLabel>{label}</InputLabel>)}
 
           <Select
             {...field}
             label={label}
-            value={field.value ?? ""}
+            value={field.value ? field.value : ""}
             onChange={(e) => field.onChange(Number(e.target.value))}
           >
-            {placeholder && (
-              <MenuItem value="" disabled>
-                {placeholder}
-              </MenuItem>
-            )}
+            <MenuItem value={0}>
+              <i>none</i>
+            </MenuItem>
 
-            {options.map((opt) => (
+            {options?.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>

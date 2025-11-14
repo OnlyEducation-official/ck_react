@@ -68,7 +68,11 @@ function App() {
           </InitialDataContextProvider>
         } />
         <Route path="/q" element={<QuestionPreview />} />
-        <Route path="/edit/:id" element={<QuestionPreview2 />} />
+        <Route path="/edit/:id" element={
+          <InitialDataContextProvider>
+            <QuestionPreview2 />
+          </InitialDataContextProvider>
+        } />
         <Route path="/listing" element={<GetAllList />} />
       </Routes>
     </div>
