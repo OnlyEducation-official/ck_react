@@ -26,6 +26,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
   rows = 3,
   fullWidth = true,
   rules,
+  ...rest
 }) => {
   const isNumber = type === "number";
 
@@ -50,6 +51,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             const value = e.target.value;
             field.onChange(isNumber && value !== "" ? Number(value) : value);
           }}
+          {...rest}
           inputProps={
             isNumber
               ? { inputMode: "numeric", pattern: "[0-9]*" }
