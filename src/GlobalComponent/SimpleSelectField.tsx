@@ -53,7 +53,22 @@ const SimpleSelectField = <T extends FieldValues>({
           <Select
             {...field}
             label={label}
+            size="small"
             value={typeof field.value === "number" ? (field.value ? field.value : '') : field.value}
+            slotProps={{
+              root: {
+                style: {
+                  // maxHeight: '430px',
+                  width: '100%'
+                }
+              }
+            }}
+            MenuProps={{
+              style: {
+                maxHeight: '430px',
+                width: '100%'
+              }
+            }}
             onChange={(e) => {
               if (typeof e.target.value === 'number') {
                 field.onChange(Number(e.target.value));

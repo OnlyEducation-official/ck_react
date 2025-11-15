@@ -37,7 +37,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
       rules={rules}
       render={({ field, fieldState }) => (
         <TextField
-          // size="small"
+          size="small"
           {...field}
           fullWidth={fullWidth}
           type={type === "textarea" ? "text" : type}
