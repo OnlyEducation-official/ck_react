@@ -21,7 +21,7 @@ export type Option = {
 interface SimpleSelectFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
-  label?: string;
+  label: string;
   options: Option[];
   placeholder?: string;
   disabled?: boolean;
@@ -48,7 +48,7 @@ const SimpleSelectField = <T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <FormControl fullWidth={fullWidth} error={!!fieldState.error} disabled={disabled}>
-          {label && (<InputLabel>{label}</InputLabel>)}
+          <InputLabel>{label}</InputLabel>
 
           <Select
             {...field}
