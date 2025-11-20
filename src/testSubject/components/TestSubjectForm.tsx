@@ -23,6 +23,19 @@ import SimpleSelectField, {
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useParams } from "react-router-dom";
 
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+};
+
+
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
   { value: "science", label: "Science Icon" },
@@ -51,17 +64,6 @@ const TestSubjectForm = () => {
     },
   });
   console.log("watch: ", watch());
-  const slugify = (text: string): string => {
-    return text
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "")
-      .replace(/\-\-+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
-  };
 
   const nameValue = watch("name");
 
@@ -75,9 +77,8 @@ const TestSubjectForm = () => {
     if (!id) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-subjects/${id}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-subjects/${id}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -111,7 +112,7 @@ const TestSubjectForm = () => {
     const url = isEdit
       ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${id}`
       : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
-// test-series-subjects
+    // test-series-subjects
     const method = isEdit ? "PUT" : "POST";
 
     const body = JSON.stringify({

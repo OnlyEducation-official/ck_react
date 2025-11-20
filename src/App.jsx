@@ -12,6 +12,7 @@ import TestTopicPage from "./testTopic/Index";
 import TestSubjectPage from "./testSubject/Index";
 import TestExamCategoriesForm from "./TestExamCategories/components/TestExamCategoriesForm";
 import TestExamsForm from "./test-exams/TestExamsForm";
+import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
             </InitialDataContextProvider>
           }
         />
+        <Route
+          path="/test-exams/:id"
+          element={
+            <InitialDataContextProvider>
+              <TestExamsFormEdit />
+            </InitialDataContextProvider>
+          }
+        />
 
         {/* t-questions */}
         <Route path="/questions-list" element={<GetAllList routeName="t-questions" lol="questions" />} />
@@ -47,12 +56,12 @@ function App() {
         <Route path="/test-exams-category/edit/:qid" element={<TestExamCategoriesForm />} />
 
         {/* t-subjects */}
-        <Route path="/test-subject-list" element={<GetAllList routeName="test-series-subjects" lol="test-subject"/>} />
+        <Route path="/test-subject-list" element={<GetAllList routeName="test-series-subjects" lol="test-subject" />} />
         <Route path="/test-subject" element={<TestSubjectPage />} />
         <Route path="/test-subject/edit/:qid" element={<TestSubjectPage />} />
 
         {/* t-topic */}
-        <Route path="/test-topic-list" element={<GetAllList routeName="t-topics" lol="test-topic"/>} />
+        <Route path="/test-topic-list" element={<GetAllList routeName="t-topics" lol="test-topic" />} />
         <Route
           path="/test-topic"
           element={
@@ -78,7 +87,7 @@ function App() {
             </InitialDataContextProvider>
           }
         />
-        
+
       </Routes>
     </div>
   );

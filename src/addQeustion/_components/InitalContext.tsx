@@ -27,7 +27,7 @@ const fetchDataFunc = async (url: string) => {
     headers: {
       "Content-Type": "application/json",
       Authorization:
-        "Bearer 396dcb5c356426f8c3ce8303bcdc6feb5ecb1fd4aa4aaa59e42e1c7f82b6385cf4107d023cc58cfd61294adb023993a8e58e0aad8759fbf44fc020c1ac02f492c9d42d1f7dc12fc05c8144fbe80f06850c79d4b823241c83c5e153b03d1f8d0316fb9dec1a531c0df061e1f242bab549f17f715b900ba9546f6a6351fdd7dfa8",
+        "Bearer 2e50f97e2dbab2098ac3c8302155beef954e0f72bd1253a0336f633e65229bbe80ed0cf2feb91092cfa30d23345b1e1b77fd4f506fa8cbd4277e65f7a99b0f6e5fe477efa9cdf2b26239ebdc800346b2bfe20d5ec36f897a9a868b12270a86b6781c8b062f3a9c15f0306285694cd9019e3d42d48de2c3c0b6d3b1fff76647ba",
     },
   });
   const data = await response.json();
@@ -54,7 +54,7 @@ export function InitialDataContextProvider({
         "https://admin.onlyeducation.co.in/api/t-categories?[fields][0]=name&[fields][1]=slug"
       );
       const tExamsData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}t-exams`
+        "https://admin.onlyeducation.co.in/api/t-exams?[fields][0]=title&[fields][1]=slug"
       );
       setData({
         subjectTagData: subjectData.data,

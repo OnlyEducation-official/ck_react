@@ -7,6 +7,8 @@ import useInitialDataContext from '../../addQeustion/_components/InitalContext'
 import { difficultyOptions, optionTypeData } from '../../addQeustion/_components/data'
 import MainEditor from '../../addQeustion/components/MainEditor'
 import { ExamsSchemaType } from '../../validation/testSeriesExamSchema'
+import { useEffect } from 'react'
+import { slugify } from '../../testSubject/components/TestSubjectForm'
 
 export default function TestExamFormStructure({
     control,
@@ -18,6 +20,10 @@ export default function TestExamFormStructure({
     setValue: UseFormSetValue<ExamsSchemaType>
 }) {
     const { subjectTagData, topicTagData, examCategoryData } = useInitialDataContext();
+    useEffect(() => {
+        if (!watch('title')) return;
+        setValue("slug", slugify(watch('title')));
+    }, [watch('title'), setValue]);
 
     return (
         <Grid
@@ -44,16 +50,16 @@ export default function TestExamFormStructure({
                     rules={{ required: "Enter title" }}
                 />
             </Grid>
-            {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <Typography variant="subtitle1">
                     Slug
                 </Typography>
                 <SimpleTextField
                     name="slug"
                     control={control}
-                    rules={{ required: "Enter title" }}
+                    rules={{ required: "Slug is required" }}
                 />
-            </Grid> */}
+            </Grid>
             <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 {/* <SimpleSelectField /> */}
                 <Typography variant="subtitle1">
