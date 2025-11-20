@@ -45,16 +45,16 @@ export function InitialDataContextProvider({
   useEffect(() => {
     async function dummy() {
       const subjectData = await fetchDataFunc(
-        "https://admin.onlyeducation.co.in/api/test-series-subjects?[fields][0]=name&[fields][1]=slug"
+        `${import.meta.env.VITE_BASE_URL}test-series-subjects?[fields][0]=name&[fields][1]=slug`
       );
       const topicData = await fetchDataFunc(
-        "https://admin.onlyeducation.co.in/api/t-topics?[fields][0]=name&[fields][1]=slug"
+        `${import.meta.env.VITE_BASE_URL}t-topics?[fields][0]=name&[fields][1]=slug`
       );
       const examCategoryData = await fetchDataFunc(
-        "https://admin.onlyeducation.co.in/api/t-categories?[fields][0]=name&[fields][1]=slug"
+        `${import.meta.env.VITE_BASE_URL}t-categories?populate=*`
       );
       const tExamsData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}t-exams`
+        `${import.meta.env.VITE_BASE_URL}t-exams?populate=*`
       );
       setData({
         subjectTagData: subjectData.data,
