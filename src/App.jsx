@@ -36,8 +36,26 @@ function App() {
           }
         />
         <Route path="/q" element={<QuestionPreview />} />
-        <Route path="/test-subject" element={<TestSubjectPage />} />
-        <Route path="/test-exams-category" element={<TestExamCategoriesForm />} />
+        <Route
+          path="/test-subject"
+          element={
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
+          }
+        />
+        <Route
+          path="/test-subject/:id"
+          element={
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
+          }
+        />
+        <Route
+          path="/test-exams-category"
+          element={<TestExamCategoriesForm />}
+        />
         <Route
           path="/test-topic"
           element={

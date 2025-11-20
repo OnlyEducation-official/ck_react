@@ -4,7 +4,7 @@ export const TestSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().nullable().optional(),
   order: z.number().nullable().optional(),
-  testSeriesExams: z.number().nullable().optional(),     
+  test_series_exams: z.number().nullable().optional(),     
 //   icon: z
 //     .any()
 //     .refine((file) => file instanceof File, "Please upload an image")
