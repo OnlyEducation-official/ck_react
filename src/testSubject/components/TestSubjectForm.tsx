@@ -22,6 +22,7 @@ import SimpleSelectField, {
 } from "../../GlobalComponent/SimpleSelectField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useParams } from "react-router-dom";
+import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
 
 export const slugify = (text: string): string => {
   return text
@@ -196,6 +197,24 @@ const TestSubjectForm = () => {
               noneOption={false}
               rules={{ required: "Select at least one subject" }}
             />
+            <SimpleMultiAutoComplete
+              name="test_series_exams"
+              control={control}
+              label=""
+              // options={[
+              //   { value: 0, label: "0" },
+              //   { label: "1", value: 1 },
+              // ]}
+              options={
+                getInitalData.tExamsData?.map((exam) => ({
+                  value: exam.id,
+                  label: exam.attributes.title,
+                })) as Option[]
+              }
+              // noneOption={false}
+              rules={{ required: "Select at least one subject" }}
+            />
+            
           </Grid>
 
           {/* isActive (toggle) */}

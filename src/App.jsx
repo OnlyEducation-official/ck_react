@@ -84,13 +84,20 @@ function App() {
             <GetAllList routeName="test-series-subjects" lol="test-subject" />
           }
         />
-        <Route path="/test-subject" element={<TestSubjectPage />} />
+        <Route
+          path="/test-subject"
+          element={
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
+          }
+        />
         <Route path="/test-subject/edit/:qid" element={<TestSubjectPage />} />
 
         {/* t-topic */}
         <Route
           path="/test-topic-list"
-          element={<GetAllList routeName="t-topics" lol="test-topic"  />}
+          element={<GetAllList routeName="t-topics" lol="test-topic" />}
         />
         <Route
           path="/test-topic"
@@ -117,7 +124,6 @@ function App() {
             </InitialDataContextProvider>
           }
         />
-
       </Routes>
     </div>
   );

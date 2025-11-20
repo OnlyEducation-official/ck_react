@@ -27,7 +27,7 @@ const fetchDataFunc = async (url: string) => {
     headers: {
       "Content-Type": "application/json",
       Authorization:
-        "Bearer 2e50f97e2dbab2098ac3c8302155beef954e0f72bd1253a0336f633e65229bbe80ed0cf2feb91092cfa30d23345b1e1b77fd4f506fa8cbd4277e65f7a99b0f6e5fe477efa9cdf2b26239ebdc800346b2bfe20d5ec36f897a9a868b12270a86b6781c8b062f3a9c15f0306285694cd9019e3d42d48de2c3c0b6d3b1fff76647ba",
+        `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
     },
   });
   const data = await response.json();
