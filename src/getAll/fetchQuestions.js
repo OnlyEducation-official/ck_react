@@ -1,4 +1,4 @@
-export async function fetchQuestions(routeName,page = 1, pageSize = 25) {
+export async function fetchQuestions(routeName,page) {
     // const url = `https://admin.onlyeducation.co.in/api/${routeName}?pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
     const url = `http://127.0.0.1:1337/api/${routeName}?pagination[page]=${page}&pagination[pageSize]=25`;
 

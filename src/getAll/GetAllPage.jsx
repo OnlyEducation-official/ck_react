@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchQuestions } from "./fetchQuestions";
 import { Box, Card, Container, Grid, IconButton, Typography } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation  } from "react-router-dom";
 import Pagination from '@mui/material/Pagination';
 // import { Link } from 'react-router-dom'
 
@@ -9,47 +9,42 @@ export default function GetAllList({ routeName, lol }) {
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [ppage, setPage] = useState({
-        page: 0,
-        pageCount: 0,
+        page: 1,
+        pageCount: 1,
         total: 0
     })
     const navigate = useNavigate()
+    const location = useLocation();
 
     useEffect(() => {
         async function loadData() {
-            const res = await fetchQuestions(routeName, 1, 10);
+            const res = await fetchQuestions(routeName, ppage.page);
             if (res && res.data) {
                 console.log('res: ', res);
                 setQuestions(res.data);
                 setPage(prev => ({
                     ...prev,
                     page: res.meta.pagination.page,
-                    pageCount:res.meta.pagination.pageCount,
-                    totel:res.meta.pagination.total
+                    pageCount: res.meta.pagination.pageCount,
+                    totel: res.meta.pagination.total
                 }));
             }
             setLoading(false);
         }
 
         loadData();
-    }, [routeName, lol]);
+    }, [routeName, lol, ppage.page]);
 
     const handleClick = (qid) => {
-        // if (routeName == "t-categories") {
         navigate(`/${lol}/edit/${qid}`);
-        // }else if(routeName == "test-series-subjects"){
-
-        // }
     }
 
-    const handleChange = (e,value) => {
-        console.log(value)
-
+    const handleChange = (_event, value) => {
         setPage(prev => ({
             ...prev,
-            page:value
-        }))
-    }
+            page: value,
+        }));
+    };
 
     if (loading) return <p>Loading...</p>;
 
@@ -136,8 +131,14 @@ export default function GetAllList({ routeName, lol }) {
                     ))}
                 </Grid>
             </Box>
+
             <Typography>Page: {ppage.page}</Typography>
-            <Pagination count={ppage.pageCount} page={ppage.page} onChange={handleChange} />
+            <Pagination
+                count={ppage.pageCount}
+                page={ppage.page}
+                onChange={handleChange}   // 👈 don’t wrap in arrow
+            />
+
         </Container>
     );
 }

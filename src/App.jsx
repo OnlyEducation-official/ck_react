@@ -27,14 +27,12 @@ function App() {
             </InitialDataContextProvider>
           }
         />
-        <Route
-          path="/test-exams"
-          element={
-            <InitialDataContextProvider>
-              <TestExamsForm />
-            </InitialDataContextProvider>
-          }
-        />
+
+        {/* t-exams */}
+        <Route path="/exams-list" element={<GetAllList routeName="t-exams" lol="test-exams" />} />
+        <Route path="/test-exams" element={ <InitialDataContextProvider> <TestExamsForm /> </InitialDataContextProvider> } />
+        <Route path="/test-exams/edit/:qid" element={ <InitialDataContextProvider> <TestExamsForm /> </InitialDataContextProvider> } />
+
 
         {/* t-questions */}
         <Route path="/questions-list" element={<GetAllList routeName="t-questions" lol="questions" />} />
@@ -53,22 +51,8 @@ function App() {
 
         {/* t-topic */}
         <Route path="/test-topic-list" element={<GetAllList routeName="t-topics" lol="test-topic"/>} />
-        <Route
-          path="/test-topic"
-          element={
-            <InitialDataContextProvider>
-              <TestTopicPage />
-            </InitialDataContextProvider>
-          }
-        />
-        <Route
-          path="/test-topic/edit/:qid"
-          element={
-            <InitialDataContextProvider>
-              <TestTopicPage />
-            </InitialDataContextProvider>
-          }
-        />
+        <Route path="/test-topic" element={ <InitialDataContextProvider> <TestTopicPage /> </InitialDataContextProvider>}/>
+        <Route path="/test-topic/edit/:qid" element={ <InitialDataContextProvider> <TestTopicPage /> </InitialDataContextProvider> }/>
 
         <Route
           path="/edit/:id"

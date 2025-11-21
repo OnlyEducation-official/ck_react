@@ -34,7 +34,7 @@ const sidebarData = [
     },
     {
         label: 'Exam',
-        url: '/test-exams'
+        url: '/exams-list'
     },
 ]
 
