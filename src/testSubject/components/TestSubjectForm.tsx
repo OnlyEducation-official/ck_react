@@ -22,6 +22,20 @@ import SimpleSelectField, {
 } from "../../GlobalComponent/SimpleSelectField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useParams } from "react-router-dom";
+import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
+
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+};
+
 
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
@@ -51,17 +65,6 @@ const TestSubjectForm = () => {
     },
   });
   console.log("watch: ", watch());
-  const slugify = (text: string): string => {
-    return text
-      .toString()
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-]/g, "")
-      .replace(/\-\-+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
-  };
 
   const nameValue = watch("name");
 
@@ -75,9 +78,8 @@ const TestSubjectForm = () => {
     if (!id) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-subjects/${id}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-subjects/${id}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -111,7 +113,7 @@ const TestSubjectForm = () => {
     const url = isEdit
       ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${id}`
       : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
-// test-series-subjects
+    // test-series-subjects
     const method = isEdit ? "PUT" : "POST";
 
     const body = JSON.stringify({
@@ -195,6 +197,24 @@ const TestSubjectForm = () => {
               noneOption={false}
               rules={{ required: "Select at least one subject" }}
             />
+            <SimpleMultiAutoComplete
+              name="test_series_exams"
+              control={control}
+              label=""
+              // options={[
+              //   { value: 0, label: "0" },
+              //   { label: "1", value: 1 },
+              // ]}
+              options={
+                getInitalData.tExamsData?.map((exam) => ({
+                  value: exam.id,
+                  label: exam.attributes.title,
+                })) as Option[]
+              }
+              // noneOption={false}
+              rules={{ required: "Select at least one subject" }}
+            />
+            
           </Grid>
 
           {/* isActive (toggle) */}
