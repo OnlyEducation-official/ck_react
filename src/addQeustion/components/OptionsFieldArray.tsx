@@ -10,6 +10,8 @@ import { Box, Grid, Button, Checkbox, FormControlLabel, Stack, IconButton, Typog
 import MainEditor from "./MainEditor";
 import DeleteIcon from '@mui/icons-material/Delete';
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
+import { optionLabel } from "../_components/data"
+
 interface OptionFieldArrayProps<T extends FieldValues> {
   control: Control<T>;
   setValue: UseFormSetValue<T>;
@@ -64,6 +66,16 @@ const OptionsFieldArray = <T extends FieldValues>({
             </Stack>
 
             <Stack gap={1} sx={{ paddingInline: 2, paddingBlock: 1 }}>
+
+              <SimpleSelectField
+                label="Option Label"
+                name={`options.${index}.option_label` as any}  
+                control={control}
+                options={optionLabel}                          
+                noneOption={false}
+                rules={{ required: "Please select a label" }}
+              />
+
               <MainEditor
                 name={`options.${index}.option`}
                 setValue={setValue as any}
@@ -87,6 +99,9 @@ const OptionsFieldArray = <T extends FieldValues>({
                 }
                 label="Mark as correct"
               />
+
+
+
             </Stack>
             {/* <Button
               variant="outlined"

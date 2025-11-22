@@ -21,14 +21,14 @@ export default function QuestionPreview2() {
             difficulty: "easy",
             explanation: "",
             option_type: "input_box",
-            options: [{ option_label: "A", option: "", is_correct: false }],
+            options: [{option_label: "", option: "", is_correct: false }],
         },
         resolver: zodResolver(QuestionSchema),
     });
 
     const onSubmitt = (data) => {
         const isEdit = Boolean(id);
-
+        console.log(data)
         const url = isEdit
             ? `${import.meta.env.VITE_BASE_URL}t-questions/${id}`
             : `${import.meta.env.VITE_BASE_URL}t-questions`;
@@ -44,7 +44,7 @@ export default function QuestionPreview2() {
             body: JSON.stringify({ data: data }),
         })
 
-        console.log(response)
+        console.log("response",response)
     }
 
     useEffect(() => {
@@ -61,6 +61,8 @@ export default function QuestionPreview2() {
                 });
                 const { data } = await response.json();
                 let attributes = data.attributes
+
+                console.log(attributes)
 
                 reset({
                     subject_tag: attributes?.subject_tag?.data?.id,

@@ -70,7 +70,6 @@ export function InitialDataContextProvider({
 
   useEffect(() => {
     async function dummy() {
-      console.log(subject)
       const subjectData = await fetchDataFunc(
         `${import.meta.env.VITE_BASE_URL}test-series-subjects?[fields][0]=name&[fields][1]=slug`
       );
