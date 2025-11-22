@@ -50,7 +50,6 @@ const SimpleMultiAutoComplete = <T extends FieldValues>({
   rules,
   ...autocompleteProps
 }: SimpleMultiAutoCompleteProps<T>) => {
-  console.log('opt', options);
   return (
     <Controller
       name={name}

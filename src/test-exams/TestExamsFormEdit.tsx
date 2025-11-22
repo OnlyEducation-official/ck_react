@@ -39,7 +39,7 @@ export default function TestExamsFormEdit() {
 
 
     const onSubmitt = (data: ExamsSchemaType) => {
-        const response = fetch(`https://admin.onlyeducation.co.in/api/t-questions/${id}`, {
+        const response = fetch(`https://admin.onlyeducation.co.in/api/t-exams/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export default function TestExamsFormEdit() {
                     }
                 });
                 const { data } = await response.json();
-                console.log('dataferguhfdjughuifdghuih: ', data);
+                console.log('data: ', data);
 
                 reset({
                     title: data.attributes.title,
@@ -71,9 +71,9 @@ export default function TestExamsFormEdit() {
                     marking_negative: data.attributes.marking_negative,
                     marking_positive: data.attributes.marking_positive,
                     timer: data.attributes.timer,
-                    test_series_subjects: data.id,
+                    test_series_subjects: data.attributes.test_series_subjects.data.map((subject: any) => subject.id),
                     difficulty: data.attributes.difficulty,
-                    test_series_topics: data.id
+                    test_series_topics: data.attributes.test_series_topics.data.map((topic: any) => topic.id),
                 });
             } catch (error) {
                 console.error(error);

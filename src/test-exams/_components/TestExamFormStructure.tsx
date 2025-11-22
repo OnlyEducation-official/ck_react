@@ -21,7 +21,6 @@ export default function TestExamFormStructure({
     setValue: UseFormSetValue<ExamsSchemaType>
 }) {
     const { data: { examCategoryData, subjectTagData, topicTagData, tExamsData }, setSubject } = useInitialDataContext();
-    console.log('topicTagData: ', topicTagData);
     useEffect(() => {
         if (!watch('title')) return;
         setValue("slug", slugify(watch('title')));
