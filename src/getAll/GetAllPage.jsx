@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchQuestions } from "./fetchQuestions";
 import { Box, Button, Card, Container, Grid, IconButton, Typography } from "@mui/material";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Pagination from '@mui/material/Pagination';
 // import { Link } from 'react-router-dom'
 
@@ -14,7 +14,6 @@ export default function GetAllList({ routeName, lol }) {
         total: 0
     })
     const navigate = useNavigate()
-    const location = useLocation();
 
     useEffect(() => {
         async function loadData() {
@@ -68,8 +67,8 @@ export default function GetAllList({ routeName, lol }) {
                     </Typography>
                     <Button variant="contained" >
                         <Link to="/test-exams-category">
-                        
-                        Add New Questions
+
+                            Add New Questions
                         </Link>
                     </Button>
                 </Box>

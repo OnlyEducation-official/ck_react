@@ -105,7 +105,7 @@ function App() {
         {/* t-exams */}
         <Route path="/exams-list" element={<GetAllList routeName="t-exams" lol="test-exams" />} />
         <Route path="/test-exams" element={<InitialDataContextProvider> <TestExamsForm /> </InitialDataContextProvider>} />
-        <Route path="/test-exams/edit/:qid" element={<InitialDataContextProvider> <TestExamsForm /> </InitialDataContextProvider>} />
+        <Route path="/test-exams/edit/:id" element={<InitialDataContextProvider> <TestExamsFormEdit /> </InitialDataContextProvider>} />
         {/* t-exams */}
 
 

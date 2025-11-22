@@ -84,6 +84,7 @@ export function InitialDataContextProvider({
         `${import.meta.env.VITE_BASE_URL}t-exams?[fields][0]=title&[fields][1]=slug`
       );
 
+      console.log('topicData: ', topicData);
       setData({
         subjectTagData: subjectData.data,
         topicTagData: topicData.data,

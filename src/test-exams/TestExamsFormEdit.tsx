@@ -30,9 +30,9 @@ export default function TestExamsFormEdit() {
             marking_negative: 0,
             marking_positive: 0,
             timer: 0,
-            test_series_subjects: 0,
+            test_series_subjects: [],
             difficulty: "Easy",
-            test_series_topics: 0,
+            test_series_topics: [],
         },
         resolver: zodResolver(examsSchema),
     });
@@ -61,6 +61,7 @@ export default function TestExamsFormEdit() {
                     }
                 });
                 const { data } = await response.json();
+                console.log('dataferguhfdjughuifdghuih: ', data);
 
                 reset({
                     title: data.attributes.title,

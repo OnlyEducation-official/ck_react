@@ -23,9 +23,9 @@ export default function TestExamsForm() {
             marking_negative: 0,
             marking_positive: 0,
             timer: 0,
-            test_series_subjects: 0,
+            test_series_subjects: [],
             difficulty: "Easy",
-            test_series_topics: 0,
+            test_series_topics: [],
         },
         resolver: zodResolver(examsSchema),
     });

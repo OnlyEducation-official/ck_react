@@ -9,6 +9,7 @@ import MainEditor from '../../addQeustion/components/MainEditor'
 import { ExamsSchemaType } from '../../validation/testSeriesExamSchema'
 import { useEffect } from 'react'
 import { slugify } from '../../testSubject/components/TestSubjectForm'
+import SimpleMultiAutoComplete from '../../GlobalComponent/SimpleMultiAutoComplete'
 
 export default function TestExamFormStructure({
     control,
@@ -19,11 +20,15 @@ export default function TestExamFormStructure({
     watch: UseFormWatch<ExamsSchemaType>;
     setValue: UseFormSetValue<ExamsSchemaType>
 }) {
-    const { subjectTagData, topicTagData, examCategoryData } = useInitialDataContext();
+    const { data: { examCategoryData, subjectTagData, topicTagData, tExamsData }, setSubject } = useInitialDataContext();
+    console.log('topicTagData: ', topicTagData);
     useEffect(() => {
         if (!watch('title')) return;
         setValue("slug", slugify(watch('title')));
     }, [watch('title'), setValue]);
+    // useEffect(() => {
+    //     setSubject(watch('test_series_subjects'));
+    // }, [watch('test_series_subjects')]);
 
     return (
         <Grid
@@ -120,9 +125,30 @@ export default function TestExamFormStructure({
             </Grid>
             <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <Typography variant="subtitle1">
+                    {`Timer (seconds)`}
+                </Typography>
+                <SimpleTextField
+                    name="timer"
+                    control={control}
+                    // label="Select Subject"
+                    rules={{ required: "Please select a subject" }}
+                />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                <Typography variant="subtitle1">
                     Select subject
                 </Typography>
-                <SimpleSelectField
+                <SimpleMultiAutoComplete
+                    control={control}
+                    name='test_series_subjects'
+                    options={
+                        subjectTagData?.map((subject) => ({
+                            value: subject.id,
+                            label: subject.attributes.name,
+                        })) as Option[]
+                    }
+                />
+                {/* <SimpleSelectField
                     name="test_series_subjects"
                     control={control}
                     // label="Select Subject"
@@ -133,7 +159,7 @@ export default function TestExamFormStructure({
                         })) as Option[]
                     }
                     rules={{ required: "Please select a subject" }}
-                />
+                /> */}
             </Grid>
             <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 {/* <SimpleSelectField /> */}
@@ -153,7 +179,7 @@ export default function TestExamFormStructure({
                 <Typography variant="subtitle1">
                     Select topic
                 </Typography>
-                <SimpleSelectField
+                <SimpleMultiAutoComplete
                     name="test_series_topics"
                     control={control}
                     // label="Test Series Topic"
