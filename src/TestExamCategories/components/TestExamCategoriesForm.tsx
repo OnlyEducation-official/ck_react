@@ -62,8 +62,7 @@ const TestExamCategoriesForm = () => {
 
   const location = useLocation();
 
-  const isActive = watch("is_active");
-  const { tExamsData } = useInitialDataContext();
+  const { data : {tExamsData} } = useInitialDataContext();
 
   useEffect(() => {
     if (!id) return; // CREATE mode
@@ -71,7 +70,7 @@ const TestExamCategoriesForm = () => {
     const fetchItem = async () => {
       const url = `${
         import.meta.env.VITE_BASE_URL
-      }t-categories/${id}?populate=*`;
+      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -87,24 +86,24 @@ const TestExamCategoriesForm = () => {
         slug: item?.attributes?.slug,
         description: item?.attributes?.description,
         order: item?.attributes?.order,
-        test_series_exams:
-          item?.attributes?.test_series_exams?.data?.[0].id ?? null,
-        is_active: item?.attributes?.isActive,
+        test_series_exams:item?.attributes?.test_series_exams?.data?.[0].id ?? null,
+        is_active: item?.attributes?.is_active,
       });
     };
 
     fetchItem();
   }, [id, reset]);
 
-  const onSubmit = async (data: TestSchemaType) => {
 
+  const onSubmit = async (data: TestSchemaType) => {
+    
     const isEdit = Boolean(id);
 
     const url = isEdit
       ? `${import.meta.env.VITE_BASE_URL}t-categories/${id}`
       : `${import.meta.env.VITE_BASE_URL}t-categories`;
-    // test-series-subjects
-    const method = isEdit ? "PUT" : "POST";
+
+      const method = isEdit ? "PUT" : "POST";
 
     const body = JSON.stringify({
       data: data,
@@ -193,7 +192,7 @@ const TestExamCategoriesForm = () => {
             <FormControlLabel
               control={
                 <Switch
-                  checked={isActive}
+                  checked={watch("is_active")}
                   onChange={(e) => setValue("is_active", e.target.checked)}
                 />
               }

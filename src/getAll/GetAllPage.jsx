@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchQuestions } from "./fetchQuestions";
-import { Box, Button, Card, Container, Grid, IconButton, Typography } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Box, Button, Card, Container, Grid, IconButton, List, ListItemButton, Typography } from "@mui/material";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Pagination from '@mui/material/Pagination';
 // import { Link } from 'react-router-dom'
 
@@ -52,97 +52,148 @@ export default function GetAllList({ routeName, lol }) {
                 {/* Header */}
                 <Box
                     sx={{
-                        mb: 3,
-                        display: 'flex',
-                        alignItems: 'baseline',
-                        justifyContent: 'space-between',
-                        mt: 5
+                        mb: 4,
+                        mt: 5,
+                        display: "flex",
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        justifyContent: "space-between",
+                        gap: 2,
                     }}
                 >
-                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                        Exam Categories
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {questions.length} total
-                    </Typography>
-                    <Button variant="contained" >
-                        <Link to={`/${lol}`}>
-                        
-                        Add New Questions
-                        </Link>
-                    </Button>
+                    <Box>
+                        <Typography
+                            variant="h4"
+                            sx={{ fontWeight: 700, letterSpacing: 0.2, mb: 0.5 }}
+                        >
+                            Exam Categories
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Manage all your exam categories in one place.
+                        </Typography>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 2,
+                            flexShrink: 0,
+                        }}
+                    >
+                        {/* Count pill */}
+                        <Box
+                            sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                borderRadius: 999,
+                                bgcolor: "grey.100",
+                                fontSize: 12,
+                                fontWeight: 500,
+                                color: "text.secondary",
+                            }}
+                        >
+                            {questions.length} total
+                        </Box>
+
+                        <Button
+                            variant="contained"
+                            component={Link}
+                            to={`/${lol}`}
+                            sx={{ borderRadius: 999, textTransform: "none", fontWeight: 600 }}
+                        >
+                            Add New Questions
+                        </Button>
+                    </Box>
                 </Box>
 
-                {/* Grid of cards */}
-                <Grid container spacing={2}>
-                    {questions.map((q) => (
-                        <Grid xs={12} sm={6} md={4} key={q.id}>
-                            <Card
+                {/* List container */}
+                <Box
+                    sx={{
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        bgcolor: "background.paper",
+                        boxShadow: "0 18px 45px rgba(15,23,42,0.06)",
+                        border: "1px solid",
+                        borderColor: "divider",
+                    }}
+                >
+                    <List disablePadding sx={{ width: "100%" }}>
+                        {questions.map((q, index) => (
+                            <ListItemButton
+                                key={q.id}
                                 onClick={() => handleClick(q.id)}
                                 sx={{
-                                    cursor: 'pointer',
+                                    py: 1.75,
                                     px: 2.5,
-                                    py: 2,
-                                    borderRadius: 3,
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    bgcolor: 'primary.main',
-                                    color: 'primary.contrastText',
-                                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        transform: 'translateY(-4px)',
-                                        boxShadow: '0 16px 35px rgba(0,0,0,0.25)',
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    gap: 2,
+                                    borderBottom:
+                                        index === questions.length - 1 ? "none" : "1px solid",
+                                    borderColor: "divider",
+                                    transition: "background-color 0.15s ease, transform 0.1s ease",
+                                    "&:hover": {
+                                        bgcolor: "action.hover",
+                                        transform: "translateY(-1px)",
                                     },
                                 }}
                             >
-                                <Box sx={{ overflow: 'hidden', pr: 1 }}>
-                                    <Typography
-                                        variant="caption"
-                                        sx={{ opacity: 0.7, textTransform: 'uppercase' }}
-                                    >
-                                        Question ID
-                                    </Typography>
+                                {/* Left content */}
+                                <Box sx={{ minWidth: 0 }}>
                                     <Typography
                                         variant="subtitle1"
                                         sx={{
-                                            fontWeight: 700,
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
+                                            fontWeight: 600,
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
                                         }}
                                     >
-                                        {q.id || 'Untitled'}
+                                        {q?.attributes?.name || q.id || "Untitled"}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        ID: {q.id}
                                     </Typography>
                                 </Box>
 
-                                <IconButton
-                                    size="small"
-                                    sx={{
-                                        bgcolor: 'rgba(255,255,255,0.18)',
-                                        color: 'inherit',
-                                        '&:hover': {
-                                            bgcolor: 'rgba(255,255,255,0.28)',
-                                        },
-                                    }}
+                                {/* Right subtle label (visual only) */}
+                                <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 500, color: "text.secondary" }}
                                 >
-                                    {/* <ArrowForwardIosRoundedIcon fontSize="small" /> */}
-                                </IconButton>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+                                    View details
+                                </Typography>
+                            </ListItemButton>
+                        ))}
+                    </List>
+                </Box>
+
+                {/* Pagination */}
+                <Box
+                    sx={{
+                        mt: 3,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        rowGap: 1.5,
+                    }}
+                >
+                    <Typography variant="caption" color="text.secondary">
+                        Page {ppage.page} of {ppage.pageCount}
+                    </Typography>
+
+                    <Pagination
+                        count={ppage.pageCount}
+                        page={ppage.page}
+                        onChange={handleChange}
+                        shape="rounded"
+                        size="small"
+                    />
+                </Box>
             </Box>
-
-            <Typography>Page: {ppage.page}</Typography>
-            <Pagination
-                count={ppage.pageCount}
-                page={ppage.page}
-                onChange={handleChange}   // 👈 don’t wrap in arrow
-            />
-
         </Container>
+
     );
 }
