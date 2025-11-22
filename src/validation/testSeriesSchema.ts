@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const TestSeriesSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  // slug: z.string().min(1, "Slug is required"),
+  slug: z.string().min(1, "Slug is required"),
   order: z.union([z.literal(0), z.literal(1)]),
   is_active: z.boolean(),
 

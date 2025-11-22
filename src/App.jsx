@@ -13,12 +13,13 @@ import TestSubjectPage from "./testSubject/Index";
 import TestExamCategoriesForm from "./TestExamCategories/components/TestExamCategoriesForm";
 import TestExamsForm from "./test-exams/TestExamsForm";
 import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <div>
       <DrawerAppBar />
-
+      <ToastContainer position="top-right" autoClose={2000} />
       <Routes>
         <Route
           path="/"
@@ -59,13 +60,17 @@ function App() {
           path="/questions-list"
           element={<GetAllList routeName="t-questions" lol="questions" />}
         />
-        <Route path="/questions" element={
-          <InitialDataContextProvider>
-            <QuestionPreview2 />
-          </InitialDataContextProvider>
-        } />
+        <Route
+          path="/questions"
+          element={
+            <InitialDataContextProvider>
+              <QuestionPreview2 />
+            </InitialDataContextProvider>
+          }
+        />
 
-        <Route path="/questions/edit/:qid"
+        <Route
+          path="/questions/edit/:qid"
           element={
             <InitialDataContextProvider>
               <QuestionPreview2 />
@@ -89,17 +94,39 @@ function App() {
             </InitialDataContextProvider>
           }
         />
-        <Route path="/test-subject/edit/:qid" element={
-          <InitialDataContextProvider>
-            <TestSubjectPage />
-          </InitialDataContextProvider>
-        } />
+        <Route
+          path="/test-subject/edit/:qid"
+          element={
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
+          }
+        />
         {/* t-subjects */}
 
         {/* t-topic */}
-        <Route path="/test-topic-list" element={<GetAllList routeName="t-topics" lol="test-topic" />} />
-        <Route path="/test-topic" element={<InitialDataContextProvider> <TestTopicPage /> </InitialDataContextProvider>} />
-        <Route path="/test-topic/edit/:qid" element={<InitialDataContextProvider> <TestTopicPage /> </InitialDataContextProvider>} />
+        <Route
+          path="/test-topic-list"
+          element={<GetAllList routeName="t-topics" lol="test-topic" />}
+        />
+        <Route
+          path="/test-topic"
+          element={
+            <InitialDataContextProvider>
+              {" "}
+              <TestTopicPage />{" "}
+            </InitialDataContextProvider>
+          }
+        />
+        <Route
+          path="/test-topic/edit/:qid"
+          element={
+            <InitialDataContextProvider>
+              {" "}
+              <TestTopicPage />{" "}
+            </InitialDataContextProvider>
+          }
+        />
         {/* t-topic */}
 
         {/* t-exams */}
@@ -107,7 +134,6 @@ function App() {
         <Route path="/test-exams" element={<InitialDataContextProvider> <TestExamsForm /> </InitialDataContextProvider>} />
         <Route path="/test-exams/edit/:id" element={<InitialDataContextProvider> <TestExamsFormEdit /> </InitialDataContextProvider>} />
         {/* t-exams */}
-
 
         {/* <Route
           path="/edit/:id"

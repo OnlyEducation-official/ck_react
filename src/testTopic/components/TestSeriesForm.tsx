@@ -18,6 +18,9 @@ import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useParams } from "react-router-dom";
+import { useSlugGenerator } from "../../hooks/useSlugGenerator";
+import { toastResponse } from "../../util/toastResponse";
+import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
 
 const TestSeriesForm = () => {
   const {
@@ -31,23 +34,33 @@ const TestSeriesForm = () => {
     resolver: zodResolver(TestSeriesSchema),
     defaultValues: {
       name: "",
-      //   slug: "",
+      slug: "",
       order: 0,
       is_active: true,
       test_series_subject: 0,
     },
   });
-  const { id } = useParams(); // id will be string | undefined
+  const { qid } = useParams(); // qid will be string | undefined
+    console.log('watch: ', watch("test_series_subject"));
 
-  const getData = useInitialDataContext();
-
+  useSlugGenerator<TestSeriesSchemaType>({
+    watch,
+    setValue,
+    source: "name",
+    target: "slug",
+  });
+  const {
+    data: { subjectTagData },
+  } = useInitialDataContext();
 
   useEffect(() => {
-    if (!id) return; // no id → create mode → don't fetch data
+    if (!qid) return; // no qid → create mode → don't fetch data
 
     const fetchData = async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}t-topics/${id}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields][0]=id`,
+        `${
+          import.meta.env.VITE_BASE_URL
+        }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid`,
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
@@ -62,21 +75,26 @@ const TestSeriesForm = () => {
       reset({
         name: item?.name ?? "",
         order: item?.order ?? 0,
+        slug: item?.slug ?? null,
         is_active: item?.is_active ?? true,
-        test_series_subject: item.test_series_subject?.data?.id ?? 0,
+        test_series_subject: item.test_series_subject?.data.id ?? 0,
       });
+      console.log(
+        "item.test_series_subject?.data.id: ",
+        item.test_series_subject?.data.id
+      );
     };
 
     fetchData();
-  }, [id, reset]);
+  }, [qid, reset]);
   const isActive = watch("is_active");
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
-    const url = id
-      ? `https://admin.onlyeducation.co.in/api/t-topics/${id}` // UPDATE
-      : `https://admin.onlyeducation.co.in/api/t-topics`; // CREATE
+    const url = qid
+      ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
+      : `${import.meta.env.VITE_BASE_URL}t-topics`; // CREATE
 
-    const method = id ? "PUT" : "POST";
+    const method = qid ? "PUT" : "POST";
 
     const response = await fetch(url, {
       method,
@@ -86,6 +104,11 @@ const TestSeriesForm = () => {
       },
       body: JSON.stringify({ data }),
     });
+    toastResponse(
+      response,
+      `${qid ? "Updated" : "Created"} Topic successfully`,
+      " Topic is Failed"
+    );
 
     const result = await response.json();
   };
@@ -98,7 +121,7 @@ const TestSeriesForm = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h5" mb={3}>
-        {id ? "Update Test Topic" : "Create Test Topic"}
+        {qid ? "Update Test Topic" : "Create Test Topic"}
       </Typography>
 
       <Grid container spacing={3}>
@@ -113,21 +136,40 @@ const TestSeriesForm = () => {
             rules={{ required: "Select at least one subject" }}
           />
         </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1">Slug</Typography>
+          <SimpleTextField
+            name="slug"
+            control={control}
+            disabled={true}
+            sx={{
+              cursor: "not-allowed",
+              "& .MuiInputBase-root": {
+                cursor: "not-allowed",
+              },
+              "& .MuiInputBase-input": {
+                cursor: "not-allowed",
+              },
+            }}
+            rules={{ required: "Slug is required" }}
+          />
+        </Grid>
 
         {/* SUBJECT RELATION (multi select) */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1">Test Series Subject</Typography>
-          <SimpleSelectField
+          <SimpleMultiAutoComplete
             name="test_series_subject"
             control={control}
             label=""
-            options={getData?.subjectTagData?.map((topic) => ({
+            options={subjectTagData?.map((topic) => ({
               value: topic.id,
               label: topic?.attributes?.name,
             }))}
             placeholder="Add relation"
             rules={{ required: "Select at least one subject" }}
           />
+          
         </Grid>
 
         {/* ORDER */}

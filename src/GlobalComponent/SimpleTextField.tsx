@@ -1,7 +1,7 @@
 import React from "react";
 import { Controller, Control } from "react-hook-form";
-import { TextField } from "@mui/material";
-import { fi } from "zod/v4/locales";
+import { SxProps, TextField } from "@mui/material";
+import { Theme } from "@emotion/react";
 
 interface SimpleTextFieldProps {
   name: string;
@@ -14,6 +14,7 @@ interface SimpleTextFieldProps {
   rows?: number;
   fullWidth?: boolean;
   rules?: object;
+  sx?: SxProps<Theme>; // ✅ Proper MUI type
 }
 
 const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
@@ -27,6 +28,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
   rows = 3,
   fullWidth = true,
   rules,
+  sx,
   ...rest
 }) => {
   const isNumber = type === "number";
@@ -41,6 +43,7 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
           <TextField
             size="small"
             {...field}
+            sx={sx}
             fullWidth={fullWidth}
             type={type === "textarea" ? "text" : type}
             label={label}
