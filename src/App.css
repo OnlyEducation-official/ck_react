@@ -40,3 +40,23 @@
 .read-the-docs {
   color: #888;
 } */
+
+
+
+/* Inline formulas */
+/* .my-editor .Wirisformula-inline {
+  display: inline-block !important;
+} */
+
+/* Block formulas - not full-width */
+/* .my-editor .Wirisformula {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 10px 0 !important;
+} */
+
+
+/* .Wirisformula {
+  display: block;
+  width: 100%;
+} */
