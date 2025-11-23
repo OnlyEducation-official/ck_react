@@ -15,7 +15,7 @@ import OptionsFieldArray from "../components/OptionsFieldArray";
 import {
   difficultyOptions,
   dummySubject,
-  dummyTopics,
+  dummyTopics, 
   optionTypeData,
   optionLabel
 } from "./data";
