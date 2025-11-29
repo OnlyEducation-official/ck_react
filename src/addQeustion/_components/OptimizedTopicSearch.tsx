@@ -1,20 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Autocomplete,
   TextField,
   CircularProgress,
   Chip,
-  Box,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
   Typography,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { searchTopics } from "../../util/topicSearch";
-
+import type { SxProps, Theme } from "@mui/material";
+import type { TextFieldProps, AutocompleteProps } from "@mui/material";
 export type TopicHit = {
   id: number;
   name?: string;
@@ -31,6 +25,20 @@ interface Props<
   dropdownType: "single" | "multi";
   setValue: (field: TField, value: TSchema[TField]) => void;
   watch: (field: TField) => TSchema[TField];
+  // NEW EXTENDED PROPS
+  sx?: SxProps<Theme>;
+  label?: string;
+  placeholder?: string;
+
+  // allow passing additional Autocomplete props
+  autocompleteProps?: Partial<
+    AutocompleteProps<any, boolean, boolean, boolean>
+  >;
+  required?: boolean;
+  showLabel?: boolean;
+  labelSx?: SxProps<Theme>;
+  // allow passing additional TextField props
+  textFieldProps?: Partial<TextFieldProps>;
 }
 
 const OptimizedTopicSearch = <
@@ -42,6 +50,14 @@ const OptimizedTopicSearch = <
   fieldName,
   setValue,
   watch,
+  sx,
+  label = "Search topics",
+  placeholder = "Type to search…",
+  autocompleteProps,
+  textFieldProps,
+  required = false,
+  showLabel = true,
+  labelSx,
 }: Props<TSchema, TField>) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -88,28 +104,6 @@ const OptimizedTopicSearch = <
 
   console.log("watch(fieldName): ", watch(fieldName));
   // // ADD THIS USEEFFECT (for edit mode)
-  // useEffect(() => {
-  //   if (dropdownType === "multi") {
-  //     const defaultValue = watch(fieldName) as TopicHit[];
-  //     console.log('defaultValue: ', defaultValue);
-
-  //     if (
-  //       defaultValue &&
-  //       Array.isArray(defaultValue) &&
-  //       defaultValue.length > 0
-  //     ) {
-  //       setSelectedOptions(defaultValue);
-  //       console.log('defaultValue: ', defaultValue);
-
-  //       setOptions((prev) => {
-  //         const merged = [...prev, ...defaultValue];
-  //         return Array.from(
-  //           new Map(merged.map((item) => [item.id, item])).values()
-  //         );
-  //       });
-  //     }
-  //   }
-  // }, [watch(fieldName)]);
   const fieldValue = watch(fieldName);
   useEffect(() => {
     if (dropdownType !== "multi") return;
@@ -156,11 +150,24 @@ const OptimizedTopicSearch = <
 
   return (
     <>
+      {showLabel && (
+        <Typography
+          variant="subtitle1"
+          sx={{ mb: 1.5, fontWeight: 600, ...labelSx }}
+          component="label"
+        >
+          {label}
+          {required && (
+            <Typography sx={{ color: "red", marginLeft: 2 }}>*</Typography>
+          )}
+        </Typography>
+      )}
       {/* AUTOCOMPLETE FIELD */}
       <Autocomplete
         size="small"
         multiple={dropdownType === "multi"}
         open={open}
+        sx={sx}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         loading={loading}
@@ -171,9 +178,10 @@ const OptimizedTopicSearch = <
         filterSelectedOptions
         isOptionEqualToValue={(option, value) => option.id === value.id}
         getOptionLabel={(o) => o.name || o.title || o.slug || `Topic #${o.id}`}
+        {...autocompleteProps} // ← allow overriding Autocomplete props
         renderTags={(value, getTagProps) =>
           // dropdownType === "multi"
-          //   ? value.map((option: TopicHit, index: number) => ( 
+          //   ? value.map((option: TopicHit, index: number) => (
           //       <Chip
           //         {...getTagProps({ index })}
           //         label={option.name || `#${option.id}`}
@@ -200,8 +208,9 @@ const OptimizedTopicSearch = <
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Search topics"
-            placeholder="Type to search…"
+            label={""}
+            placeholder={placeholder}
+            {...textFieldProps} // ← allow overriding TextField props
             InputProps={{
               ...params.InputProps,
               endAdornment: (
@@ -214,76 +223,6 @@ const OptimizedTopicSearch = <
           />
         )}
       />
-
-      {/* ---------------- SINGLE SELECT DISPLAY ---------------- */}
-      {dropdownType === "single" && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Selected Subject
-          </Typography>
-
-          {selected === 0 ? (
-            <Typography>No subject selected.</Typography>
-          ) : (
-            <Paper variant="outlined" sx={{ borderRadius: 2 }}>
-              <List>
-                <ListItem
-                  secondaryAction={
-                    <IconButton
-                      onClick={() => setValue(fieldName, 0 as TSchema[TField])}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemText primary={`Selected ID: ${selected}`} />
-                </ListItem>
-              </List>
-            </Paper>
-          )}
-        </Box>
-      )}
-
-      {/* ---------------- MULTI SELECT DISPLAY ---------------- */}
-      {dropdownType === "multi" && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Selected Topics
-          </Typography>
-
-          {selectedOptions.length === 0 ? (
-            <Typography>No topics selected.</Typography>
-          ) : (
-            <Paper
-              variant="outlined"
-              sx={{ borderRadius: 2, maxHeight: 180, overflowY: "auto" }}
-            >
-              <List>
-                {selectedOptions.map((item, index) => (
-                  <ListItem
-                    key={index}
-                    secondaryAction={
-                      <IconButton
-                        onClick={() => {
-                          const filtered = selectedOptions.filter(
-                            (x) => x.id !== item.id
-                          );
-                          setSelectedOptions(filtered);
-                          setValue(fieldName, filtered as TSchema[TField]);
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemText primary={item.name || `#${item.id}`} />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          )}
-        </Box>
-      )}
     </>
   );
 };

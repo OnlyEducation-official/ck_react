@@ -2,12 +2,7 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import SimpleSelectField, {
   Option,
 } from "../../GlobalComponent/SimpleSelectField";
-import {
-  Control,
-  useForm,
-  UseFormSetValue,
-  UseFormWatch,
-} from "react-hook-form";
+import { Control, useForm } from "react-hook-form";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
 import { QuestionSchemaType } from "../../addQeustion/QuestionSchema";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
@@ -265,9 +260,9 @@ export default function TestExamFormStructure({}: //   control,
             setValue={setValue}
             watch={watch}
           />
-          <pre>
+          {/* <pre>
             {JSON.stringify(watch("test_series_subjects"), null, 2)}
-          </pre>
+          </pre> */}
 
           {/* <SimpleSelectField
                     name="test_series_subjects"
@@ -295,7 +290,7 @@ export default function TestExamFormStructure({}: //   control,
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Select topic</Typography>
+          {/* <Typography variant="subtitle1">Select topic</Typography> */}
           {/* <SimpleMultiAutoComplete
                     name="test_series_topics"
                     control={control}
@@ -314,9 +309,15 @@ export default function TestExamFormStructure({}: //   control,
             fieldName="test_series_topics"
             setValue={setValue}
             watch={watch}
+            // sx={{
+            //   border: "2px solid red",
+            // }}
+            placeholder="topic and search"
+            label="sdfs"
+            
           />
         </Grid>
-        <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre>
+        {/* <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre> */}
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           <Button variant="contained" type="submit" sx={{ paddingInline: 10 }}>
             Submit
