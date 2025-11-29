@@ -52,7 +52,7 @@ const OptimizedTopicSearch = <
   setValue,
   watch,
   sx,
-  label = "Search topics",
+  label,
   placeholder = "Type to search…",
   autocompleteProps,
   textFieldProps,
@@ -81,15 +81,12 @@ const OptimizedTopicSearch = <
       debouncedFetch(query || "");
     }
   }, [open]);
-  console.log("routeName: ", routeName);
   const debouncedFetch = useMemo(
     () =>
       debounce(async (text: string) => {
         try {
           setLoading(true);
           const results = await searchTopics(text, routeName);
-          console.log("results: ", results);
-
           // setOptions((prev) => {
           //   const merged = [...results, ...selectedOptions];
           //   return Array.from(
@@ -119,14 +116,12 @@ const OptimizedTopicSearch = <
     debouncedFetch(query);
   }, [query]);
 
-  console.log("watch(fieldName): ", watch(fieldName));
   // // ADD THIS USEEFFECT (for edit mode)
   const fieldValue = watch(fieldName);
   useEffect(() => {
-    if (dropdownType !== "multi") return;
+    // if (dropdownType !== "multi") return;
 
     const defaultValue = fieldValue as TopicHit[];
-    console.log("defaultValue from RHF:", defaultValue);
 
     if (
       defaultValue &&
@@ -253,18 +248,18 @@ const OptimizedTopicSearch = <
           //   : null
           dropdownType === "multi"
             ? value.map((option: TopicHit, index: number) => {
-                const tagProps = getTagProps({ index });
-                const { key, ...rest } = tagProps; // ⬅️ remove key from spread
+              const tagProps = getTagProps({ index });
+              const { key, ...rest } = tagProps; // ⬅️ remove key from spread
 
-                return (
-                  <Chip
-                    key={key} // ⬅️ pass key explicitly (React requirement)
-                    {...rest}
-                    label={option.name || `#${option.id}`}
-                    size="small"
-                  />
-                );
-              })
+              return (
+                <Chip
+                  key={key} // ⬅️ pass key explicitly (React requirement)
+                  {...rest}
+                  label={option.name || `#${option.id}`}
+                  size="small"
+                />
+              );
+            })
             : null
         }
         renderInput={(params) => (

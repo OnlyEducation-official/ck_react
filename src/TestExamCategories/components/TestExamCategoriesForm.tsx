@@ -24,6 +24,7 @@ import { useLocation, useParams } from "react-router-dom";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useEffect } from "react";
 import { useSlugGenerator } from "../../hooks/useSlugGenerator";
+import { slugify } from "../../testSubject/components/TestSubjectForm";
 
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
@@ -46,13 +47,12 @@ const TestExamCategoriesForm = () => {
       slug: null,
       description: "",
       order: 0,
-      test_series_exams: null,
       is_active: false,
     },
   });
 
   const { id } = useParams(); // id or undefined
-  
+
   useSlugGenerator<TestSeriesExamType>({
     watch,
     setValue,
@@ -62,15 +62,14 @@ const TestExamCategoriesForm = () => {
 
   const location = useLocation();
 
-  const { data : {tExamsData} } = useInitialDataContext();
+  const { data: { tExamsData } } = useInitialDataContext();
 
   useEffect(() => {
     if (!id) return; // CREATE mode
 
     const fetchItem = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -86,7 +85,6 @@ const TestExamCategoriesForm = () => {
         slug: item?.attributes?.slug,
         description: item?.attributes?.description,
         order: item?.attributes?.order,
-        test_series_exams:item?.attributes?.test_series_exams?.data?.[0].id ?? null,
         is_active: item?.attributes?.is_active,
       });
     };
@@ -95,15 +93,22 @@ const TestExamCategoriesForm = () => {
   }, [id, reset]);
 
 
-  const onSubmit = async (data: TestSchemaType) => {
-    
+  const nameValue = watch("name");
+  useEffect(() => {
+    if (!nameValue) return;
+    setValue("slug", slugify(nameValue));
+  }, [nameValue, setValue]);
+
+
+  const onSubmit = async (data: any) => {
+
     const isEdit = Boolean(id);
 
     const url = isEdit
       ? `${import.meta.env.VITE_BASE_URL}t-categories/${id}`
       : `${import.meta.env.VITE_BASE_URL}t-categories`;
 
-      const method = isEdit ? "PUT" : "POST";
+    const method = isEdit ? "PUT" : "POST";
 
     const body = JSON.stringify({
       data: data,
@@ -125,7 +130,7 @@ const TestExamCategoriesForm = () => {
         Create Test Series Category
       </Typography>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <Box component={'form'} onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
           {/* NAME */}
           <Grid size={{ xs: 12, md: 6 }}>
@@ -136,6 +141,26 @@ const TestExamCategoriesForm = () => {
               label=""
               rules={{ required: "Name is required" }}
               fullWidth
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography variant="subtitle1">Slug</Typography>
+            <SimpleTextField
+              name="slug"
+              disabled
+              control={control}
+              label=""
+              fullWidth
+              sx={{
+                cursor: "not-allowed",
+                "& .MuiInputBase-root": {
+                  cursor: "not-allowed",
+                },
+                "& .MuiInputBase-input": {
+                  cursor: "not-allowed",
+                },
+              }}
             />
           </Grid>
 
@@ -172,20 +197,6 @@ const TestExamCategoriesForm = () => {
               rows={3}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1">Test Series Exams</Typography>
-            <SimpleSelectField
-              name="test_series_exams"
-              control={control}
-              label=""
-              options={tExamsData?.map((exam) => ({
-                label: exam.attributes.title,
-                value: exam.id,
-              }))}
-              noneOption={false}
-              rules={{ required: "Select at least one subject" }}
-            />
-          </Grid>
 
           {/* isActive (toggle) */}
           <Grid size={{ xs: 12, md: 6 }}>
@@ -210,7 +221,7 @@ const TestExamCategoriesForm = () => {
         <Grid>
           {/* <TopicsPage /> */}
         </Grid>
-      </form>
+      </Box>
     </Box>
   );
 };

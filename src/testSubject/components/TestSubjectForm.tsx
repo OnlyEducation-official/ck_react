@@ -51,8 +51,6 @@ const TestSubjectForm = () => {
       name: "",
       slug: null,
       order: 0,
-      test_series_exams: null,
-      //   icon: null,
       isActive: true,
     },
   });
@@ -68,16 +66,14 @@ const TestSubjectForm = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-subjects/${qid}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-subjects/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
         },
       });
-      console.log("res: ", res);
 
       const json = await res.json();
       console.log("json: ", json);
@@ -89,7 +85,6 @@ const TestSubjectForm = () => {
         slug: item?.slug ?? null,
         isActive: item?.is_active ?? true,
         // is_active: item?.isActive ?? true,
-        test_series_exams: item?.test_series_exams?.data[0]?.id ?? 0,
       });
     };
 
@@ -128,8 +123,9 @@ const TestSubjectForm = () => {
   };
 
   return (
-    <Box p={4} borderRadius={2}>
-      <Typography variant="h6" mb={3}>
+    <Box p={4} borderRadius={2}
+      sx={{ marginBlockStart: 6 }}>
+      <Typography variant="h5" mb={3}>
         {qid ? "Update" : "Create"} Test Subject
       </Typography>
 
@@ -178,32 +174,6 @@ const TestSubjectForm = () => {
                 { value: 0, label: "0" },
                 { label: "1", value: 1 },
               ]}
-              // isOptionEqualToValue={
-              //   watch("order") === 0
-              //     ? (a, b) => a.value === b.value
-              //     : (a, b) => a.value === b.value
-              // }
-              noneOption={false}
-              // placeholder="Add relation"
-              rules={{ required: "Select at least one subject" }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1">test Series Exams</Typography>
-            <SimpleSelectField
-              name="test_series_exams"
-              control={control}
-              label=""
-              // options={[
-              //   { value: 0, label: "0" },
-              //   { label: "1", value: 1 },
-              // ]}
-              options={
-                tExamsData?.map((exam) => ({
-                  value: exam.id,
-                  label: exam.attributes.title,
-                })) as Option[]
-              }
               noneOption={false}
               rules={{ required: "Select at least one subject" }}
             />

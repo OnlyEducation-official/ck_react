@@ -21,6 +21,7 @@ import { useParams } from "react-router-dom";
 import { useSlugGenerator } from "../../hooks/useSlugGenerator";
 import { toastResponse } from "../../util/toastResponse";
 import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
+import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 
 const TestSeriesForm = () => {
   const {
@@ -37,7 +38,7 @@ const TestSeriesForm = () => {
       slug: "",
       order: 0,
       is_active: true,
-      test_series_subject: 0,
+      test_series_subject: [],
     },
   });
   const { qid } = useParams(); // qid will be string | undefined
@@ -57,8 +58,7 @@ const TestSeriesForm = () => {
 
     const fetchData = async () => {
       const res = await fetch(
-        `${
-          import.meta.env.VITE_BASE_URL
+        `${import.meta.env.VITE_BASE_URL
         }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid`,
         {
           headers: {
@@ -69,14 +69,16 @@ const TestSeriesForm = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
+      console.log('item: ', item);
 
+      console.log('slug: item.test_series_subject?.data.slug: ', item.test_series_subject?.data.attributes.slug);
       // Load fetched data into form
       reset({
         name: item?.name ?? "",
         order: item?.order ?? 0,
         slug: item?.slug ?? null,
         is_active: item?.is_active ?? true,
-        test_series_subject: item.test_series_subject?.data.id ?? 0,
+        test_series_subject: [{ name: item.test_series_subject?.data.attributes.name, id: item.test_series_subject?.data.id }],
       });
 
     };
@@ -108,6 +110,7 @@ const TestSeriesForm = () => {
 
     const result = await response.json();
   };
+  console.log('watch', watch())
 
   return (
     <Box
@@ -117,13 +120,13 @@ const TestSeriesForm = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h5" mb={3}>
-        {qid ? "Update Test Topic" : "Create Test Topic"}
+        {qid ? "Update Topic" : "Add Topic"}
       </Typography>
 
       <Grid container spacing={3}>
         {/* NAME */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Test Topic Subject</Typography>
+          <Typography variant="subtitle1">Name</Typography>
           <SimpleTextField
             name="name"
             control={control}
@@ -153,8 +156,15 @@ const TestSeriesForm = () => {
 
         {/* SUBJECT RELATION (multi select) */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Test Series Subject</Typography>
-          <SimpleSelectField
+          <Typography variant="subtitle1">Subject</Typography>
+          <OptimizedTopicSearch
+            routeName="test-series-subject"
+            dropdownType="single"
+            fieldName="test_series_subject"
+            setValue={setValue}
+            watch={watch}
+          />
+          {/* <SimpleSelectField
             name="test_series_subject"
             control={control}
             label=""
@@ -164,7 +174,7 @@ const TestSeriesForm = () => {
             }))}
             placeholder="Add relation"
             rules={{ required: "Select at least one subject" }}
-          />
+          /> */}
         </Grid>
 
         {/* ORDER */}
