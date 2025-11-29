@@ -52,8 +52,8 @@ const OptimizedTopicSearch = <
   setValue,
   watch,
   sx,
-  label = "Search topics",
-  placeholder = "Type to search…",
+  label = "",
+  placeholder = "",
   autocompleteProps,
   textFieldProps,
   required = false,
@@ -123,7 +123,7 @@ const OptimizedTopicSearch = <
   // // ADD THIS USEEFFECT (for edit mode)
   const fieldValue = watch(fieldName);
   useEffect(() => {
-    if (dropdownType !== "multi") return;
+    // if (dropdownType !== "multi") return;
 
     const defaultValue = fieldValue as TopicHit[];
     console.log("defaultValue from RHF:", defaultValue);

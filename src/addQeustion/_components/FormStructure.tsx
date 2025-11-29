@@ -13,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm } from "react-hook-form";
 import { QuestionSchema, QuestionSchemaType } from "../QuestionSchema";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import { difficultyOptions } from "./data";
+import { difficultyOptions, optionTypeData } from "./data";
 import TopicSearchBar from "../../components/TopicSearchBar";
 import UseMeiliDataContext from "../../context/MeiliContext";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,25 +29,26 @@ export default function FormStructure() {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      subject_tag: 0,
+      subject_tag: [],
       test_series_topic: [],
       // test_series_exams: [],
       marks: 0,
-      difficulty: "easy",
+      difficulty: "Easy",
       hint: "",
       option_type: "single_select",
-      // explanation: "",
-      // options: [
-      //   { option_label: "A", option: "", is_correct: false },
-      //   { option_label: "B", option: "", is_correct: false },
-      //   { option_label: "C", option: "", is_correct: false },
-      //   { option_label: "B", option: "", is_correct: false },
-      // ],
+      explanation: "",
+      options: [
+        { option_label: "A", option: "", is_correct: false },
+        { option_label: "B", option: "", is_correct: false },
+        { option_label: "C", option: "", is_correct: false },
+        { option_label: "B", option: "", is_correct: false },
+      ],
     },
     resolver: zodResolver(QuestionSchema),
     // resolver: zodResolver(QuestionSchema),
   });
   console.log("watch: ", watch());
+  console.log("errors: ", errors);
 
   // console.log('watch: ', watch());
   const onSubmitt = async (data: any) => {
@@ -64,23 +65,6 @@ export default function FormStructure() {
   };
   // deleteDropItem
   const { data } = UseMeiliDataContext();
-  // console.log("data: ", data);
-
-  // const deleteData = (id: number, type: any) => {
-  //   deleteDropItem(id, type);
-  // };
-  // console.log('watch: ', watch());
-
-  // const topics = data.topicData || [];
-  // const subjects = data.subjectData || [];
-  // console.log("data.subjectData: ", data?.subjectData?.[0]?.id);
-  // setValue("subject_tag", data?.subjectData?.[0]?.id || 0);
-  // const subjectOptions = subjects
-  //   .filter((s) => typeof s.id === "number") // keep only items with id
-  //   .map((s) => ({
-  //     value: s.id as number,
-  //     label: s.title || s.name || s.slug || "",
-  //   }));
 
   return (
     <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
@@ -90,125 +74,65 @@ export default function FormStructure() {
         sx={{ marginBlockStart: 10, paddingInline: 3, paddingBlockEnd: 5 }}
       >
         <Grid container size={12}>
-          <Typography variant="h4">Questionas Form</Typography>
-        </Grid>
-        {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-        <Typography variant="subtitle1">Select subject</Typography>
-        <SimpleSelectField
-          label=""
-          name="subject_tag"
-          control={control}
-          // label="Select Subject"
-          options={
-            subjectTagData?.map((subject) => ({
-              value: subject.id,
-              label: subject.attributes.name,
-            })) as Option[]
-          }
-          rules={{ required: "Please select a subject" }}
-        />
-      </Grid> */}
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <OptimizedTopicSearch
-            routeName="test-series-subject"
-            dropdownType="single"
-            fieldName="subject_tag"
-            setValue={setValue}
-            watch={watch}
-            required={true}
-          />
+          <Typography variant="h4">Question Form</Typography>
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <OptimizedTopicSearch
-            routeName="t-topic"
-            dropdownType="multi"
-            fieldName="test_series_topic"
-            setValue={setValue}
-            watch={watch}
-          />
-        </Grid>
-
-        <Grid>
-          <TopicSearchBar
-            setValue={setValue}
-            watch={watch}
-            fieldName="subject_tag"
-            routeName="test-series-subject"
-            typeName="subjectData"
-            dropdownType="single"
-          />
-        </Grid>
-
-        <Grid>
-          <TopicSearchBar
-            setValue={setValue}
-            watch={watch}
-            fieldName="test_series_topic"
-            routeName="t-topic"
-            typeName="topicData"
-            dropdownType="multi"
-          />
-          {/* <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Select subject
             <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ mb: 1, fontWeight: 700 }}
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
             >
-              Selected topics
+              *
             </Typography>
-
-            {watch("test_series_topic").length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                No topics added yet. Start searching and selecting from the
-                dropdown.
-              </Typography>
-            ) : (
-              <Paper
-                variant="outlined"
-                sx={{
-                  borderRadius: 2,
-                  maxHeight: 240,
-                  overflowY: "auto",
-                }}
-              >
-                <List dense disablePadding>
-                  {watch("test_series_topic").map((d, index) => (
-                    <ListItem
-                      key={index}
-                      secondaryAction={
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          // onClick={() => deleteData(d.id as number, "topicData")}
-                          onClick={() =>
-                            setValue(
-                              "test_series_topic",
-                              watch("test_series_topic").filter(
-                                (item: number) => item !== d
-                              )
-                            )
-                          }
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      }
-                    >
-                      <ListItemText
-                        primary={
-                          d
-                          // d.title || d.name || d.slug || "Untitled topic"
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
-            )}
-          </Box> */}
+          </Typography>
+          <OptimizedTopicSearch
+            routeName="test-series-subject"
+            dropdownType="single"
+            fieldName="subject_tag"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {" "}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Select Topic
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            routeName="t-topic"
+            dropdownType="multi"
+            fieldName="test_series_topic"
+            setValue={setValue}
+            watch={watch}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Marks</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Marks
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="marks"
             control={control}
@@ -220,7 +144,41 @@ export default function FormStructure() {
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Difficulty</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Select Option Type Of Question
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <SimpleSelectField
+            label=""
+            name="option_type"
+            control={control}
+            // label="Test Series Topic"
+            options={optionTypeData}
+            rules={{ required: "Please select a Topic" }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            OptionType
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleSelectField
             label=""
             name="difficulty"
@@ -232,7 +190,18 @@ export default function FormStructure() {
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Hint</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Hint
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="hint"
             control={control}
