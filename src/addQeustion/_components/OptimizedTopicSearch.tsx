@@ -52,6 +52,8 @@ const OptimizedTopicSearch = <
   setValue,
   watch,
   sx,
+  label = "",
+  placeholder = "",
   label,
   placeholder = "Type to search…",
   autocompleteProps,
@@ -119,6 +121,7 @@ const OptimizedTopicSearch = <
   // // ADD THIS USEEFFECT (for edit mode)
   const fieldValue = watch(fieldName);
   useEffect(() => {
+    // if (dropdownType !== "multi") return;
     // if (dropdownType !== "multi") return;
 
     const defaultValue = fieldValue as TopicHit[];

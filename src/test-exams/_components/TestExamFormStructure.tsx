@@ -2,34 +2,21 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import SimpleSelectField, {
   Option,
 } from "../../GlobalComponent/SimpleSelectField";
-import { Control, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import { QuestionSchemaType } from "../../addQeustion/QuestionSchema";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
-import {
-  difficultyOptions,
-  optionTypeData,
-} from "../../addQeustion/_components/data";
-import MainEditor from "../../addQeustion/components/MainEditor";
+import { difficultyOptions } from "../../addQeustion/_components/data";
 import {
   examsSchema,
   ExamsSchemaType,
 } from "../../validation/testSeriesExamSchema";
 import { useEffect, useState } from "react";
 import { slugify } from "../../testSubject/components/TestSubjectForm";
-import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 import { useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-export default function TestExamFormStructure({}: //   control,
-//   watch,
-//   setValue,
-{
-  //   control: Control<ExamsSchemaType>;
-  //   watch: UseFormWatch<ExamsSchemaType>;
-  //   setValue: UseFormSetValue<ExamsSchemaType>;
-}) {
+export default function TestExamFormStructure() {
   const { id } = useParams();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -57,11 +44,8 @@ export default function TestExamFormStructure({}: //   control,
     },
     resolver: zodResolver(examsSchema),
   });
-  console.log("watch: ", watch());
-  console.log("errors: ", errors);
 
   const onSubmitt = (data: ExamsSchemaType) => {
-    console.log("data: ", data);
 
     const url = id
       ? `${import.meta.env.VITE_BASE_URL}t-exams/${id}` // UPDATE
@@ -77,8 +61,6 @@ export default function TestExamFormStructure({}: //   control,
       },
       body: JSON.stringify({ data: data }),
     });
-
-    console.log(response);
   };
 
   useEffect(() => {
@@ -98,14 +80,6 @@ export default function TestExamFormStructure({}: //   control,
           }
         );
         const { data } = await response.json();
-        console.log("data: ", data);
-        console.log(
-          "data: ",
-          data?.attributes?.test_series_topics?.data?.map((topic: any) => ({
-            id: topic?.id,
-            name: topic?.attributes?.name,
-          }))
-        );
 
         reset({
           title: data?.attributes?.title,
@@ -118,7 +92,10 @@ export default function TestExamFormStructure({}: //   control,
           timer: data?.attributes?.timer,
           test_series_subjects:
             data?.attributes?.test_series_subjects?.data?.map(
-              (subject: any) => subject?.id
+              (subject: any) => ({
+                id: subject?.id,
+                name: subject?.attributes?.name,
+              })
             ),
           difficulty: data?.attributes?.difficulty,
           test_series_topics: data?.attributes?.test_series_topics?.data?.map(
@@ -138,20 +115,14 @@ export default function TestExamFormStructure({}: //   control,
     fetchData();
   }, []);
 
-  //   if (isLoading) return <div>Loading...</div>;
-  // if (!id) return null;
   const {
-    data: { examCategoryData, subjectTagData, topicTagData, tExamsData },
-    setSubject,
+    data: { examCategoryData },
   } = useInitialDataContext();
   useEffect(() => {
     if (!watch("title")) return;
     setValue("slug", slugify(watch("title")));
   }, [watch("title"), setValue]);
-  // useEffect(() => {
-  //     setSubject(watch('test_series_subjects'));
-  // }, [watch('test_series_subjects')]);
-
+  
   return (
     <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
       <Grid
@@ -165,36 +136,77 @@ export default function TestExamFormStructure({}: //   control,
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Title</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Title
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="title"
             control={control}
-            // label="Test Series Topic"
-            // options={difficultyOptions}
             rules={{ required: "Enter title" }}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Typography variant="subtitle1">Slug</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Slug
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="slug"
             control={control}
             rules={{ required: "Slug is required" }}
+            disabled
+            sx={{ pointerEvents: "none", cursor: "not-allowed", opacity: 0.6 }}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Description</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Description
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="description"
             control={control}
-            // label="Test Series Topic"
-            // options={difficultyOptions}
             rules={{ required: "Enter description" }}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Typography variant="subtitle1">Test Series Category</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Test Series Category
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleSelectField
             name="test_series_category"
             control={control}
@@ -210,7 +222,18 @@ export default function TestExamFormStructure({}: //   control,
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Marking Negative</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Marking Negative
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="marking_negative"
             control={control}
@@ -222,7 +245,18 @@ export default function TestExamFormStructure({}: //   control,
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Marking Positive</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Marking Positive
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="marking_positive"
             control={control}
@@ -233,7 +267,18 @@ export default function TestExamFormStructure({}: //   control,
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Typography variant="subtitle1">{`Timer (seconds)`}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            {`Timer (seconds)`}
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="timer"
             control={control}
@@ -242,44 +287,31 @@ export default function TestExamFormStructure({}: //   control,
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <Typography variant="subtitle1">Select subject</Typography>
-          {/* <SimpleMultiAutoComplete
-            control={control}
-            name="test_series_subjects"
-            options={
-              subjectTagData?.map((subject) => ({
-                value: subject.id,
-                label: subject.attributes.name,
-              })) as Option[]
-            }
-          /> */}
           <OptimizedTopicSearch
             routeName="test-series-subject"
-            dropdownType="single"
+            dropdownType="multi"
             fieldName="test_series_subjects"
             setValue={setValue}
             watch={watch}
+            placeholder="topic and search"
+            label="Select Subject"
+            required={true}
           />
-          {/* <pre>
-            {JSON.stringify(watch("test_series_subjects"), null, 2)}
-          </pre> */}
-
-          {/* <SimpleSelectField
-                    name="test_series_subjects"
-                    control={control}
-                    // label="Select Subject"
-                    options={
-                        subjectTagData?.map((subject) => ({
-                            value: subject.id,
-                            label: subject.attributes.name,
-                        })) as Option[]
-                    }
-                    rules={{ required: "Please select a subject" }}
-                /> */}
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1">Difficulty</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Difficulty
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleSelectField
             name="difficulty"
             control={control}
@@ -289,32 +321,15 @@ export default function TestExamFormStructure({}: //   control,
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          {/* <Typography variant="subtitle1">Select topic</Typography> */}
-          {/* <SimpleMultiAutoComplete
-                    name="test_series_topics"
-                    control={control}
-                    // label="Test Series Topic"
-                    options={
-                        topicTagData?.map((topic) => ({
-                            value: topic.id,
-                            label: topic.attributes.name,
-                        })) as Option[]
-                    }
-                    rules={{ required: "Please select a Topic" }}
-                /> */}
           <OptimizedTopicSearch
             routeName="t-topic"
             dropdownType="multi"
             fieldName="test_series_topics"
             setValue={setValue}
             watch={watch}
-            // sx={{
-            //   border: "2px solid red",
-            // }}
-            placeholder="topic and search"
-            label="sdfs"
-            
+            placeholder="search Topic eg: Algebra"
+            label="Select Topic"
+            required={true}
           />
         </Grid>
         {/* <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre> */}

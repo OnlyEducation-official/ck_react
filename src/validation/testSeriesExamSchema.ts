@@ -17,15 +17,20 @@ export const examsSchema = z.object({
     })
     .min(0, "Must be zero or positive"),
   timer: z.number().min(1, "Please enter a timer value"),
-  test_series_subjects: z.array(z.number().optional()),
+  test_series_subjects: z.array(
+    z.object({
+      id: z.number().optional(),
+      name: z.string().optional(),
+    }).optional()
+  ).optional(),
   difficulty: z.enum(["Easy", "Medium", "Hard"], {
     error: "Please select difficulty",
   }),
   test_series_topics: z.array(
     z.object({
-      id: z.number(),
-      name: z.string(),
-    })
-  ),
+      id: z.number().optional(),
+      name: z.string().optional(),
+    }).optional()
+  ).optional(),
 });
 export type ExamsSchemaType = z.infer<typeof examsSchema>;
