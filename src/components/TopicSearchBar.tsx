@@ -70,14 +70,14 @@ const TopicSearchBar = <
         options={results.filter((result) => !formValue?.some((val) => val.id === result.id))}
         fullWidth
         getOptionLabel={(option) => option.name || option.title || ""}
-        value={formValue}
+        value={formValue as TopicHit | null}
         onChange={(_, newValue) => {
           if (!newValue?.name) return null;
           console.log('newValue: ', newValue);
           if (multiSelect) {
-            setValue(fieldName, [...watch(fieldName), { id: newValue?.id, name: newValue?.name }]);
+            setValue(fieldName, [...watch(fieldName), { id: newValue?.id, name: newValue?.name }] as TSchema[TField]);
           } else {
-            setValue(fieldName, { id: newValue?.id, name: newValue?.name });
+            setValue(fieldName, { id: newValue?.id, name: newValue?.name } as TSchema[TField]);
           }
         }}
         inputValue={query}
