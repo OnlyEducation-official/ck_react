@@ -18,6 +18,7 @@ import TopicSearchBar from "../../components/TopicSearchBar";
 import UseMeiliDataContext from "../../context/MeiliContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
+import OptimizedTopicSearch from "./OptimizedTopicSearch";
 
 export default function FormStructure({}: // control,
 // watch,
@@ -116,6 +117,26 @@ export default function FormStructure({}: // control,
           rules={{ required: "Please select a subject" }}
         />
       </Grid> */}
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          subject async
+          <OptimizedTopicSearch
+            routeName="test-series-subject"
+            dropdownType="single"
+            fieldName="subject_tag"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          topic async
+          <OptimizedTopicSearch
+            routeName="t-topic"
+            dropdownType="multi"
+            fieldName="test_series_topic"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
 
         <Grid>
           <TopicSearchBar
@@ -127,6 +148,7 @@ export default function FormStructure({}: // control,
             dropdownType="single"
           />
         </Grid>
+
         <Grid>
           <TopicSearchBar
             setValue={setValue}
