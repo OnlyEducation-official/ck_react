@@ -54,8 +54,8 @@ const OptimizedTopicSearch = <
   sx,
   label = "",
   placeholder = "",
-  label,
-  placeholder = "Type to search…",
+  // label,
+  // placeholder = "Type to search…",
   autocompleteProps,
   textFieldProps,
   required = false,
@@ -227,7 +227,130 @@ const OptimizedTopicSearch = <
         size="small"
         multiple={dropdownType === "multi"}
         open={open}
-        sx={sx}
+        sx={{
+          ...sx,
+          // =========================================
+          // 🎯 MULTI SELECT STYLE (chips)
+          // =========================================
+          ...(dropdownType === "multi" && {
+            width: "100%",
+
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "10px",
+              backgroundColor: "#fafafa",
+              transition: "all 0.25s ease",
+              alignItems: "flex-start",
+              paddingTop: "6px !important",
+              paddingBottom: "6px !important",
+              paddingLeft: "10px !important",
+              // minHeight: "48px",
+
+              "& fieldset": { borderColor: "#D0D5DD" },
+              "&:hover fieldset": { borderColor: "#B8BDC5" },
+              "&.Mui-focused fieldset": {
+                borderColor: "primary.main",
+                boxShadow: "0 0 0 3px rgba(25,118,210,0.25)",
+              },
+            },
+
+            "& .MuiAutocomplete-inputRoot": {
+              flexWrap: "wrap !important",
+            },
+
+            "& .MuiChip-root": {
+              margin: "4px 4px 0 0",
+              borderRadius: "8px",
+              backgroundColor: "rgba(25,118,210,0.08)",
+              fontWeight: 700,
+              fontSize: "0.8rem",
+              // paddingInline: "4px",
+            },
+
+            "& .MuiChip-deleteIcon": {
+              color: "#d32f2f !important",
+              fontSize: "18px",
+              "&:hover": { color: "#b71c1c !important" },
+            },
+
+            "& .MuiAutocomplete-clearIndicator": {
+              color: "#d32f2f !important",
+              "&:hover": {
+                backgroundColor: "rgba(211,47,47,0.08)",
+                color: "#b71c1c !important",
+              },
+            },
+
+            "& .MuiAutocomplete-endAdornment": {
+              top: "20px",
+              right: "18px",
+            },
+
+            "& .MuiAutocomplete-paper": {
+              borderRadius: "12px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            },
+
+            "& .MuiAutocomplete-option": {
+              padding: "10px 14px",
+              fontSize: "0.9rem",
+              borderBottom: "1px solid #f3f3f3",
+              "&:last-of-type": { borderBottom: "none" },
+
+              "&.Mui-focused": { backgroundColor: "rgba(25,118,210,0.08)" },
+              "&.Mui-selected": {
+                backgroundColor: "rgba(25,118,210,0.15) !important",
+                fontWeight: 600,
+              },
+            },
+          }),
+
+          // =========================================
+          // 🎯 SINGLE SELECT STYLE (NO CHIPS)
+          // =========================================
+          ...(dropdownType === "single" && {
+            width: "100%",
+
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "10px",
+              backgroundColor: "#ffffff",
+              transition: "all 0.25s ease",
+              minHeight: "42px",
+              paddingLeft: "10px !important",
+
+              "& fieldset": { borderColor: "#D0D5DD" },
+              "&:hover fieldset": { borderColor: "#B8BDC5" },
+              "&.Mui-focused fieldset": {
+                borderColor: "primary.main",
+                boxShadow: "0 0 0 3px rgba(25,118,210,0.25)",
+              },
+            },
+
+            "& .MuiAutocomplete-inputRoot": {
+              padding: "6px 8px !important",
+            },
+
+            "& .MuiAutocomplete-endAdornment": {
+              top: "50%",
+              transform: "translateY(-50%)",
+              right: "10px",
+            },
+
+            "& .MuiAutocomplete-option": {
+              padding: "10px 14px",
+              fontSize: "0.9rem",
+              borderBottom: "1px solid #f3f3f3",
+              "&:last-of-type": { borderBottom: "none" },
+              "&.Mui-focused": { backgroundColor: "rgba(25,118,210,0.08)" },
+              "&.Mui-selected": {
+                backgroundColor: "rgba(25,118,210,0.15) !important",
+                fontWeight: 600,
+              },
+            },
+
+            // 🚫 No chips in single select
+            // "& .MuiChip-root": { display: "none" },
+          }),
+        }}
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         loading={loading}
@@ -251,18 +374,18 @@ const OptimizedTopicSearch = <
           //   : null
           dropdownType === "multi"
             ? value.map((option: TopicHit, index: number) => {
-              const tagProps = getTagProps({ index });
-              const { key, ...rest } = tagProps; // ⬅️ remove key from spread
+                const tagProps = getTagProps({ index });
+                const { key, ...rest } = tagProps; // ⬅️ remove key from spread
 
-              return (
-                <Chip
-                  key={key} // ⬅️ pass key explicitly (React requirement)
-                  {...rest}
-                  label={option.name || `#${option.id}`}
-                  size="small"
-                />
-              );
-            })
+                return (
+                  <Chip
+                    key={key} // ⬅️ pass key explicitly (React requirement)
+                    {...rest}
+                    label={option.name || `#${option.id}`}
+                    size="small"
+                  />
+                );
+              })
             : null
         }
         renderInput={(params) => (

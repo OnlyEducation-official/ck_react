@@ -1,96 +1,107 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import { Link } from 'react-router-dom';
-import { IconButton, Stack, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
-
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import { Link } from "react-router-dom";
+import { IconButton, Stack, Typography } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 const sidebarData = [
-    {
-        label: 'Exams Category',
-        url: '/test-exams-category-list'
-    },
-    {
-        label: 'Questions',
-        url: '/questions-list'
-    },
-    {
-        label: 'Subject',
-        url: '/test-subject-list'
-    },
-    {
-        label: 'Topic',
-        url: '/test-topic-list'
-    },
-    {
-        label: 'Exam',
-        url: '/exams-list'
-    },
-]
+  {
+    label: "Exams Category",
+    url: "/test-exams-category-list",
+  },
+  {
+    label: "Questions",
+    url: "/questions-list",
+  },
+  {
+    label: "Subject",
+    url: "/test-subject-list",
+  },
+  {
+    label: "Topic",
+    url: "/test-topic-list",
+  },
+  {
+    label: "Exam",
+    url: "/exams-list",
+  },
+];
 
 export default function Sidebar() {
-    const [state, setState] = React.useState(false);
+  const [state, setState] = React.useState(false);
 
-    const toggleDrawer =
-        (open: boolean) =>
-            (event: React.KeyboardEvent | React.MouseEvent) => {
-                if (
-                    event.type === 'keydown' &&
-                    ((event as React.KeyboardEvent).key === 'Tab' ||
-                        (event as React.KeyboardEvent).key === 'Shift')
-                ) {
-                    return;
-                }
+  const toggleDrawer =
+    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      if (
+        event.type === "keydown" &&
+        ((event as React.KeyboardEvent).key === "Tab" ||
+          (event as React.KeyboardEvent).key === "Shift")
+      ) {
+        return;
+      }
 
-                setState(open);
-            };
+      setState(open);
+    };
 
-    const list = () => (
-        <Box
-            sx={{ width: 250 }}
-            role="presentation"
-            onClick={toggleDrawer(false)}
-            onKeyDown={toggleDrawer(false)}
+  const list = () => (
+    <Box
+      sx={{ width: 250 }}
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
+    >
+      <Stack
+        spacing={1}
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: 2,
+        }}
+      >
+        <Typography
+          variant="h5"
+          noWrap
+          component={Link}
+          to={"/"}
+          sx={{
+            display: { xs: "none", sm: "block" },
+            fontWeight: 600,
+            textDecoration: "none",
+            color: "black",
+          }}
         >
-            <Stack spacing={1} direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                <Typography
-                    variant="h5"
-                    noWrap
-                    component={Link}
-                    to={'/'}
-                    sx={{ display: { xs: 'none', sm: 'block' }, fontWeight: 600, textDecoration: 'none', color: 'black' }}
-                >
-                    ONLY TEST
-                </Typography>
-                <IconButton onClick={toggleDrawer(false)} sx={{ padding: 0.5 }}>
-                    <CloseIcon sx={{ color: 'black' }} />
-                </IconButton>
-            </Stack>
+          ONLY TEST
+        </Typography>
+        <IconButton onClick={toggleDrawer(false)} sx={{ padding: 0.5 }}>
+          <CloseIcon sx={{ color: "black" }} />
+        </IconButton>
+      </Stack>
 
-            <Divider />
-            <List>
-                {sidebarData.map((obj, index) => (
-                    <ListItem key={obj.label} disablePadding>
-                        <ListItemButton component={Link} to={obj.url}>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={obj.label} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-            {/* 
+      <Divider />
+      <List>
+        {sidebarData.map((obj, index) => (
+          <ListItem key={obj.label} disablePadding>
+            <ListItemButton component={Link} to={obj.url}>
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={obj.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      {/* 
             <List>
                 {['All mail', 'Trash', 'Spam'].map((text, index) => (
                     <ListItem key={text} disablePadding>
@@ -103,21 +114,23 @@ export default function Sidebar() {
                     </ListItem>
                 ))}
             </List> */}
-        </Box>
-    );
+    </Box>
+  );
 
-    return (
-        <div>
-            <React.Fragment>
-                <Button onClick={toggleDrawer(true)} sx={{ color: 'white' }}>Open</Button>
-                <Drawer
-                    anchor={'right'}
-                    open={state}
-                    onClose={() => toggleDrawer(false)}
-                >
-                    {list()}
-                </Drawer>
-            </React.Fragment>
-        </div>
-    );
+  return (
+    <div>
+      <React.Fragment>
+        <Button onClick={toggleDrawer(true)} sx={{ color: "white" }}>
+          <MenuIcon />
+        </Button>
+        <Drawer
+          anchor={"right"}
+          open={state}
+          onClose={() => toggleDrawer(false)}
+        >
+          {list()}
+        </Drawer>
+      </React.Fragment>
+    </div>
+  );
 }

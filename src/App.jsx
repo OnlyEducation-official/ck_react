@@ -20,7 +20,7 @@ function App() {
   return (
     <div>
       <DrawerAppBar />
-      <ToastContainer position="top-right" autoClose={2000} />
+      <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
         <Route
           path="/"

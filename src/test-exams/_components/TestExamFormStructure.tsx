@@ -15,6 +15,8 @@ import { slugify } from "../../testSubject/components/TestSubjectForm";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 import { useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import { toastResponse } from "../../util/toastResponse";
 
 export default function TestExamFormStructure() {
   const { id } = useParams();
@@ -45,22 +47,34 @@ export default function TestExamFormStructure() {
     resolver: zodResolver(examsSchema),
   });
 
-  const onSubmitt = (data: ExamsSchemaType) => {
-
-    const url = id
-      ? `${import.meta.env.VITE_BASE_URL}t-exams/${id}` // UPDATE
-      : `${import.meta.env.VITE_BASE_URL}t-exams`; // CREATE
-
-    const method = id ? "PUT" : "POST";
-
-    const response = fetch(`${url}`, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-      },
-      body: JSON.stringify({ data: data }),
-    });
+  const onSubmitt = async (data: ExamsSchemaType) => {
+    try {
+      const url = id
+        ? `${import.meta.env.VITE_BASE_URL}t-exams/${id}` // UPDATE
+        : `${import.meta.env.VITE_BASE_URL}t-exams`; // CREATE
+      const response = fetch(`${url}`, {
+        method: id ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        },
+        body: JSON.stringify({ data: data }),
+      });
+      const success = await toastResponse(
+        await response,
+        id
+          ? "Updated Exam Form Successfully!"
+          : "Created Exam Form Successfully!",
+        id ? "Update Exam Form Failed!" : "Create Exam Form Failed!"
+      );
+      if (!success) return; // ❌ stop if failed
+      // 👉 Your next steps (optional)
+      // reset();
+      // router.push("/exam-category");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
   };
 
   useEffect(() => {
@@ -122,16 +136,27 @@ export default function TestExamFormStructure() {
     if (!watch("title")) return;
     setValue("slug", slugify(watch("title")));
   }, [watch("title"), setValue]);
-  
+
   return (
     <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
       <Grid
         container
-        spacing={3}
+        spacing={2}
         sx={{ marginBlockStart: 10, paddingInline: 3, paddingBlockEnd: 5 }}
       >
-        <Grid container size={12}>
-          <Typography variant="h4">Exam Form</Typography>
+        <Grid container size={12} sx={{ height: "fit-content" }}>
+          <Typography
+            variant="h4"
+            sx={{
+              mb: 2,
+              fontWeight: "bold",
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {id ? "Update Exam " : "Add Exam "}
+          </Typography>
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -333,9 +358,27 @@ export default function TestExamFormStructure() {
           />
         </Grid>
         {/* <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre> */}
-        <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
-          <Button variant="contained" type="submit" sx={{ paddingInline: 10 }}>
-            Submit
+        <Grid size={12} sx={{ textAlign: "start", paddingBlock: 2 }}>
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              px: 5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "18px",
+              borderRadius: "13px",
+              background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+              color: "#fff",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+              },
+            }}
+          >
+         { id ? "Update Exam " : "Create Exam "}
           </Button>
         </Grid>
       </Grid>

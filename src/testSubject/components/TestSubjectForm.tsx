@@ -14,9 +14,7 @@ import {
   TestSchemaType,
 } from "../../validation/testSeriesSubjectSchema";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import SimpleSelectField, {
-  Option,
-} from "../../GlobalComponent/SimpleSelectField";
+import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -66,8 +64,9 @@ const TestSubjectForm = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }test-series-subjects/${qid}?populate=*`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }test-series-subjects/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -93,47 +92,72 @@ const TestSubjectForm = () => {
   const isActive = watch("isActive");
 
   const onSubmit = async (data: TestSchemaType) => {
-    const isEdit = Boolean(qid);
+    try {
+      const isEdit = Boolean(qid);
+      const url = isEdit
+        ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${qid}`
+        : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
+      // test-series-subjects
 
-    const url = isEdit
-      ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${qid}`
-      : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
-    // test-series-subjects
-    const method = isEdit ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        },
+        body: JSON.stringify({
+          data: data,
+        }),
+      });
 
-    const body = JSON.stringify({
-      data: data,
-    });
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-      },
-      body,
-    });
-
-    toastResponse(
-      res,
-      `${qid ? "Updated" : "Created"} subject successfully`,
-      " subject is Failed"
-    );
-    const json = await res.json();
+      const success = await toastResponse(
+        res,
+        `${qid ? "Updated" : "Created"} subject successfully`,
+        " subject is Failed"
+      );
+      const json = await res.json();
+      if (!success) return; // ❌ stop if failed
+      // 👉 Your next steps (optional)
+      // reset();
+      // router.push("/exam-category");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
   };
 
   return (
-    <Box p={4} borderRadius={2}
-      sx={{ marginBlockStart: 6 }}>
-      <Typography variant="h5" mb={3}>
-        {qid ? "Update" : "Create"} Test Subject
+    <Box p={4} borderRadius={2} sx={{ marginBlockStart: 6 }}>
+      <Typography
+        variant="h5"
+        mb={3}
+        sx={{
+          mb: 2,
+          fontWeight: "bold",
+          pl: 2,
+          borderLeft: "6px solid",
+          borderColor: "primary.main",
+        }}
+      >
+        {qid ? "Update Subject" : "Create Subject"}
       </Typography>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
           {/* NAME */}
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1">Name</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Name
+              <Typography
+                variant="subtitle1"
+                component="span"
+                color="error"
+                fontWeight={700}
+                marginLeft={0.2}
+              >
+                *
+              </Typography>
+            </Typography>
             <SimpleTextField
               name="name"
               control={control}
@@ -143,7 +167,18 @@ const TestSubjectForm = () => {
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1">Slug</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Slug
+              <Typography
+                variant="subtitle1"
+                component="span"
+                color="error"
+                fontWeight={700}
+                marginLeft={0.2}
+              >
+                *
+              </Typography>
+            </Typography>
             <SimpleTextField
               name="slug"
               disabled
@@ -164,8 +199,18 @@ const TestSubjectForm = () => {
 
           {/* ORDER */}
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1">Order</Typography>
-
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Order
+              <Typography
+                variant="subtitle1"
+                component="span"
+                color="error"
+                fontWeight={700}
+                marginLeft={0.2}
+              >
+                *
+              </Typography>
+            </Typography>
             <SimpleSelectField
               name="order"
               control={control}
@@ -180,7 +225,10 @@ const TestSubjectForm = () => {
           </Grid>
 
           {/* isActive (toggle) */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid
+            size={{ xs: 12, md: 6 }}
+            sx={{ display: "flex", alignItems: "center" }}
+          >
             <FormControlLabel
               control={
                 <Switch
@@ -188,14 +236,45 @@ const TestSubjectForm = () => {
                   onChange={(e) => setValue("isActive", e.target.checked)}
                 />
               }
-              label="Is Active"
+              label={
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  Is Active
+                  <Typography
+                    variant="subtitle1"
+                    component="span"
+                    color="error"
+                    fontWeight={700}
+                    ml={0.3}
+                  >
+                    *
+                  </Typography>
+                </Typography>
+              }
             />
           </Grid>
 
           {/* SUBMIT BUTTON */}
           <Grid size={{ xs: 12 }}>
-            <Button variant="contained" type="submit">
-              Submit
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                px: 5,
+                py: 1,
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "18px",
+                borderRadius: "13px",
+                background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+                color: "#fff",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+                "&:hover": {
+                  background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+                },
+              }}
+            >
+              {qid ? "Update" : "Submit"}
             </Button>
           </Grid>
         </Grid>

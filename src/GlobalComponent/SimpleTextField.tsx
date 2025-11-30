@@ -43,7 +43,63 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
           <TextField
             size="small"
             {...field}
-            sx={sx}
+            sx={{
+              ...sx,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+                backgroundColor: "#fafafa",
+                transition: "all 0.25s ease",
+
+                "& fieldset": {
+                  borderColor: "#D0D5DD",
+                },
+
+                "&:hover fieldset": {
+                  borderColor: "#B8BDC5",
+                },
+
+                "&.Mui-focused fieldset": {
+                  borderColor: "primary.main",
+                  boxShadow: "0 0 0 3px rgba(25,118,210,0.25)",
+                },
+
+                "&.Mui-error fieldset": {
+                  borderColor: "#d32f2f",
+                  boxShadow: "0 0 0 3px rgba(211,47,47,0.25)",
+                },
+              },
+
+              // Input spacing & font
+              "& .MuiInputBase-input": {
+                padding: "10px 12px",
+                fontSize: "0.9rem",
+                fontWeight: 500,
+              },
+
+              // Label styling
+              "& .MuiInputLabel-root": {
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "text.secondary",
+              },
+
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "primary.main",
+              },
+
+              // Error text
+              "& .MuiFormHelperText-root": {
+                marginLeft: 0,
+                fontSize: "0.75rem",
+                fontWeight: 600,
+              },
+
+              // Textarea padding
+              "& .MuiInputBase-inputMultiline": {
+                padding: "12px !important",
+                lineHeight: "1.5rem",
+              },
+            }}
             fullWidth={fullWidth}
             type={type === "textarea" ? "text" : type}
             label={label}
@@ -53,10 +109,14 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             rows={multiline || type === "textarea" ? rows : undefined}
             error={!!fieldState.error}
             helperText={fieldState.error?.message || ""}
-            value={typeof field.value === 'string' ? field.value || "" : Number(field.value) || 0}
+            value={
+              typeof field.value === "string"
+                ? field.value || ""
+                : Number(field.value) || 0
+            }
             onChange={(e) => {
               const value = Number(e.target.value);
-              if (!(Number.isNaN(value)) && e.target.value.length === 0) {
+              if (!Number.isNaN(value) && e.target.value.length === 0) {
                 return field.onChange(e.target.value);
               } else if (Number.isNaN(value)) {
                 return field.onChange(e.target.value);
@@ -66,12 +126,10 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             }}
             {...rest}
             inputProps={
-              isNumber
-                ? { inputMode: "numeric", pattern: "[0-9]*" }
-                : undefined
+              isNumber ? { inputMode: "numeric", pattern: "[0-9]*" } : undefined
             }
           />
-        )
+        );
       }}
     />
   );

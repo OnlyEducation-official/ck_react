@@ -22,6 +22,7 @@ import { useSlugGenerator } from "../../hooks/useSlugGenerator";
 import { toastResponse } from "../../util/toastResponse";
 import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
+import { toast } from "react-toastify";
 
 const TestSeriesForm = () => {
   const {
@@ -58,7 +59,8 @@ const TestSeriesForm = () => {
 
     const fetchData = async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL
+        `${
+          import.meta.env.VITE_BASE_URL
         }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid`,
         {
           headers: {
@@ -69,18 +71,25 @@ const TestSeriesForm = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
-      console.log('item: ', item);
+      console.log("item: ", item);
 
-      console.log('slug: item.test_series_subject?.data.slug: ', item.test_series_subject?.data.attributes.slug);
+      console.log(
+        "slug: item.test_series_subject?.data.slug: ",
+        item.test_series_subject?.data.attributes.slug
+      );
       // Load fetched data into form
       reset({
         name: item?.name ?? "",
         order: item?.order ?? 0,
         slug: item?.slug ?? null,
         is_active: item?.is_active ?? true,
-        test_series_subject: [{ name: item.test_series_subject?.data.attributes.name, id: item.test_series_subject?.data.id }],
+        test_series_subject: [
+          {
+            name: item.test_series_subject?.data.attributes.name,
+            id: item.test_series_subject?.data.id,
+          },
+        ],
       });
-
     };
 
     fetchData();
@@ -88,45 +97,77 @@ const TestSeriesForm = () => {
   const isActive = watch("is_active");
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
-    const url = qid
-      ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
-      : `${import.meta.env.VITE_BASE_URL}t-topics`; // CREATE
+    try {
+      const url = qid
+        ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
+        : `${import.meta.env.VITE_BASE_URL}t-topics`; // CREATE
+      const response = await fetch(url, {
+        method: qid ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        },
+        body: JSON.stringify({ data }),
+      });
+      toastResponse(
+        response,
+        `${qid ? "Updated" : "Created"} Topic successfully`,
+        " Topic is Failed"
+      );
 
-    const method = qid ? "PUT" : "POST";
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-      },
-      body: JSON.stringify({ data }),
-    });
-    toastResponse(
-      response,
-      `${qid ? "Updated" : "Created"} Topic successfully`,
-      " Topic is Failed"
-    );
-
-    const result = await response.json();
+      const result = await response.json();
+      const success = await toastResponse(
+        response,
+        qid ? "Updated Topic Successfully!" : "Created Topic Successfully!",
+        qid ? "Update Topic Failed!" : "Create Topic Failed!"
+      );
+      if (!success) return; // ❌ stop if failed
+      // 👉 Your next steps (optional)
+      // reset();
+      // router.push("/exam-category");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
   };
-  console.log('watch', watch())
+  console.log("watch", watch());
 
   return (
     <Box
       p={4}
-      sx={{ marginBlockStart: 5 }}
+      sx={{ marginBlockStart: 6 }}
       component="form"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Typography variant="h5" mb={3}>
+      <Typography
+        variant="h5"
+        mb={3}
+        sx={{
+          mb: 2,
+          fontWeight: "bold",
+          pl: 2,
+          borderLeft: "6px solid",
+          borderColor: "primary.main",
+        }}
+      >
         {qid ? "Update Topic" : "Add Topic"}
       </Typography>
 
       <Grid container spacing={3}>
         {/* NAME */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Name</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Name
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="name"
             control={control}
@@ -136,7 +177,18 @@ const TestSeriesForm = () => {
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Slug</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Slug
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleTextField
             name="slug"
             control={control}
@@ -156,7 +208,18 @@ const TestSeriesForm = () => {
 
         {/* SUBJECT RELATION (multi select) */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Subject</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <OptimizedTopicSearch
             routeName="test-series-subject"
             dropdownType="single"
@@ -179,7 +242,18 @@ const TestSeriesForm = () => {
 
         {/* ORDER */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1">Order</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Order
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <SimpleSelectField
             name="order"
             control={control}
@@ -210,13 +284,45 @@ const TestSeriesForm = () => {
                 onChange={(e) => setValue("is_active", e.target.checked)}
               />
             }
-            label="Is Active"
+            // label="Is Active"
+            label={
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                Is Active
+                <Typography
+                  variant="subtitle1"
+                  component="span"
+                  color="error"
+                  fontWeight={700}
+                  marginLeft={0.2}
+                >
+                  *
+                </Typography>
+              </Typography>
+            }
           />
         </Grid>
 
         <Grid size={{ xs: 12 }}>
-          <Button variant="contained" type="submit" fullWidth>
-            Submit
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              px: 5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "18px",
+              borderRadius: "13px",
+              background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+              color: "#fff",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+              },
+            }}
+          >
+            {qid ? "Update" : "Submit"}
           </Button>
         </Grid>
       </Grid>

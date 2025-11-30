@@ -19,8 +19,12 @@ import UseMeiliDataContext from "../../context/MeiliContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import OptimizedTopicSearch from "./OptimizedTopicSearch";
+import { toast } from "react-toastify";
+import { toastResponse } from "../../util/toastResponse";
+import { useParams } from "react-router-dom";
 
 export default function FormStructure() {
+  const { qid } = useParams();
   const {
     control,
     watch,
@@ -51,30 +55,62 @@ export default function FormStructure() {
   console.log("errors: ", errors);
 
   // console.log('watch: ', watch());
-  const onSubmitt = async (data: any) => {
-    const url = `${import.meta.env.VITE_BASE_URL}t-questions`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-      },
-      body: JSON.stringify({ data: data }),
-    });
-    const datas = await response.json();
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}t-questions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          },
+          body: JSON.stringify({ data: data }),
+        }
+      );
+      const success = await toastResponse(
+        response,
+        qid
+          ? "Updated  Question Form Successfully!"
+          : "Created  Question Form Successfully!",
+        qid ? "Update  Question Form Failed!" : "Create Question Form Failed!"
+      );
+      const datas = await response.json();
+      if (!success) return; // ❌ stop if failed
+      // 👉 Your next steps (optional)
+      // reset();
+      // router.push("/exam-category");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
   };
   // deleteDropItem
   const { data } = UseMeiliDataContext();
 
   return (
-    <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
+    <Box
+      sx={{ marginBlockStart: 6, bgcolor: "background.paper" }}
+      component={"form"}
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Grid
         container
-        spacing={3}
+        spacing={2}
         sx={{ marginBlockStart: 10, paddingInline: 3, paddingBlockEnd: 5 }}
       >
         <Grid container size={12}>
-          <Typography variant="h4">Question Form</Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: "bold",
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {qid ? "Edit Question Form " : "Add Question Form "}
+          </Typography>
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -145,7 +181,7 @@ export default function FormStructure() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Select Option Type Of Question
+            Select Question Type 
             <Typography
               variant="subtitle1"
               component="span"
@@ -211,8 +247,26 @@ export default function FormStructure() {
           />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
-          <Button variant="contained" type="submit" sx={{ paddingInline: 10 }}>
-            Submit
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              px: 5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "18px",
+              borderRadius: "13px",
+              background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+              color: "#fff",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+              },
+            }}
+          >
+            {qid ? "Update" : "Submit"}
           </Button>
         </Grid>
       </Grid>
