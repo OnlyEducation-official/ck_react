@@ -39,4 +39,28 @@ export const resources = {
       singular: "Topic",
     },
   },
+};
+
+export function getResourceByPath(pathname: string) {
+  if (pathname.includes("test-exams-category-list")) {
+    return resources.categories;
+  }
+
+  if (pathname.includes("questions-list")) {
+    return resources.questions;
+  }
+
+  if (pathname.includes("test-subject-list")) {
+    return resources.subjects;
+  }
+
+  if (pathname.includes("test-topic-list")) {
+    return resources.topics;
+  }
+
+  if (pathname.includes("exams-list")) {
+    return resources.exams;
+  }
+
+  return null; // fallback
 }

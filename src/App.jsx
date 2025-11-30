@@ -1,7 +1,6 @@
 import { Routes, Route, Link } from "react-router-dom";
 // import Home from './pages/Home'
 // import EditPage from './pages/EditPage'
-import GetAllList from "./getAll/GetAllPage";
 import QuestionPreview from "./ui/Form";
 import QuestionPreview2 from "./ui/Form2";
 import ResponsiveAppBar from "./ui/Header";
@@ -15,8 +14,7 @@ import TestExamsForm from "./test-exams/TestExamsForm";
 import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
 import { ToastContainer } from "react-toastify";
 import { MeiliDataContextProvide } from "./context/MeiliContext";
-import { resources } from "./util/resource";
-
+import GetAllList from "./getAll/GetAllPage";
 
 function App() {
   return (
@@ -39,11 +37,7 @@ function App() {
         <Route
           path="/test-exams-category-list"
           element={
-            <GetAllList
-              routeName={resources.categories.routeName}
-              lol={resources.categories.uid}
-              title={resources.categories.labels}
-            />
+            <GetAllList routeName="t-categories" lol="test-exams-category" />
           }
         />
         <Route
@@ -67,13 +61,7 @@ function App() {
         {/* t-questions */}
         <Route
           path="/questions-list"
-          element={
-            <GetAllList
-              routeName={resources.questions.routeName}
-              lol={resources.questions.uid}
-              title={resources.questions.labels}
-            />
-          }
+          element={<GetAllList routeName="t-questions" lol="questions" />}
         />
         <Route
           path="/questions"
@@ -98,11 +86,7 @@ function App() {
         <Route
           path="/test-subject-list"
           element={
-            <GetAllList
-              routeName={resources.subjects.routeName}
-              lol={resources.subjects.uid}
-              title={resources.subjects.labels}
-            />
+            <GetAllList routeName="test-series-subjects" lol="test-subject" />
           }
         />
         <Route
@@ -126,13 +110,7 @@ function App() {
         {/* t-topic */}
         <Route
           path="/test-topic-list"
-          element={
-            <GetAllList
-              routeName={resources.topics.routeName}
-              lol={resources.topics.uid}
-              title={resources.topics.labels}
-            />
-          }
+          element={<GetAllList routeName="t-topics" lol="test-topic" />}
         />
         <Route
           path="/test-topic"
@@ -157,13 +135,7 @@ function App() {
         {/* t-exams */}
         <Route
           path="/exams-list"
-          element={
-            <GetAllList
-              routeName={resources.exams.routeName}
-              lol={resources.exams.uid}
-              title={resources.exams.labels}
-            />
-          }
+          element={<GetAllList routeName="t-exams" lol="test-exams" />}
         />
         <Route
           path="/test-exams"

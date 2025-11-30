@@ -110,6 +110,16 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             // rows={multiline || type === "textarea" ? rows : undefined}
             error={!!fieldState.error}
             helperText={fieldState.error?.message || ""}
+            onKeyDown={(e) => {
+              if (isNumber) {
+                const invalidKeys = ["e", "E", "+", "-", "."];
+
+                // Prevent invalid chars
+                if (invalidKeys.includes(e.key)) {
+                  e.preventDefault();
+                }
+              }
+            }}
             value={
               typeof field.value === "string"
                 ? field.value || ""
