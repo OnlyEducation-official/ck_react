@@ -16,6 +16,7 @@ import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
 import { ToastContainer } from "react-toastify";
 import { MeiliDataContextProvide } from "./context/MeiliContext";
 import { resources } from "./util/resource";
+import Login from "./login/Login";
 
 
 function App() {
@@ -24,14 +25,18 @@ function App() {
       <DrawerAppBar />
       <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
+
+        <Route
+          path="/login"
+          element={
+            <Login />
+          }
+        />
+
         <Route
           path="/"
           element={
-            <InitialDataContextProvider>
-              <MeiliDataContextProvide>
-                <Index />
-              </MeiliDataContextProvide>
-            </InitialDataContextProvider>
+            <Login />
           }
         />
 
