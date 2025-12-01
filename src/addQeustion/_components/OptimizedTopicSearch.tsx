@@ -381,7 +381,7 @@ const OptimizedTopicSearch = <
                   <Chip
                     key={key} // ⬅️ pass key explicitly (React requirement)
                     {...rest}
-                    label={option.name || `#${option.id}`}
+                    label={option?.name || option?.title || `#${option.id}`}
                     size="small"
                   />
                 );

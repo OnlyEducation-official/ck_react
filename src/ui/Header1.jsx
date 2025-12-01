@@ -116,7 +116,7 @@ function DrawerAppBar() {
                 component={Link}
                 to={"/"}
                 sx={{
-                  display: { xs: "none", sm: "block" },
+                  display: { xs: "block" },
                   fontWeight: 600,
                   textDecoration: "none",
                   color: "white",
@@ -134,7 +134,7 @@ function DrawerAppBar() {
                     key={index}
                     sx={{
                       flexGrow: 1,
-                      display: { xs: "none", sm: "block" },
+                      display: { xs: "none", md: "block" },
                       fontWeight: 600,
                       color:
                         location.pathname === btn.url
@@ -163,7 +163,7 @@ function DrawerAppBar() {
                   </Typography>
                 ))}
               </Stack>
-              <Box sx={{ display: { xs: "flex", sm: "none" } }}>
+              <Box sx={{ display: { xs: "flex", md: "none" } }}>
                 <Sidebar />
               </Box>
             </Box>

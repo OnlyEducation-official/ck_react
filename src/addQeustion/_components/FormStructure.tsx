@@ -13,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useForm } from "react-hook-form";
 import { QuestionSchema, QuestionSchemaType } from "../QuestionSchema";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import { difficultyOptions, optionTypeData } from "./data";
+import { difficultyOptions, optionTypeData, QuestionOptionType } from "./data";
 import TopicSearchBar from "../../components/TopicSearchBar";
 import UseMeiliDataContext from "../../context/MeiliContext";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,23 +21,27 @@ import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import OptimizedTopicSearch from "./OptimizedTopicSearch";
 import { toast } from "react-toastify";
 import { toastResponse } from "../../util/toastResponse";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import MainEditor from "../components/MainEditor";
+import OptionsFieldArray from "../components/OptionsFieldArray";
+import { useEffect } from "react";
 
 export default function FormStructure() {
   const { qid } = useParams();
+  const navigate = useNavigate();
   const {
     control,
     watch,
     setValue,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
       subject_tag: [],
       test_series_topic: [],
       // test_series_exams: [],
-      marks: 0,
-      difficulty: "Easy",
+      difficulty: "easy",
       hint: "",
       option_type: "single_select",
       explanation: "",
@@ -47,6 +51,7 @@ export default function FormStructure() {
         { option_label: "C", option: "", is_correct: false },
         { option_label: "B", option: "", is_correct: false },
       ],
+      question_title: "",
     },
     resolver: zodResolver(QuestionSchema),
     // resolver: zodResolver(QuestionSchema),
@@ -54,13 +59,93 @@ export default function FormStructure() {
   console.log("watch: ", watch());
   console.log("errors: ", errors);
 
+  useEffect(() => {
+    if (!qid) return; // CREATE MODE
+    const fetchQuestionById = async (
+      qid: number
+    ): Promise<QuestionSchemaType> => {
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true`;
+
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        },
+      });
+
+      const json = await res.json();
+      console.log('json: ', json);
+      const item = json.data;
+
+      if (!item) throw new Error("Question not found");
+
+      const attr = item.attributes;
+
+      return {
+        /** SIMPLE FIELDS */
+        difficulty: attr.difficulty?.toLowerCase(), // "easy" | "medium" | "hard"
+        explanation: attr.explanation ?? "",
+        option_type: attr.option_type ?? "single_select",
+        hint: attr.hint ?? "",
+        question_title: attr.question_title ?? "",
+
+        /** SUBJECT TAG → single object in API, array in schema */
+        subject_tag: attr.subject_tag?.data
+          ? [
+              {
+                id: attr.subject_tag.data.id,
+                name: attr.subject_tag.data.attributes.name,
+              },
+            ]
+          : [],
+
+        /** TOPIC → Strapi returns single, schema requires an array */
+        test_series_topic: attr.test_series_topic?.data
+          ? [
+              {
+                id: attr.test_series_topic.data.id,
+                name: attr.test_series_topic.data.attributes.name,
+              },
+            ]
+          : [],
+
+        /** TEST SERIES EXAMS → many-to-many array */
+        test_series_exams:
+          attr.test_series_exams?.data?.map((exam: any) => ({
+            id: exam.id,
+            title: exam.attributes.title,
+          })) ?? [],
+
+        /** OPTIONS → already perfect for your UI */
+        options:
+          attr.options?.map((opt: any) => ({
+            option_label: opt.option_label,
+            option: opt.option,
+            is_correct: opt.is_correct,
+          })) ?? [],
+      };
+    };
+    const loadQuestion = async () => {
+      try {
+        const data = await fetchQuestionById(Number(qid));
+        reset(data); // 🔥 FULLY WORKS WITH ZOD + RHF + CKEDITOR
+      } catch (err) {
+        console.error("Failed to load question", err);
+      }
+    };
+
+    loadQuestion();
+  }, [qid, reset]);
+
   // console.log('watch: ', watch());
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}t-questions`,
+      const isEdit = Boolean(qid);
+      const url = isEdit ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}` : `${import.meta.env.VITE_BASE_URL}t-questions`;
+      const response = await fetch(url,
         {
-          method: "POST",
+          method: isEdit ? 'PUT' : "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
@@ -78,15 +163,16 @@ export default function FormStructure() {
       const datas = await response.json();
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      // reset();
-      // router.push("/exam-category");
+      if (!qid) {
+        reset();
+        navigate("/questions-list");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
   };
   // deleteDropItem
-  const { data } = UseMeiliDataContext();
 
   return (
     <Box
@@ -158,29 +244,6 @@ export default function FormStructure() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Marks
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
-          </Typography>
-          <SimpleTextField
-            name="marks"
-            control={control}
-            // label="Marks"
-            type="number"
-            placeholder="Enter marks"
-            rules={{ min: { value: 1, message: "Marks must be at least 1" } }}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Select Question Type
             <Typography
               variant="subtitle1"
@@ -220,7 +283,7 @@ export default function FormStructure() {
             name="difficulty"
             control={control}
             // label="Test Series Topic"
-            options={difficultyOptions}
+            options={QuestionOptionType}
             rules={{ required: "Please select a Topic" }}
           />
         </Grid>
@@ -244,6 +307,79 @@ export default function FormStructure() {
             // label="Test Series Topic"
             // options={difficultyOptions}
             rules={{ required: "Please select a Topic" }}
+          />
+        </Grid>
+        {/* Test series Exam */}
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Test Series Exam
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="multi"
+            fieldName="test_series_exams"
+            routeName="t-exam"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        {/* ---------- QUESTION FIELD ---------- */}
+        <Grid size={12}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Question
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <MainEditor
+            name="question_title"
+            setValue={setValue}
+            watch={watch}
+            value={watch("question_title")}
+          />
+        </Grid>
+
+        {/* ---------- OPTIONS FIELD ARRAY ---------- */}
+        <Grid size={12}>
+          <OptionsFieldArray
+            control={control}
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={12}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Explaination
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <MainEditor
+            name="explanation"
+            setValue={setValue}
+            watch={watch}
+            value={watch("explanation")}
           />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>

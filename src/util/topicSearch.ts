@@ -17,7 +17,7 @@ export async function searchTopics(
 
   const options: any = {
     limit: 20,
-    attributesToRetrieve: ["name", "id", "slug"],
+    attributesToRetrieve: ["name", "id", "slug", "title"],
   };
 
   let topicIndex = meiliIndex(routeName)

@@ -13,13 +13,14 @@ import {
 import { useEffect, useState } from "react";
 import { slugify } from "../../testSubject/components/TestSubjectForm";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { toastResponse } from "../../util/toastResponse";
 
 export default function TestExamFormStructure() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,8 +70,10 @@ export default function TestExamFormStructure() {
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      // reset();
-      // router.push("/exam-category");
+      if(!id) {
+        reset();
+        navigate("/exams-list");
+      } 
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");

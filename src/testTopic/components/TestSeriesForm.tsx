@@ -17,7 +17,7 @@ import {
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSlugGenerator } from "../../hooks/useSlugGenerator";
 import { toastResponse } from "../../util/toastResponse";
 import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
@@ -25,6 +25,7 @@ import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSe
 import { toast } from "react-toastify";
 
 const TestSeriesForm = () => {
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
@@ -108,11 +109,6 @@ const TestSeriesForm = () => {
         },
         body: JSON.stringify({ data }),
       });
-      toastResponse(
-        response,
-        `${qid ? "Updated" : "Created"} Topic successfully`,
-        " Topic is Failed"
-      );
 
       const result = await response.json();
       const success = await toastResponse(
@@ -122,8 +118,10 @@ const TestSeriesForm = () => {
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      // reset();
-      // router.push("/exam-category");
+      if(!qid){
+        reset();
+        navigate("/test-topic-list");
+      } 
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");

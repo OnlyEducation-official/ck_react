@@ -16,7 +16,7 @@ import {
   TestExamSchema,
   TestSeriesExamType,
 } from "../../validation/testSeriesExamCategorySchema";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useEffect } from "react";
 import { useSlugGenerator } from "../../hooks/useSlugGenerator";
@@ -31,6 +31,7 @@ const iconOptions: Option[] = [
 ];
 
 const TestExamCategoriesForm = () => {
+  const navigate = useNavigate();
   const {
     control,
     setValue,
@@ -58,7 +59,6 @@ const TestExamCategoriesForm = () => {
     target: "slug",
   });
 
-  const location = useLocation();
 
   const {
     data: { tExamsData },
@@ -126,8 +126,10 @@ const TestExamCategoriesForm = () => {
 
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      // reset();
-      // router.push("/exam-category");
+      if(!id) { 
+        reset();
+        navigate("/test-exams-category-list");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");

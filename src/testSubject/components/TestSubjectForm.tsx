@@ -16,7 +16,7 @@ import {
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { toastResponse } from "../../util/toastResponse";
 
@@ -36,6 +36,7 @@ const TestSubjectForm = () => {
     data: { tExamsData },
   } = useInitialDataContext();
   const { qid } = useParams();
+  const navigate = useNavigate()
   const {
     control,
     setValue,
@@ -117,8 +118,10 @@ const TestSubjectForm = () => {
       const json = await res.json();
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      // reset();
-      // router.push("/exam-category");
+      if(!qid){ 
+        reset();
+        navigate("/test-subject-list");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");

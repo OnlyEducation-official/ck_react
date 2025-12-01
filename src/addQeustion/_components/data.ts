@@ -30,6 +30,12 @@ export const optionTypeData = [
     { label: "Multi Select", value: "multi_select" },
     // { label: "Single Select", value: "single_select" },
 ];
+export const QuestionOptionType = [
+ { label: "Easy", value: "easy" },
+    { label: "Medium", value: "M=medium" },
+    { label: "Hard", value: "hard" },
+    // { label: "Single Select", value: "single_select" },
+];
 
 export const optionLabel = [
   { label: "A", value: "A" },

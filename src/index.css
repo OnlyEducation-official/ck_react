@@ -67,16 +67,16 @@ button:focus-visible {
   }
 } */
 
-/* .katex-block {
+.katex-block {
   display: block;
   margin: 10px 0;
-} */
+}
 
-/* .math-block {
+.math-block {
   display: block;
   text-align: center;
   margin: 12px 0;
-} */
+}
 
 /* @import "tailwindcss"; */
 

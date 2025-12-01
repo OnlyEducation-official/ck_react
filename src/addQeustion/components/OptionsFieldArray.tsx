@@ -6,11 +6,20 @@ import {
   UseFormSetValue,
   FieldValues,
 } from "react-hook-form";
-import { Box, Grid, Button, Checkbox, FormControlLabel, Stack, IconButton, Typography } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Stack,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import MainEditor from "./MainEditor";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
-import { optionLabel } from "../_components/data"
+import { optionLabel } from "../_components/data";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
   control: Control<T>;
@@ -36,8 +45,24 @@ const OptionsFieldArray = <T extends FieldValues>({
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: 1 }}>
-        <Typography variant="subtitle1">Options</Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Options
+          <Typography
+            variant="subtitle1"
+            component="span"
+            color="error"
+            fontWeight={700}
+            marginLeft={0.2}
+          >
+            *
+          </Typography>
+        </Typography>
         <Button variant="outlined" size="small" onClick={handleAddOption}>
           + Add Option
         </Button>
@@ -57,7 +82,17 @@ const OptionsFieldArray = <T extends FieldValues>({
               gap: 1,
             }}
           >
-            <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'} sx={{ borderBottom: '1px solid', borderColor: 'rgb(204, 204, 204)', paddingInline: 2, paddingBlock: 1 }}>
+            <Stack
+              direction={"row"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+              sx={{
+                borderBottom: "1px solid",
+                borderColor: "rgb(204, 204, 204)",
+                paddingInline: 2,
+                paddingBlock: 1,
+              }}
+            >
               {/* <Box fontWeight={600}>Option {index + 1}</Box> */}
               <Typography variant="subtitle1">Options {index + 1}</Typography>
               <IconButton size="small" onClick={() => remove(index)}>
@@ -66,12 +101,11 @@ const OptionsFieldArray = <T extends FieldValues>({
             </Stack>
 
             <Stack gap={1} sx={{ paddingInline: 2, paddingBlock: 1 }}>
-
               <SimpleSelectField
                 label="Option Label"
-                name={`options.${index}.option_label` as any}  
+                name={`options.${index}.option_label` as any}
                 control={control}
-                options={optionLabel}                          
+                options={optionLabel}
                 noneOption={false}
                 rules={{ required: "Please select a label" }}
               />
@@ -99,9 +133,6 @@ const OptionsFieldArray = <T extends FieldValues>({
                 }
                 label="Mark as correct"
               />
-
-
-
             </Stack>
             {/* <Button
               variant="outlined"

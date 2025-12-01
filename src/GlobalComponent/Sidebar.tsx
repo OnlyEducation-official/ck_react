@@ -10,7 +10,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { IconButton, Stack, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -39,7 +39,7 @@ const sidebarData = [
 
 export default function Sidebar() {
   const [state, setState] = React.useState(false);
-
+  const location = useLocation();
   const toggleDrawer =
     (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
       if (
@@ -75,7 +75,7 @@ export default function Sidebar() {
           component={Link}
           to={"/"}
           sx={{
-            display: { xs: "none", sm: "block" },
+            display: { xs: "block" },
             fontWeight: 600,
             textDecoration: "none",
             color: "black",
@@ -92,7 +92,21 @@ export default function Sidebar() {
       <List>
         {sidebarData.map((obj, index) => (
           <ListItem key={obj.label} disablePadding>
-            <ListItemButton component={Link} to={obj.url}>
+            <ListItemButton
+              component={Link}
+              to={obj.url}
+              selected={location.pathname === obj.url} // <-- Active highlight
+              sx={{
+                "&.Mui-selected": {
+                  backgroundColor: "#1976d2",
+                  color: "white",
+                  "& .MuiListItemIcon-root": { color: "white" },
+                },
+                "&.Mui-selected:hover": {
+                  backgroundColor: "#115293",
+                },
+              }}
+            >
               <ListItemIcon>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
