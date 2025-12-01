@@ -210,15 +210,6 @@ const TestExamCategoriesForm = () => {
           <Grid size={{ xs: 12, md: 6 }} sx={{ height: "fit-content" }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Order
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
             </Typography>
             <SimpleSelectField
               name="order"
@@ -235,15 +226,6 @@ const TestExamCategoriesForm = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Description
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
             </Typography>
             <SimpleTextField
               name="description"
@@ -252,7 +234,7 @@ const TestExamCategoriesForm = () => {
               rules={{ required: "Description is required" }}
               fullWidth
               multiline
-              rows={3}
+              rows={2}
             />
           </Grid>
 

@@ -103,10 +103,11 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             fullWidth={fullWidth}
             type={type === "textarea" ? "text" : type}
             label={label}
+            maxRows={rows || 0}
             placeholder={placeholder}
             disabled={disabled}
             multiline={multiline || type === "textarea"}
-            rows={multiline || type === "textarea" ? rows : undefined}
+            // rows={multiline || type === "textarea" ? rows : undefined}
             error={!!fieldState.error}
             helperText={fieldState.error?.message || ""}
             value={

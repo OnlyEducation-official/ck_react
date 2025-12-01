@@ -82,8 +82,7 @@ export default function TestExamFormStructure() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          `${
-            import.meta.env.VITE_BASE_URL
+          `${import.meta.env.VITE_BASE_URL
           }t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`,
           {
             headers: {
@@ -203,34 +202,20 @@ export default function TestExamFormStructure() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Description
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
           </Typography>
           <SimpleTextField
             name="description"
             control={control}
-            rules={{ required: "Enter description" }}
+            label=""
+            rules={{ required: "Description is required" }}
+            fullWidth
+            multiline
+            rows={2}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Test Series Category
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
           </Typography>
           <SimpleSelectField
             name="test_series_category"
@@ -249,15 +234,6 @@ export default function TestExamFormStructure() {
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Marking Negative
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
           </Typography>
           <SimpleTextField
             name="marking_negative"
@@ -320,7 +296,7 @@ export default function TestExamFormStructure() {
             watch={watch}
             placeholder="topic and search"
             label="Select Subject"
-            required={true}
+            required={false}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -354,7 +330,7 @@ export default function TestExamFormStructure() {
             watch={watch}
             placeholder="search Topic eg: Algebra"
             label="Select Topic"
-            required={true}
+            required={false}
           />
         </Grid>
         {/* <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre> */}
@@ -378,7 +354,7 @@ export default function TestExamFormStructure() {
               },
             }}
           >
-         { id ? "Update Exam " : "Create Exam "}
+            {id ? "Update Exam " : "Create Exam "}
           </Button>
         </Grid>
       </Grid>
