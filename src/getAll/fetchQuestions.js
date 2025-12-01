@@ -1,5 +1,5 @@
 export async function fetchQuestions(routeName, page) {
-    const url = `${import.meta.env.VITE_BASE_URL}${routeName}?pagination[page]=${page}&pagination[pageSize]=25`;
+    const url = `${import.meta.env.VITE_BASE_URL}${routeName}?pagination[page]=${page}&pagination[pageSize]=10`;
     // const url = `http://127.0.0.1:1337/api/${routeName}?pagination[page]=${page}&pagination[pageSize]=25`;
 
 

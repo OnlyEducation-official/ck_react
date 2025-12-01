@@ -8,15 +8,19 @@ export const examsSchema = z.object({
   // test_series_questions: z.number().nullable().optional(),
   marking_negative: z
     .number({
-      error: "Enter value in number",
+      error: "Please enter a valid number",
     })
-    .min(0, "Must be zero or negative"),
+    .min(0, "Value must be greater or equals to 0."),
   marking_positive: z
     .number({
-      error: "Enter value in number",
+      error: "Please enter a valid number",
     })
-    .min(0, "Must be zero or positive"),
-  timer: z.number().min(1, "Please enter a timer value"),
+    .min(1, "Value must be greater than 0."),
+  timer: z
+    .number({
+      error: "Please enter a valid number",
+    })
+    .min(1, "Value must be greater than 0."),
   test_series_subjects: z.array(
     z.object({
       id: z.number().optional(),

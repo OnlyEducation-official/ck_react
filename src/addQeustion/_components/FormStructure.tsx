@@ -181,7 +181,7 @@ export default function FormStructure() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Select Question Type 
+            Select Question Type
             <Typography
               variant="subtitle1"
               component="span"

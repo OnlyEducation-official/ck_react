@@ -68,9 +68,8 @@ const TestExamCategoriesForm = () => {
     if (!id) return; // CREATE mode
 
     const fetchItem = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -136,11 +135,11 @@ const TestExamCategoriesForm = () => {
   };
 
   return (
-    <Box p={4} sx={{ marginBlockStart: 6, bgcolor: "background.paper" }}>
+    <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
       <Typography
         variant="h5"
         sx={{
-          mb: 2,
+          mb: { xs: 2, md: 4 },
           fontWeight: "bold",
           pl: 2,
           borderLeft: "6px solid",
