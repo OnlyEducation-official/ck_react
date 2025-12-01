@@ -15,6 +15,8 @@ import TestExamsForm from "./test-exams/TestExamsForm";
 import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
 import { ToastContainer } from "react-toastify";
 import { MeiliDataContextProvide } from "./context/MeiliContext";
+import { resources } from "./util/resource";
+
 
 function App() {
   return (
@@ -37,7 +39,11 @@ function App() {
         <Route
           path="/test-exams-category-list"
           element={
-            <GetAllList routeName="t-categories" lol="test-exams-category" />
+            <GetAllList
+              routeName={resources.categories.routeName}
+              lol={resources.categories.uid}
+              title={resources.categories.labels}
+            />
           }
         />
         <Route
@@ -61,7 +67,13 @@ function App() {
         {/* t-questions */}
         <Route
           path="/questions-list"
-          element={<GetAllList routeName="t-questions" lol="questions" />}
+          element={
+            <GetAllList
+              routeName={resources.questions.routeName}
+              lol={resources.questions.uid}
+              title={resources.questions.labels}
+            />
+          }
         />
         <Route
           path="/questions"
@@ -86,7 +98,11 @@ function App() {
         <Route
           path="/test-subject-list"
           element={
-            <GetAllList routeName="test-series-subjects" lol="test-subject" />
+            <GetAllList
+              routeName={resources.subjects.routeName}
+              lol={resources.subjects.uid}
+              title={resources.subjects.labels}
+            />
           }
         />
         <Route
@@ -110,7 +126,13 @@ function App() {
         {/* t-topic */}
         <Route
           path="/test-topic-list"
-          element={<GetAllList routeName="t-topics" lol="test-topic" />}
+          element={
+            <GetAllList
+              routeName={resources.topics.routeName}
+              lol={resources.topics.uid}
+              title={resources.topics.labels}
+            />
+          }
         />
         <Route
           path="/test-topic"
@@ -135,7 +157,13 @@ function App() {
         {/* t-exams */}
         <Route
           path="/exams-list"
-          element={<GetAllList routeName="t-exams" lol="test-exams" />}
+          element={
+            <GetAllList
+              routeName={resources.exams.routeName}
+              lol={resources.exams.uid}
+              title={resources.exams.labels}
+            />
+          }
         />
         <Route
           path="/test-exams"

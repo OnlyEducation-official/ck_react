@@ -237,15 +237,6 @@ const TestSeriesForm = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Order
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
           </Typography>
           <SimpleSelectField
             name="order"

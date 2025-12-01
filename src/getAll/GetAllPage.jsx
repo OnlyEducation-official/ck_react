@@ -13,9 +13,11 @@ import {
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 // import { Link } from 'react-router-dom'
 
-export default function GetAllList({ routeName, lol }) {
+export default function GetAllList({ routeName, lol, title }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ppage, setPage] = useState({
@@ -86,7 +88,7 @@ export default function GetAllList({ routeName, lol }) {
                 width: "fit-content",
               }}
             >
-              Exam Categories
+              All {title.plural}
             </Typography>
 
             <Typography
@@ -97,7 +99,7 @@ export default function GetAllList({ routeName, lol }) {
                 width: "fit-content",
               }}
             >
-              Manage all your exam categories in one place.
+              Manage all your {title.plural} in one place.
             </Typography>
           </Box>
 
@@ -145,10 +147,37 @@ export default function GetAllList({ routeName, lol }) {
                 width: { xs: 180 },
               }}
             >
-              Add New Questions
+              Add New {title.singular}
             </Button>
           </Box>
         </Box>
+
+        <Box>
+          <Typography>
+            Search
+          </Typography>
+
+          <Autocomplete
+            options={questions}
+            // What text should be shown in the dropdown / input?
+            getOptionLabel={(option) => {
+              if (!option) return "";
+              // Strapi structure: { id, attributes: { title, ... } }
+              return option.attributes?.title ?? String(option.id ?? "");
+            }}
+
+            // Helps MUI compare options and values correctly
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+
+            renderInput={(params) => (
+              <TextField {...params} label="Search Questions" variant="outlined" />
+            )}
+          />
+
+        </Box>
+
+
+
 
         {/* List container */}
         <Box
@@ -195,7 +224,7 @@ export default function GetAllList({ routeName, lol }) {
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {q?.attributes?.question_title || q?.id || "Untitled"}
+                    {q?.attributes?.question_title || q?.attributes?.name || q?.attributes?.subject_tag || q?.attributes?.title || "Untitled"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     ID: {q.id}
