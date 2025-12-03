@@ -1,20 +1,16 @@
 import { Routes, Route, Link } from "react-router-dom";
-// import Home from './pages/Home'
-// import EditPage from './pages/EditPage'
-import QuestionPreview from "./ui/Form";
-import QuestionPreview2 from "./ui/Form2";
-import ResponsiveAppBar from "./ui/Header";
-import DrawerAppBar from "./ui/Header1";
-import Index from "./addQeustion/Index";
-import { InitialDataContextProvider } from "./addQeustion/_components/InitalContext";
-import TestTopicPage from "./testTopic/Index";
-import TestSubjectPage from "./testSubject/Index";
-import TestExamCategoriesForm from "./TestExamCategories/components/TestExamCategoriesForm";
-import TestExamsForm from "./test-exams/TestExamsForm";
-import TestExamsFormEdit from "./test-exams/TestExamsFormEdit";
+import QuestionPreview2 from "./ui/Form2.jsx";
+import DrawerAppBar from "./ui/Header1.jsx";
+import Index from "./addQeustion/Index.js";
+import { InitialDataContextProvider } from "./addQeustion/_components/InitalContext.js";
+import TestTopicPage from "./testTopic/Index.js";
+import TestSubjectPage from "./testSubject/Index.js";
+import TestExamCategoriesForm from "./TestExamCategories/components/TestExamCategoriesForm.js";
+import TestExamsForm from "./test-exams/TestExamsForm.js";
+import TestExamsFormEdit from "./test-exams/TestExamsFormEdit.js";
 import { ToastContainer } from "react-toastify";
-import { MeiliDataContextProvide } from "./context/MeiliContext";
-import GetAllList from "./getAll/GetAllPage";
+import { MeiliDataContextProvide } from "./context/MeiliContext.js";
+import GetAllList from "./getAll/GetAllPage.js";
 
 function App() {
   return (

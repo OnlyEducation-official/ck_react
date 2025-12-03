@@ -1,4 +1,4 @@
-import TestExamFormStructure from "./_components/TestExamFormStructure";
+import TestExamFormStructure from "./_components/TestExamFormStructure.js";
 
 
 export default function TestExamsForm() {

@@ -1,11 +1,10 @@
 import {
   useFieldArray,
-  Control,
-  UseFormWatch,
-  UseFormSetValue,
-  FieldValues,
-  FieldErrors,
-  UseFormTrigger,
+  type Control,
+  type UseFormWatch,
+  type UseFormSetValue,
+  type FieldValues,
+  type UseFormTrigger,
 } from "react-hook-form";
 import {
   Box,
@@ -18,18 +17,18 @@ import {
   Typography,
   FormHelperText,
 } from "@mui/material";
-import MainEditor from "./MainEditor";
+import MainEditor from "./MainEditor.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
-import { optionLabel } from "../_components/data";
-import { QuestionSchemaType } from "../QuestionSchema";
+import type { QuestionSchemaType } from "../QuestionSchema.js";
+import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
+import { optionLabel } from "../_components/data.js";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
   control: Control<T>;
   setValue: UseFormSetValue<T>;
   watch: UseFormWatch<T>;
   errors: any;
-  trigger: UseFormTrigger<QuestionSchemaType>
+  trigger: UseFormTrigger<QuestionSchemaType>;
 }
 
 const OptionsFieldArray = <T extends FieldValues>({
@@ -48,7 +47,7 @@ const OptionsFieldArray = <T extends FieldValues>({
   const handleAddOption = () => {
     // cast to any to satisfy RHF typing
     append({ option_label: "", option: "", is_correct: false } as any);
-    trigger('options');
+    trigger("options");
   };
 
   return (
@@ -110,10 +109,13 @@ const OptionsFieldArray = <T extends FieldValues>({
             >
               {/* <Box fontWeight={600}>Option {index + 1}</Box> */}
               <Typography variant="subtitle1">Options {index + 1}</Typography>
-              <IconButton size="small" onClick={() => {
-                remove(index);
-                trigger('options')
-              }}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  remove(index);
+                  trigger("options");
+                }}
+              >
                 <DeleteIcon />
               </IconButton>
             </Stack>
@@ -141,7 +143,6 @@ const OptionsFieldArray = <T extends FieldValues>({
                     // watch returns unknown; coerce to boolean
                     checked={!!watch(`options.${index}.is_correct` as any)}
                     onChange={(e) => {
-
                       // cast value param to any to satisfy setValue typing
                       setValue(
                         `options.${index}.is_correct` as any,
@@ -151,11 +152,9 @@ const OptionsFieldArray = <T extends FieldValues>({
                           shouldDirty: true,
                           shouldTouch: true,
                         }
-                      )
-                      trigger('options');
-
-                    }
-                    }
+                      );
+                      trigger("options");
+                    }}
                   />
                 }
                 label="Mark as correct"

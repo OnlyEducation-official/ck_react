@@ -1,32 +1,17 @@
-import {
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { QuestionSchema, QuestionSchemaType } from "../QuestionSchema";
-import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import { difficultyOptions, optionTypeData, QuestionOptionType } from "./data";
-import TopicSearchBar from "../../components/TopicSearchBar";
-import UseMeiliDataContext from "../../context/MeiliContext";
-import { zodResolver } from "@hookform/resolvers/zod";
-import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
-import OptimizedTopicSearch from "./OptimizedTopicSearch";
-import { toast } from "react-toastify";
-import { toastResponse } from "../../util/toastResponse";
 import { useNavigate, useParams } from "react-router-dom";
-import MainEditor from "../components/MainEditor";
-import OptionsFieldArray from "../components/OptionsFieldArray";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { QuestionSchema, type QuestionSchemaType } from "../QuestionSchema.js";
 import { useEffect } from "react";
-import { tr } from "zod/v4/locales";
-
+import { toastResponse } from "../../util/toastResponse.js";
+import { toast } from "react-toastify";
+import OptimizedTopicSearch from "./OptimizedTopicSearch.js";
+import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
+import { optionTypeData, QuestionOptionType } from "./data.js";
+import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
+import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
+import MainEditor from "../components/MainEditor.jsx";
 export default function FormStructure() {
   const { qid } = useParams();
   const navigate = useNavigate();
@@ -64,8 +49,9 @@ export default function FormStructure() {
     const fetchQuestionById = async (
       qid: number
     ): Promise<QuestionSchemaType> => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -74,7 +60,7 @@ export default function FormStructure() {
       });
 
       const json = await res.json();
-      console.log('json: ', json);
+      console.log("json: ", json);
       const item = json.data;
 
       if (!item) throw new Error("Question not found");
@@ -92,21 +78,21 @@ export default function FormStructure() {
         /** SUBJECT TAG → single object in API, array in schema */
         subject_tag: attr.subject_tag?.data
           ? [
-            {
-              id: attr.subject_tag.data.id,
-              name: attr.subject_tag.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.subject_tag.data.id,
+                name: attr.subject_tag.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TOPIC → Strapi returns single, schema requires an array */
         test_series_topic: attr.test_series_topic?.data
           ? [
-            {
-              id: attr.test_series_topic.data.id,
-              name: attr.test_series_topic.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_topic.data.id,
+                name: attr.test_series_topic.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TEST SERIES EXAMS → many-to-many array */
@@ -141,17 +127,17 @@ export default function FormStructure() {
   const onSubmit = async (data: any) => {
     try {
       const isEdit = Boolean(qid);
-      const url = isEdit ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}` : `${import.meta.env.VITE_BASE_URL}t-questions`;
-      const response = await fetch(url,
-        {
-          method: isEdit ? 'PUT' : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-          },
-          body: JSON.stringify({ data: data }),
-        }
-      );
+      const url = isEdit
+        ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
+        : `${import.meta.env.VITE_BASE_URL}t-questions`;
+      const response = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        },
+        body: JSON.stringify({ data: data }),
+      });
       const success = await toastResponse(
         response,
         qid

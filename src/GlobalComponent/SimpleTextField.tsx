@@ -3,9 +3,9 @@ import { Controller, Control } from "react-hook-form";
 import { SxProps, TextField } from "@mui/material";
 import { Theme } from "@emotion/react";
 
-interface SimpleTextFieldProps {
+interface SimpleTextFieldProps<T extends Record<string, any> = any> {
   name: string;
-  control: Control<any>;
+  control: Control<T>;
   label?: string;
   type?: "text" | "number" | "password" | "email" | "textarea";
   placeholder?: string;
@@ -13,7 +13,7 @@ interface SimpleTextFieldProps {
   multiline?: boolean;
   rows?: number;
   fullWidth?: boolean;
-  rules?: object;
+  rules?: Parameters<typeof Controller>[0]["rules"];
   sx?: SxProps<Theme>; // ✅ Proper MUI type
 }
 
@@ -37,7 +37,8 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
     <Controller
       name={name}
       control={control}
-      rules={rules}
+      // rules={rules}
+      {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => {
         return (
           <TextField
@@ -102,9 +103,9 @@ const SimpleTextField: React.FC<SimpleTextFieldProps> = ({
             }}
             fullWidth={fullWidth}
             type={type === "textarea" ? "text" : type}
-            label={label}
+            label={label || ""}
             maxRows={rows || 0}
-            placeholder={placeholder}
+            placeholder={placeholder || ""}
             disabled={disabled}
             multiline={multiline || type === "textarea"}
             // rows={multiline || type === "textarea" ? rows : undefined}

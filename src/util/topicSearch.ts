@@ -1,4 +1,4 @@
-import { meiliIndex } from "./meiliClient";
+import { meiliIndex } from "./meiliClient.js";
 
 // Adjust fields to what your t-topic type actually has
 export type TopicHit = {

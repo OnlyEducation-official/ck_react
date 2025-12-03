@@ -10,9 +10,10 @@ import {
   TextField,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { fetchQuestions } from "./fetchQuestions";
-import { searchTopics, TopicHit } from "../util/topicSearch";
-import { getResourceByPath, resources } from "../util/resource";
+import { getResourceByPath } from "../util/resource.js";
+import { searchTopics, type TopicHit } from "../util/topicSearch.js";
+import fetchQuestions from "./fetchQuestions.js";
+// import fetchQuestions from "./fetchQuestions.js";
 
 export enum RoutesEnum {
   CATEGORIES = "t-categories",
@@ -71,7 +72,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const searchTimer = useRef<NodeJS.Timeout | null>(null);
+  const searchTimer = useRef<number | null>(null);
 
   // Load Strapi Data
   useEffect(() => {
@@ -80,11 +81,11 @@ export default function GetAllList({ routeName, lol, title }: Props) {
     async function load() {
       const res = await fetchQuestions(routeName, pageState.page);
 
-      setList(res.data || []);
+      setList(res?.data || []);
       setPageState({
-        page: res.meta.pagination.page,
-        pageCount: res.meta.pagination.pageCount,
-        total: res.meta.pagination.total,
+        page: res?.meta.pagination.page || 1,
+        pageCount: res?.meta.pagination.pageCount || 1,
+        total: res?.meta.pagination.total || 0,
       });
 
       setLoading(false);
@@ -207,7 +208,8 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                 width: { xs: 180 },
               }}
             >
-              Add New {title?.singular}
+              {/* {title?.singular} */}
+              Add New  {resource?.labels?.singular}
             </Button>
           </Box>
         </Box>

@@ -1,9 +1,9 @@
 import {
   Controller,
-  Control,
-  FieldValues,
-  Path,
-  RegisterOptions,
+  type Control,
+  type FieldValues,
+  type RegisterOptions,
+  type Path,
 } from "react-hook-form";
 import {
   FormControl,
@@ -134,8 +134,8 @@ const SimpleSelectField = <T extends FieldValues>({
                 ? field.value
                   ? field.value
                   : noneOption
-                    ? ""
-                    : 0
+                  ? ""
+                  : 0
                 : field.value
             }
             slotProps={{

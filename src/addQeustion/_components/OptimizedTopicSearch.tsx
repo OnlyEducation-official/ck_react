@@ -7,6 +7,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+// import { searchTopics } from "../../util/topicSearch.ts";
 import { searchTopics } from "../../util/topicSearch";
 import type { SxProps, Theme } from "@mui/material";
 import type { TextFieldProps, AutocompleteProps } from "@mui/material";

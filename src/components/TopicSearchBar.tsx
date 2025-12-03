@@ -12,9 +12,12 @@ import {
   ListItem,
   IconButton,
 } from "@mui/material";
-import { searchTopics } from "../util/topicSearch";
-import UseMeiliDataContext from "../context/MeiliContext";
+// import { searchTopics } from "../util/topicSearch";
+// import UseMeiliDataContext from "../context/MeiliContext";
+// import UseMeiliDataContext from "../context/MeiliContext";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { searchTopics } from "../util/topicSearch.js";
+import UseMeiliDataContext from "../context/MeiliContext.js";
 
 interface topSearchBarProps<
   TSchema extends Record<string, any>, // schema object
