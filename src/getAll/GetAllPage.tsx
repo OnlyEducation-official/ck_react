@@ -25,6 +25,7 @@ export enum RoutesEnum {
   SUBJECTS = "test-series-subjects",
   TOPICS = "t-topics",
   EXAMS = "t-exams",
+  SUBJECTCATEGORIE = "test-series-subject-categorie",
 }
 
 interface Props {
@@ -56,6 +57,9 @@ function getRouteType(routeName: RoutesEnum): string {
     case RoutesEnum.EXAMS:
       return "t-exam";
 
+    case RoutesEnum.SUBJECTCATEGORIE:
+      return "test-series-subject-categorie";
+
     default:
       return routeName;
   }
@@ -74,7 +78,6 @@ export default function GetAllList({ routeName, lol, title }: Props) {
     pageCount: 1,
     total: 0,
   });
-  console.log("pageState: ", pageState);
 
   const [searchQuery, setSearchQuery] = useState("");
   const searchTimer = useRef<number | null>(null);
@@ -85,6 +88,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
 
     async function load() {
       const res = await fetchQuestions(routeName, pageState.page);
+      console.log("res: ", res);
 
       setList(res?.data || []);
       setPageState({
@@ -113,6 +117,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
       }
 
       const results = await searchTopics(value, getRouteType(routeName));
+      console.log("results: ", results);
       setSearchResults(results);
 
       const pageCount = Math.ceil(results.length / PAGE_SIZE);
@@ -293,6 +298,9 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                     >
                       <HtmlWithMathRenderer
                         html={
+                          item?.question_title ||
+                          item?.name ||
+                          item?.title ||
                           item?.attributes?.question_title ||
                           item?.attributes?.name ||
                           item?.attributes?.title ||

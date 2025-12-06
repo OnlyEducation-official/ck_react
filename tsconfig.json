@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
-    "module": "NodeNext",
-    "target": "esnext",
+    "module": "es2022",
+    "target": "es2022",
     "types": [],
     "sourceMap": true,
     "declaration": true,
@@ -19,8 +19,8 @@
     "importsNotUsedAsValues": "remove",
     "verbatimModuleSyntax": false,
     "preserveValueImports": false,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    // "esModuleInterop": true,
+    // "allowSyntheticDefaultImports": true
   },
 
   "include": ["src"], // ✅ This must be OUTSIDE compilerOptions

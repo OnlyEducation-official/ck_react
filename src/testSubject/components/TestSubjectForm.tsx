@@ -132,13 +132,13 @@ const TestSubjectForm = () => {
     <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
       <Typography
         variant="h5"
-        sx={{
-          mb: { xs: 2, md: 4 },
-          fontWeight: "bold",
-          pl: 2,
-          borderLeft: "6px solid",
-          borderColor: "primary.main",
-        }}
+          sx={{
+            mb: { xs: 2, md: 4 },
+            fontWeight: "bold",
+            pl: 2,
+            borderLeft: "6px solid",
+            borderColor: "primary.main",
+          }}
       >
         {qid ? "Edit Subject" : "Add Subject"}
       </Typography>

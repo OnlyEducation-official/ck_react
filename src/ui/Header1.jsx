@@ -6,10 +6,12 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Link, useLocation } from "react-router-dom";
-import { Container, Stack } from "@mui/material";
+import { Button, Container, Stack } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Sidebar from "../GlobalComponent/Sidebar";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -54,6 +56,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function DrawerAppBar() {
+  const { token, logout } = useContext(AuthContext);
+  console.log("token: ", token);
   const navBtn = [
     {
       label: "Exams Category",
@@ -167,6 +171,38 @@ function DrawerAppBar() {
                 <Sidebar />
               </Box>
             </Box>
+            <Button
+              onClick={() => logout()}
+              sx={{
+                px: 3.5,
+                py: 1.4,
+                borderRadius: 3,
+                fontWeight: 700,
+                textTransform: "none",
+                fontSize: "1rem",
+                letterSpacing: "0.3px",
+                color: "#fff",
+                background: token
+                  ? "linear-gradient(135deg, #34d399, #059669)" // Logout → Green
+                  : "linear-gradient(135deg, #a78bfa, #7c3aed)",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+                transition: "all 0.25s ease",
+
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.18)",
+                  background: token
+                    ? "linear-gradient(135deg, #059669, #047857)"
+                    : "linear-gradient(135deg, #7c3aed, #5b21b6)",
+                },
+
+                "&:active": {
+                  transform: "scale(0.97)",
+                },
+              }}
+            >
+              {token ? "Logout" : "Login"}
+            </Button>
           </Toolbar>
         </Container>
       </AppBar>
