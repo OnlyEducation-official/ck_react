@@ -153,7 +153,7 @@ const SubjectChapterForm: React.FC = () => {
       // 👉 Your next steps (optional)
       if (!qid) {
         reset();
-        navigate("/test-subject-list");
+        navigate("/test-chapter-list");
       }
     } catch (error) {
       console.error(error);

@@ -64,20 +64,28 @@ function DrawerAppBar() {
       url: "/test-exams-category-list",
     },
     {
-      label: "Questions",
-      url: "/questions-list",
+      label: "Exam",
+      url: "/exams-list",
+    },
+    {
+      label: "Subject Category",
+      url: "/test-subject-category-list",
     },
     {
       label: "Subject",
       url: "/test-subject-list",
     },
     {
-      label: "Topic",
-      url: "/test-topic-list",
+      label: "Subject Chapter",
+      url: "/test-chapter-list",
     },
     {
-      label: "Exam",
-      url: "/exams-list",
+      label: "Questions",
+      url: "/questions-list",
+    },
+    {
+      label: "Topic",
+      url: "/test-topic-list",
     },
   ];
   const location = useLocation();

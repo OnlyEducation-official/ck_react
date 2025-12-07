@@ -59,6 +59,18 @@ function App() {
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/test-chapter-list"
+          element={
+            <ProtectedRoute>
+              <GetAllList
+                key="/test-chapter-list"
+                routeName="test-series-chapters"
+                lol="test-chapter"
+              />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/test-chapter"
           element={
@@ -68,10 +80,22 @@ function App() {
           }
         />
         <Route
-          path="/test-chapter/:qid"
+          path="/test-chapter/edit/:qid"
           element={
             <ProtectedRoute>
               <SubjectChapterForm />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/test-subject-category-list"
+          element={
+            <ProtectedRoute>
+              <GetAllList
+                key="/test-subject-category-list"
+                routeName="test-series-subject-categories"
+                lol="test-subject-category"
+              />
             </ProtectedRoute>
           }
         />
@@ -84,7 +108,7 @@ function App() {
           }
         />
         <Route
-          path="/test-subject-category/:qid"
+          path="/test-subject-category/edit/:qid"
           element={
             <ProtectedRoute>
               <SubjectCategories />

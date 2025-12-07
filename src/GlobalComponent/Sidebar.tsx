@@ -20,20 +20,28 @@ const sidebarData = [
     url: "/test-exams-category-list",
   },
   {
+    label: "Exam",
+    url: "/exams-list",
+  },
+  {
+    label: "Subject Category",
+    url: "/test-subject-category",
+  },
+  {
+    label: "Subject",
+    url: "/test-subject-category-list",
+  },
+  {
+    label: "Subject Chapter",
+    url: "/test-chapter-list",
+  },
+  {
     label: "Questions",
     url: "/questions-list",
   },
   {
-    label: "Subject",
-    url: "/test-subject-list",
-  },
-  {
     label: "Topic",
     url: "/test-topic-list",
-  },
-  {
-    label: "Exam",
-    url: "/exams-list",
   },
 ];
 

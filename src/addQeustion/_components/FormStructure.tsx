@@ -31,6 +31,8 @@ export default function FormStructure() {
       hint: "",
       option_type: "single_select",
       explanation: "",
+      test_series_chapters: [],
+      test_series_subject_category: [],
       options: [
         { option_label: "A", option: "", is_correct: false },
         { option_label: "B", option: "", is_correct: false },
@@ -51,7 +53,7 @@ export default function FormStructure() {
     ): Promise<QuestionSchemaType> => {
       const url = `${
         import.meta.env.VITE_BASE_URL
-      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true`;
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -66,6 +68,10 @@ export default function FormStructure() {
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
+      // console.log(
+      //   "attr.test_series_subject_category?.data: ",
+      //   attr.
+      // );
 
       return {
         /** SIMPLE FIELDS */
@@ -101,6 +107,20 @@ export default function FormStructure() {
             id: exam.id,
             title: exam.attributes.title,
           })) ?? [],
+        test_series_chapters: attr.test_series_chapters?.data?.map(
+          (chapter: any) => ({
+            id: chapter.id,
+            name: chapter.attributes.name,
+          })
+        ),
+        test_series_subject_category: attr.test_series_subject_category?.data
+          ? [
+              {
+                id: attr.test_series_subject_category.data.id,
+                name: attr.test_series_subject_category.data.attributes.name,
+              },
+            ]
+          : [],
 
         /** OPTIONS → already perfect for your UI */
         options:
@@ -314,6 +334,50 @@ export default function FormStructure() {
             dropdownType="multi"
             fieldName="test_series_exams"
             routeName="t-exam"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Chapters
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="multi"
+            fieldName="test_series_chapters"
+            routeName="test-series-chapter"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Category
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="single"
+            fieldName="test_series_subject_category"
+            routeName="test-series-subject-categorie"
             setValue={setValue}
             watch={watch}
           />

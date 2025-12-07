@@ -25,7 +25,8 @@ export enum RoutesEnum {
   SUBJECTS = "test-series-subjects",
   TOPICS = "t-topics",
   EXAMS = "t-exams",
-  SUBJECTCATEGORIE = "test-series-subject-categorie",
+  SUBJECTCATEGORIE = "test-series-subject-categories",
+  CHAPTER = "test-series-chapters",
 }
 
 interface Props {
@@ -59,6 +60,8 @@ function getRouteType(routeName: RoutesEnum): string {
 
     case RoutesEnum.SUBJECTCATEGORIE:
       return "test-series-subject-categorie";
+    case RoutesEnum.CHAPTER:
+      return "test-series-chapter";
 
     default:
       return routeName;
@@ -215,7 +218,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                 borderRadius: 999,
                 textTransform: "none",
                 fontWeight: 600,
-                width: { xs: 180 },
+                width: { xs: 250 },
               }}
             >
               {/* {title?.singular} */}

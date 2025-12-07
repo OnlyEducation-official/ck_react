@@ -188,8 +188,7 @@ export default function SubjectCategories() {
       // 👉 Your next steps (optional)
       if (!qid) {
         reset();
-        //TODO: WRONG NAVIGATION
-        navigate("/test-subject-list");
+        navigate("/test-subject-category-list");
       }
     } catch (error) {
       console.error(error);
