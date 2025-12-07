@@ -1,3 +1,4 @@
+
 export const resources = {
   exams: {
     routeName: "t-exams",
@@ -39,6 +40,22 @@ export const resources = {
       singular: "Topic",
     },
   },
+  SubjectCategories: {
+    routeName: "test-series-subject-categories",
+    uid: "test-subject-categories",
+    labels: {
+      plural: "Subject Category",
+      singular: "Subject categories",
+    },
+  },
+  subjectChapter: {
+    routeName: "test-series-chapters",
+    uid: "test-series-chapters",
+    labels: {
+      plural: "Subject Chapter",
+      singular: "Subject Chapters",
+    },
+  },
 };
 
 export function getResourceByPath(pathname: string) {
@@ -60,6 +77,13 @@ export function getResourceByPath(pathname: string) {
 
   if (pathname.includes("exams-list")) {
     return resources.exams;
+  }
+
+  if (pathname.includes("test-subject-category")) {
+    return resources.SubjectCategories;
+  }
+  if(pathname.includes("test-chapter")){
+    return resources.subjectChapter;
   }
 
   return null; // fallback

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -23,8 +23,10 @@ import { toastResponse } from "../../util/toastResponse";
 import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComplete";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../context/AuthContext.js";
 
 const TestSeriesForm = () => {
+  const { token, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const {
     control,
@@ -60,7 +62,8 @@ const TestSeriesForm = () => {
 
     const fetchData = async () => {
       const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL
+        `${
+          import.meta.env.VITE_BASE_URL
         }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid`,
         {
           headers: {
@@ -105,10 +108,13 @@ const TestSeriesForm = () => {
         method: qid ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          // Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ data }),
       });
+      console.log('token: ', token);
+      console.log("response: ", response);
 
       const result = await response.json();
       const success = await toastResponse(
@@ -118,10 +124,10 @@ const TestSeriesForm = () => {
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      if(!qid){
+      if (!qid) {
         reset();
         navigate("/test-topic-list");
-      } 
+      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -130,7 +136,14 @@ const TestSeriesForm = () => {
   console.log("watch", watch());
 
   return (
-    <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
+    <Box
+      sx={{
+        marginBlockStart: 7,
+        bgcolor: "background.paper",
+        paddingInline: { xs: 2, sm: 3, md: 4 },
+        paddingBlock: 4,
+      }}
+    >
       <Typography
         variant="h5"
         sx={{
