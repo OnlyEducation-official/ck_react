@@ -24,9 +24,13 @@ const TestSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   is_active: z.boolean(),
-  // test_series_question: z
-  //   .object({ id: z.number(), name: z.string() })
-  //   .optional(),
+  test_series_subject: z
+    .array(
+      z
+        .object({ id: z.number().optional(), name: z.string().optional() })
+        .optional()
+    )
+    .optional(),
   test_series_subject_category: z
     .array(
       z
@@ -62,6 +66,7 @@ const SubjectChapterForm: React.FC = () => {
       //   name: "",
       // },
       test_series_subject_category: [],
+      test_series_subject: [],
     },
   });
   const nameValue = watch("name");
@@ -96,6 +101,12 @@ const SubjectChapterForm: React.FC = () => {
           {
             name: item.test_series_subject_category?.data.attributes.name,
             id: item.test_series_subject_category?.data.id,
+          },
+        ],
+        test_series_subject: [
+          {
+            name: item.test_series_subject?.data.attributes.name,
+            id: item.test_series_subject?.data.id,
           },
         ],
         // is_active: item?.isActive ?? true,
@@ -228,11 +239,47 @@ const SubjectChapterForm: React.FC = () => {
 
         {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
         <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Category
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
           <OptimizedTopicSearch
-            label="Subject Category"
+            label=""
             routeName="test-series-subject-categorie"
             dropdownType="single"
             fieldName="test_series_subject_category"
+            watch={watch}
+            setValue={setValue}
+            placeholder="Search Category…"
+          />
+        </Grid>
+        {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Select Subject
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            label=""
+            routeName="test-series-subject"
+            dropdownType="single"
+            fieldName="test_series_subject"
             watch={watch}
             setValue={setValue}
             placeholder="Search Category…"

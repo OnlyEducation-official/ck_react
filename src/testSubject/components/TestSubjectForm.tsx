@@ -36,7 +36,7 @@ const TestSubjectForm = () => {
     data: { tExamsData },
   } = useInitialDataContext();
   const { qid } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const {
     control,
     setValue,
@@ -65,8 +65,9 @@ const TestSubjectForm = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }test-series-subjects/${qid}?populate=*`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }test-series-subjects/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -118,7 +119,7 @@ const TestSubjectForm = () => {
       const json = await res.json();
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      if(!qid){ 
+      if (!qid) {
         reset();
         navigate("/test-subject-list");
       }
@@ -129,16 +130,23 @@ const TestSubjectForm = () => {
   };
 
   return (
-    <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
+    <Box
+      sx={{
+        marginBlockStart: 7,
+        bgcolor: "background.paper",
+        paddingInline: { xs: 2, sm: 3, md: 4 },
+        paddingBlock: 4,
+      }}
+    >
       <Typography
         variant="h5"
-          sx={{
-            mb: { xs: 2, md: 4 },
-            fontWeight: "bold",
-            pl: 2,
-            borderLeft: "6px solid",
-            borderColor: "primary.main",
-          }}
+        sx={{
+          mb: { xs: 2, md: 4 },
+          fontWeight: "bold",
+          pl: 2,
+          borderLeft: "6px solid",
+          borderColor: "primary.main",
+        }}
       >
         {qid ? "Edit Subject" : "Add Subject"}
       </Typography>
@@ -187,12 +195,10 @@ const TestSubjectForm = () => {
               label=""
               fullWidth
               sx={{
-                cursor: "not-allowed",
-                "& .MuiInputBase-root": {
-                  cursor: "not-allowed",
-                },
-                "& .MuiInputBase-input": {
-                  cursor: "not-allowed",
+                pointerEvents: "none", // 🔥 Completely disables field interaction
+                cursor: "not-allowed", // 🔥 Applies on the main element
+                "& *": {
+                  cursor: "not-allowed !important", // 🔥 Ensures cursor stays disabled everywhere
                 },
               }}
             />

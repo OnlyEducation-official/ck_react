@@ -84,6 +84,14 @@ function App() {
           }
         />
         <Route
+          path="/test-subject-category/:qid"
+          element={
+            <ProtectedRoute>
+              <SubjectCategories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/test-exams-category/edit/:id"
           element={
             <ProtectedRoute>
