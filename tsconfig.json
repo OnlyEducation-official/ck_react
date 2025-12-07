@@ -1,8 +1,47 @@
 {
+  // "compilerOptions": {
+  //   "target": "ES2020",
+  //   "useDefineForClassFields": true,
+  //   "lib": ["ES2020", "DOM", "DOM.Iterable"],
+  //   "module": "ESNext",
+  //   "skipLibCheck": true,
+
+  //   /* Bundler mode */
+  //   "moduleResolution": "bundler",
+  //   "allowImportingTsExtensions": false,
+  //   "resolveJsonModule": true,
+
+  //   /* React */
+  //   "jsx": "react-jsx",
+
+  //   /* Strictness */
+  //   "strict": true,
+  //   "noUnusedLocals": false,
+  //   "noUnusedParameters": false,
+  //   "noFallthroughCasesInSwitch": true,
+
+  //   /* Imports */
+  //   "isolatedModules": true,
+  //   "esModuleInterop": true,
+  //   "allowSyntheticDefaultImports": true,
+
+  //   /* Paths */
+  //   "baseUrl": ".",
+  //   "forceConsistentCasingInFileNames": true,
+  //   "paths": {
+  //     "@/*": ["src/*"]
+  //   },
+  //   "ignoreDeprecations": "6.0" // ✔ hides future deprecation warnings
+  // },
+
+  // "include": ["src", "vite-env.d.ts"],
+  // "exclude": ["node_modules", "dist"]
+
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
-    "module": "es2022",
-    "target": "es2022",
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "bundler",
     "types": [],
     "sourceMap": true,
     "declaration": true,
@@ -11,6 +50,12 @@
     "exactOptionalPropertyTypes": true,
     "strict": true,
     "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     // "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
@@ -18,11 +63,9 @@
     "skipLibCheck": true,
     "importsNotUsedAsValues": "remove",
     "verbatimModuleSyntax": false,
-    "preserveValueImports": false,
-    // "esModuleInterop": true,
-    // "allowSyntheticDefaultImports": true
+    "preserveValueImports": false
   },
 
-  "include": ["src"], // ✅ This must be OUTSIDE compilerOptions
-  "exclude": ["node_modules"]
+  "include": ["src/*", "vite-env.d.ts", "main-editor.d.ts", "wiris.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }

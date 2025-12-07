@@ -13,8 +13,9 @@ import { MeiliDataContextProvide } from "./context/MeiliContext.js";
 import GetAllList from "./getAll/GetAllPage.js";
 import Login from "./Login/Login";
 import ProtectedRoute from "./GlobalComponent/ProtectedRoute";
-import SubjectChapterForm from './SubjectChapterForm/SubjectChapterForm.js'
-import SubjectCategories from './SubjectCategories/SubjectCategories'
+import SubjectChapterForm from './SubjectChapterForm/SubjectChapterForm'
+import SubjectCategories from "./SubjectCategories/SubjectCategories";
+// import SubjectCategories from './SubjectCategories/'
 
 function App() {
   return (
