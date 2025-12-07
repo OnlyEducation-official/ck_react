@@ -1,9 +1,10 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthContext } from "../context/AuthContext.js";
-
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 // MUI Components
 import {
   Box,
@@ -12,6 +13,8 @@ import {
   Typography,
   Button,
   CircularProgress,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 
 const loginSchema = z.object({
@@ -23,6 +26,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { login } = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -60,11 +64,11 @@ export default function Login() {
         }}
       >
         <Typography variant="h4" fontWeight={700} mb={2} color="primary">
-          Admin Login
+          Test Series
         </Typography>
 
         <Typography variant="body2" color="text.secondary" mb={4}>
-          Please sign in using your admin credentials.
+          Please sign in using your user credentials.
         </Typography>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,12 +86,26 @@ export default function Login() {
           {/* Password */}
           <TextField
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             {...register("password")}
             error={Boolean(errors.password)}
             helperText={errors.password?.message}
             sx={{ mb: 3 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => {
+                      setShowPassword((prev) => !prev);
+                    }}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           {/* Submit Button */}
@@ -104,7 +122,11 @@ export default function Login() {
             }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? <CircularProgress size={26} color="inherit" /> : "Login"}
+            {isSubmitting ? (
+              <CircularProgress size={26} color="inherit" />
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
       </Paper>
