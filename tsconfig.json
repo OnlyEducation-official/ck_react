@@ -66,6 +66,7 @@
     "preserveValueImports": false
   },
 
-  "include": ["src/*", "vite-env.d.ts", "main-editor.d.ts", "wiris.d.ts"],
+  // "include": ["src/*", "vite-env.d.ts", "main-editor.d.ts", "wiris.d.ts"],
+  "include": ["src", "vite-env.d.ts", "main-editor.d.ts", "wiris.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
