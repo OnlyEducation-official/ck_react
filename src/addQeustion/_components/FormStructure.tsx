@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +33,7 @@ export default function FormStructure() {
       explanation: "",
       test_series_chapters: [],
       test_series_subject_category: [],
+      test_series_exams: [],
       options: [
         { option_label: "A", option: "", is_correct: false },
         { option_label: "B", option: "", is_correct: false },
@@ -51,9 +52,8 @@ export default function FormStructure() {
     const fetchQuestionById = async (
       qid: number
     ): Promise<QuestionSchemaType> => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -84,21 +84,21 @@ export default function FormStructure() {
         /** SUBJECT TAG → single object in API, array in schema */
         subject_tag: attr.subject_tag?.data
           ? [
-              {
-                id: attr.subject_tag.data.id,
-                name: attr.subject_tag.data.attributes.name,
-              },
-            ]
+            {
+              id: attr.subject_tag.data.id,
+              name: attr.subject_tag.data.attributes.name,
+            },
+          ]
           : [],
 
         /** TOPIC → Strapi returns single, schema requires an array */
         test_series_topic: attr.test_series_topic?.data
           ? [
-              {
-                id: attr.test_series_topic.data.id,
-                name: attr.test_series_topic.data.attributes.name,
-              },
-            ]
+            {
+              id: attr.test_series_topic.data.id,
+              name: attr.test_series_topic.data.attributes.name,
+            },
+          ]
           : [],
 
         /** TEST SERIES EXAMS → many-to-many array */
@@ -115,11 +115,11 @@ export default function FormStructure() {
         ),
         test_series_subject_category: attr.test_series_subject_category?.data
           ? [
-              {
-                id: attr.test_series_subject_category.data.id,
-                name: attr.test_series_subject_category.data.attributes.name,
-              },
-            ]
+            {
+              id: attr.test_series_subject_category.data.id,
+              name: attr.test_series_subject_category.data.attributes.name,
+            },
+          ]
           : [],
 
         /** OPTIONS → already perfect for your UI */
@@ -223,6 +223,7 @@ export default function FormStructure() {
             fieldName="subject_tag"
             setValue={setValue}
             watch={watch}
+            errors={errors?.subject_tag?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -245,21 +246,13 @@ export default function FormStructure() {
             fieldName="test_series_topic"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_topic?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Select Question Type
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
+            Option Type
           </Typography>
           <SimpleSelectField
             label=""
@@ -273,16 +266,7 @@ export default function FormStructure() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            OptionType
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
+            Select Difficulty Level
           </Typography>
           <SimpleSelectField
             label=""
@@ -336,6 +320,7 @@ export default function FormStructure() {
             routeName="t-exam"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_exams?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -358,6 +343,7 @@ export default function FormStructure() {
             routeName="test-series-chapter"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_chapters?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -380,6 +366,7 @@ export default function FormStructure() {
             routeName="test-series-subject-categorie"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_subject_category?.message}
           />
         </Grid>
         {/* ---------- QUESTION FIELD ---------- */}
@@ -402,6 +389,11 @@ export default function FormStructure() {
             watch={watch}
             value={watch("question_title")}
           />
+          {/* {errors?.question_title?.message && (
+            <FormHelperText error={!!errors?.question_title?.message}>
+              {errors?.question_title?.message}
+            </FormHelperText>
+          )} */}
         </Grid>
 
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
@@ -433,6 +425,11 @@ export default function FormStructure() {
             watch={watch}
             value={watch("explanation")}
           />
+          {errors?.explanation?.message && (
+            <FormHelperText error={!!errors?.explanation?.message}>
+              {errors?.explanation?.message}
+            </FormHelperText>
+          )}
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           <Button

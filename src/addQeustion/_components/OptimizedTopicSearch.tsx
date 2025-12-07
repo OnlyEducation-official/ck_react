@@ -11,6 +11,7 @@ import {
 import { searchTopics } from "../../util/topicSearch";
 import type { SxProps, Theme } from "@mui/material";
 import type { TextFieldProps, AutocompleteProps } from "@mui/material";
+import { UseFormSetValue } from "react-hook-form";
 export type TopicHit = {
   id: number;
   name?: string;
@@ -25,7 +26,8 @@ interface Props<
   routeName: string;
   fieldName: TField;
   dropdownType: "single" | "multi";
-  setValue: (field: TField, value: TSchema[TField]) => void;
+  setValue: any;
+  // (field: TField, value: TSchema[TField]) => void;
   watch: (field: TField) => TSchema[TField];
   // NEW EXTENDED PROPS
   sx?: SxProps<Theme>;
@@ -41,6 +43,7 @@ interface Props<
   labelSx?: SxProps<Theme>;
   // allow passing additional TextField props
   textFieldProps?: Partial<TextFieldProps>;
+  errors?: any;
 }
 
 const OptimizedTopicSearch = <
@@ -62,6 +65,7 @@ const OptimizedTopicSearch = <
   required = false,
   showLabel = true,
   labelSx,
+  errors
 }: Props<TSchema, TField>) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -133,16 +137,8 @@ const OptimizedTopicSearch = <
       defaultValue.length > 0
     ) {
       setSelectedOptions(defaultValue);
-
-      // setOptions((prev) => {
-      //   const merged = [...prev, ...defaultValue];
-      //   return Array.from(
-      //     new Map(merged.map((item) => [item.id, item])).values()
-      //   );
-      // });
       setOptions((prev) => {
         if (dropdownType !== "multi") {
-          // single → never re-add removed selected option
           return defaultValue;
         }
 
@@ -155,35 +151,12 @@ const OptimizedTopicSearch = <
     }
   }, [fieldValue]);
 
-  // ---------------- VALUE FROM FORM ----------------
   const selected = watch(fieldName);
-
-  // ---------------- HANDLE SELECT ----------------
-  // const handleSelect = (_: any, value: TopicHit[] | TopicHit | null) => {
-  //   if (!value) {
-  //     setValue(fieldName, [] as TSchema[TField]);
-  //     return;
-  //   }
-
-  //   if (dropdownType === "multi") {
-  //     const val = value as TopicHit[];
-  //     setSelectedOptions(val);
-  //     setValue(fieldName, val as TSchema[TField]); // store full objects
-  //   } else {
-  //     // const id = (value as TopicHit)?.id ?? 0;
-  //     // setValue(fieldName, id as TSchema[TField]); // store only id
-  //     // single → always save array of one object
-  //     const obj = value as TopicHit;
-  //     const arr = obj ? [obj] : [];
-  //     setSelectedOptions(arr);
-  //     setValue(fieldName, arr as TSchema[TField]);
-  //   }
-  // };
   const handleSelect = (_: any, value: TopicHit[] | TopicHit | null) => {
     if (dropdownType === "multi") {
       const val = value as TopicHit[];
       setSelectedOptions(val);
-      setValue(fieldName, val as TSchema[TField]);
+      setValue(fieldName, val as TSchema[TField], { shouldValidate: true });
     } else {
       const obj = (value as TopicHit) ?? null;
 
@@ -191,17 +164,10 @@ const OptimizedTopicSearch = <
       const arr = obj ? [obj] : [];
 
       setSelectedOptions(arr);
-      setValue(fieldName, arr as TSchema[TField]);
+      setValue(fieldName, arr as TSchema[TField], { shouldValidate: true });
     }
   };
 
-  // ---------------- FORMAT VALUE FOR AUTOCOMPLETE ----------------
-  // const autoValue =
-  //   dropdownType === "single"
-  //     ? options.find((opt) => opt.id === selected) || null
-  //     : selectedOptions;
-  // const autoValue =
-  //   dropdownType === "single" ? selectedOptions[0] ?? null : selectedOptions;
   const autoValue =
     dropdownType === "single" ? selectedOptions[0] || null : selectedOptions;
   return (
@@ -375,37 +341,53 @@ const OptimizedTopicSearch = <
           //   : null
           dropdownType === "multi"
             ? value.map((option: TopicHit, index: number) => {
-                const tagProps = getTagProps({ index });
-                const { key, ...rest } = tagProps; // ⬅️ remove key from spread
+              const tagProps = getTagProps({ index });
+              const { key, ...rest } = tagProps; // ⬅️ remove key from spread
 
-                return (
-                  <Chip
-                    key={key} // ⬅️ pass key explicitly (React requirement)
-                    {...rest}
-                    label={option?.name || option?.title || `#${option.id}`}
-                    size="small"
-                  />
-                );
-              })
+              return (
+                <Chip
+                  key={key} // ⬅️ pass key explicitly (React requirement)
+                  {...rest}
+                  label={option?.name || option?.title || `#${option.id}`}
+                  size="small"
+                />
+              );
+            })
             : null
         }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={""}
-            placeholder={placeholder}
-            {...textFieldProps} // ← allow overriding TextField props
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading && <CircularProgress size={18} />}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
+        renderInput={(params) => {
+          const { InputProps, inputProps, InputLabelProps, ...rest } = params;
+
+          return (
+            <TextField
+              {...textFieldProps}
+              fullWidth
+              size="small"
+              label=""
+              // error={Boolean(errorMessage)}
+              placeholder={placeholder}
+              error={!!errors}
+              helperText={errors || null}
+              InputProps={{
+                ...InputProps,
+                endAdornment: (
+                  <>
+                    {loading && <CircularProgress size={18} />}
+                    {InputProps.endAdornment}
+                  </>
+                ),
+              }}
+              inputProps={{
+                ...inputProps,
+              }}
+              InputLabelProps={{
+                ...InputLabelProps,
+                className: InputLabelProps?.className ?? "",
+                style: InputLabelProps?.style ?? {},
+              }}
+            />
+          );
+        }}
       />
     </>
   );
