@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardContent,
+  FormControlLabel,
   Grid,
   Switch,
   Typography,
@@ -78,7 +79,7 @@ export default function SubjectCategories() {
     defaultValues: {
       name: "",
       slug: "",
-      is_active: false,
+      is_active: true,
       test_series_subject: [],
       test_series_chapters: [],
       // test_series_questions: [],
@@ -273,7 +274,7 @@ export default function SubjectCategories() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 Subject
-                <Typography
+                {/* <Typography
                   variant="subtitle1"
                   component="span"
                   color="error"
@@ -281,7 +282,7 @@ export default function SubjectCategories() {
                   marginLeft={0.2}
                 >
                   *
-                </Typography>
+                </Typography> */}
               </Typography>
               <OptimizedTopicSearch
                 label=""
@@ -298,7 +299,7 @@ export default function SubjectCategories() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 Chapters
-                <Typography
+                {/* <Typography
                   variant="subtitle1"
                   component="span"
                   color="error"
@@ -306,7 +307,7 @@ export default function SubjectCategories() {
                   marginLeft={0.2}
                 >
                   *
-                </Typography>
+                </Typography> */}
               </Typography>
               <OptimizedTopicSearch
                 label=""
@@ -341,14 +342,27 @@ export default function SubjectCategories() {
                 name="is_active"
                 control={control}
                 render={({ field }) => (
-                  <Switch
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
+                  // <Switch
+                  //   checked={field.value}
+                  //   onChange={(e) => field.onChange(e.target.checked)}
+                  // />
+                  <FormControlLabel
+                    label="Is Active"
+                    labelPlacement="end"
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    sx={{
+                      "& .MuiFormControlLabel-label": {
+                        fontWeight: 600,
+                      },
+                    }}
                   />
                 )}
               />
-              <Typography fontWeight={600}>Active</Typography>
-
               {errors.is_active && (
                 <Typography color="error" fontSize={12}>
                   {errors.is_active.message}

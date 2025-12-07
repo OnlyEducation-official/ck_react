@@ -46,7 +46,7 @@ const TestExamCategoriesForm = () => {
       slug: null,
       description: "",
       order: 0,
-      is_active: false,
+      is_active: true,
     },
   });
 
@@ -59,7 +59,6 @@ const TestExamCategoriesForm = () => {
     target: "slug",
   });
 
-
   const {
     data: { tExamsData },
   } = useInitialDataContext();
@@ -68,8 +67,9 @@ const TestExamCategoriesForm = () => {
     if (!id) return; // CREATE mode
 
     const fetchItem = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -126,7 +126,7 @@ const TestExamCategoriesForm = () => {
 
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      if(!id) { 
+      if (!id) {
         reset();
         navigate("/test-exams-category-list");
       }
@@ -137,7 +137,14 @@ const TestExamCategoriesForm = () => {
   };
 
   return (
-    <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
+    <Box
+      sx={{
+        marginBlockStart: 7,
+        bgcolor: "background.paper",
+        paddingInline: { xs: 2, sm: 3, md: 4 },
+        paddingBlock: 4,
+      }}
+    >
       <Typography
         variant="h5"
         sx={{
@@ -248,7 +255,12 @@ const TestExamCategoriesForm = () => {
                   onChange={(e) => setValue("is_active", e.target.checked)}
                 />
               }
-              label="Is Active"
+              // label="Is Active"
+              label={
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  Is Active
+                </Typography>
+              }
             />
           </Grid>
 
