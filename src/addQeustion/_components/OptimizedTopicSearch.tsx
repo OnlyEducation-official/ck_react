@@ -404,7 +404,7 @@ const OptimizedTopicSearch = <
                 </>
               ),
             }}
-          />
+          />  
         )}
       />
     </>

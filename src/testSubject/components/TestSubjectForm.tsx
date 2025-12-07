@@ -237,7 +237,7 @@ const TestSubjectForm = () => {
               label={
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   Is Active
-                  <Typography
+                  {/* <Typography
                     variant="subtitle1"
                     component="span"
                     color="error"
@@ -245,7 +245,7 @@ const TestSubjectForm = () => {
                     ml={0.3}
                   >
                     *
-                  </Typography>
+                  </Typography> */}
                 </Typography>
               }
             />

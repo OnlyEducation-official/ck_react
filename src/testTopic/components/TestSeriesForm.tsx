@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -43,9 +43,12 @@ const TestSeriesForm = () => {
       order: 0,
       is_active: true,
       test_series_subject: [],
+      test_series_subject_category: [],
+      test_series_chapter: [],
     },
   });
   const { qid } = useParams(); // qid will be string | undefined
+  console.log("errors: ", errors);
 
   useSlugGenerator<TestSeriesSchemaType>({
     watch,
@@ -64,7 +67,7 @@ const TestSeriesForm = () => {
       const res = await fetch(
         `${
           import.meta.env.VITE_BASE_URL
-        }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid`,
+        }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=true&populate[test_series_chapter][fields]=true`,
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
@@ -92,6 +95,18 @@ const TestSeriesForm = () => {
             id: item.test_series_subject?.data.id,
           },
         ],
+        test_series_subject_category: [
+          {
+            name: item.test_series_subject_category?.data.attributes.name,
+            id: item.test_series_subject_category?.data.id,
+          },
+        ],
+        test_series_chapter: [
+          {
+            name: item.test_series_chapter?.data.attributes.name,
+            id: item.test_series_chapter?.data.id,
+          },
+        ],
       });
     };
 
@@ -100,6 +115,7 @@ const TestSeriesForm = () => {
   const isActive = watch("is_active");
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
+    console.log("data: ", data);
     try {
       const url = qid
         ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
@@ -109,11 +125,11 @@ const TestSeriesForm = () => {
         headers: {
           "Content-Type": "application/json",
           // Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
         },
         body: JSON.stringify({ data }),
       });
-      console.log('token: ', token);
+      console.log("token: ", token);
       console.log("response: ", response);
 
       const result = await response.json();
@@ -143,6 +159,8 @@ const TestSeriesForm = () => {
         paddingInline: { xs: 2, sm: 3, md: 4 },
         paddingBlock: 4,
       }}
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Typography
         variant="h5"
@@ -214,7 +232,7 @@ const TestSeriesForm = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Subject
-            <Typography
+            {/* <Typography
               variant="subtitle1"
               component="span"
               color="error"
@@ -222,7 +240,7 @@ const TestSeriesForm = () => {
               marginLeft={0.2}
             >
               *
-            </Typography>
+            </Typography> */}
           </Typography>
           <OptimizedTopicSearch
             routeName="test-series-subject"
@@ -242,6 +260,50 @@ const TestSeriesForm = () => {
             placeholder="Add relation"
             rules={{ required: "Select at least one subject" }}
           /> */}
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Category
+            {/* <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography> */}
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="single"
+            fieldName="test_series_subject_category"
+            routeName="test-series-subject-categorie"
+            setValue={setValue}
+            watch={watch}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Chapters
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="multi"
+            fieldName="test_series_chapter"
+            routeName="test-series-chapter"
+            setValue={setValue}
+            watch={watch}
+          />
         </Grid>
 
         {/* ORDER */}
@@ -272,29 +334,36 @@ const TestSeriesForm = () => {
           }}
         >
           {/* <Typography variant="subtitle1">Test Topic Subject</Typography> */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isActive}
-                onChange={(e) => setValue("is_active", e.target.checked)}
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              // <Switch
+              //   checked={field.value}
+              //   onChange={(e) => field.onChange(e.target.checked)}
+              // />
+              <FormControlLabel
+                label="Is Active"
+                labelPlacement="end"
+                control={
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                sx={{
+                  "& .MuiFormControlLabel-label": {
+                    fontWeight: 600,
+                  },
+                }}
               />
-            }
-            // label="Is Active"
-            label={
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Is Active
-                <Typography
-                  variant="subtitle1"
-                  component="span"
-                  color="error"
-                  fontWeight={700}
-                  marginLeft={0.2}
-                >
-                  *
-                </Typography>
-              </Typography>
-            }
+            )}
           />
+          {errors.is_active && (
+            <Typography color="error" fontSize={12}>
+              {errors.is_active.message}
+            </Typography>
+          )}
         </Grid>
 
         <Grid size={{ xs: 12 }}>

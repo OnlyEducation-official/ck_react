@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardContent,
+  FormControlLabel,
   Grid,
   Switch,
   Typography,
@@ -196,6 +197,15 @@ const SubjectChapterForm: React.FC = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Name
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
           </Typography>
           <SimpleTextField
             control={control}
@@ -209,6 +219,15 @@ const SubjectChapterForm: React.FC = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Slug
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
           </Typography>
 
           <SimpleTextField
@@ -241,7 +260,7 @@ const SubjectChapterForm: React.FC = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Subject Category
-            <Typography
+            {/* <Typography
               variant="subtitle1"
               component="span"
               color="error"
@@ -249,7 +268,7 @@ const SubjectChapterForm: React.FC = () => {
               marginLeft={0.2}
             >
               *
-            </Typography>
+            </Typography> */}
           </Typography>
           <OptimizedTopicSearch
             label=""
@@ -265,7 +284,7 @@ const SubjectChapterForm: React.FC = () => {
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Select Subject
-            <Typography
+            {/* <Typography
               variant="subtitle1"
               component="span"
               color="error"
@@ -273,7 +292,7 @@ const SubjectChapterForm: React.FC = () => {
               marginLeft={0.2}
             >
               *
-            </Typography>
+            </Typography> */}
           </Typography>
           <OptimizedTopicSearch
             label=""
@@ -295,9 +314,24 @@ const SubjectChapterForm: React.FC = () => {
             name="is_active"
             control={control}
             render={({ field }) => (
-              <Switch
-                checked={field.value}
-                onChange={(e) => field.onChange(e.target.checked)}
+              // <Switch
+              //   checked={field.value}
+              //   onChange={(e) => field.onChange(e.target.checked)}
+              // />
+              <FormControlLabel
+                label="Is Active"
+                labelPlacement="end"
+                control={
+                  <Switch
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                sx={{
+                  "& .MuiFormControlLabel-label": {
+                    fontWeight: 600,
+                  },
+                }}
               />
             )}
           />
@@ -306,7 +340,6 @@ const SubjectChapterForm: React.FC = () => {
               {errors.is_active.message}
             </Typography>
           )}
-          <Typography sx={{ fontWeight: 600 }}>Active Status</Typography>
         </Grid>
 
         {/* ------------------------------ SUBMIT BUTTON ------------------------------ */}
