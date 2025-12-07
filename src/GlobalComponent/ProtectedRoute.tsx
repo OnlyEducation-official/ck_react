@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!token) {
     return <Navigate to="/login" replace />;
-  }
+  } 
 
   return <>{children}</>;
 }

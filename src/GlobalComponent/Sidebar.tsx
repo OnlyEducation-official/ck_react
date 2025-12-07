@@ -81,7 +81,7 @@ export default function Sidebar() {
           variant="h5"
           noWrap
           component={Link}
-          to={"/"}
+          to={"/questions-list"}
           sx={{
             display: { xs: "block" },
             fontWeight: 600,

@@ -38,7 +38,7 @@ export default function Login() {
 
   const onSubmit = async (data: LoginForm) => {
     const success = await login(data.email, data.password);
-    if (success) window.location.href = "/";
+    if (success) window.location.href = "/questions-list";
     else alert("Invalid credentials");
   };
 

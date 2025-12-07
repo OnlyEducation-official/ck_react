@@ -13,8 +13,9 @@ import { MeiliDataContextProvide } from "./context/MeiliContext.js";
 import GetAllList from "./getAll/GetAllPage.js";
 import Login from "./Login/Login";
 import ProtectedRoute from "./GlobalComponent/ProtectedRoute";
-import SubjectChapterForm from './SubjectChapterForm/SubjectChapterForm'
+import SubjectChapterForm from "./SubjectChapterForm/SubjectChapterForm";
 import SubjectCategories from "./SubjectCategories/SubjectCategories";
+import PublicRoute from "./GlobalComponent/PublicRoute.js";
 // import SubjectCategories from './SubjectCategories/'
 
 function App() {
@@ -23,8 +24,15 @@ function App() {
       <DrawerAppBar />
       <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
-        <Route path="/login" element={<Login />} />
         <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        {/* <Route
           path="/"
           element={
             <ProtectedRoute>
@@ -35,7 +43,7 @@ function App() {
               </InitialDataContextProvider>
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         {/* t-categories */}
         <Route
@@ -60,7 +68,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/test-chapter-list"
           element={
             <ProtectedRoute>
@@ -88,7 +96,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/test-subject-category-list"
           element={
             <ProtectedRoute>
