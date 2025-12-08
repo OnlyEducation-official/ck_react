@@ -25,6 +25,7 @@ function App() {
     <div>
       <DrawerAppBar />
       <ToastContainer position="top-center" autoClose={2000} />
+
       <Routes>
         <Route path="*" element={<NotFound />} />
         <Route
@@ -35,12 +36,7 @@ function App() {
             </PublicRoute>
           }
         />
-        <Route
-          path="/"
-          element={
-            <HomePageRedirect />
-          }
-        />
+        <Route path="/" element={<HomePageRedirect />} />
 
         {/* t-categories */}
         <Route
