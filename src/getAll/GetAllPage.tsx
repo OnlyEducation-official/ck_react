@@ -8,6 +8,7 @@ import {
   Typography,
   Pagination,
   TextField,
+  LinearProgress,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getResourceByPath } from "../util/resource.js";
@@ -68,6 +69,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const [searchResults, setSearchResults] = useState<TopicHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  console.log('searchLoading: ', searchLoading);
 
   const [pageState, setPageState] = useState({
     page: 1,
@@ -176,7 +178,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
 
   // Search pagination
   let displayList: any[] = [];
-  
+
   if (searchQuery.trim().length > 0) {
     const start = (pageState.page - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
@@ -281,47 +283,9 @@ export default function GetAllList({ routeName, lol, title }: Props) {
             borderColor: "divider",
           }}
         >
+          {searchLoading && <LinearProgress />}
           <List disablePadding>
-            {searchLoading ? (
-              <Box
-                sx={{
-                  // height: "70vh",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBlock: 3,
-                  gap: 2,
-                }}
-              >
-                {/* Spinner */}
-                <Box
-                  sx={{
-                    width: 25,
-                    height: 25,
-                    borderRadius: "50%",
-                    border: "4px solid #e0e0e0",
-                    borderTopColor: "primary.main",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
-
-                {/* Description */}
-                {/* <Typography sx={{ color: "text.secondary", fontWeight: 500 }}>
-                  Loading {resource?.labels?.plural}...
-                </Typography> */}
-
-                {/* Keyframes */}
-                <style>
-                  {`
-            @keyframes spin {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
-            }
-          `}
-                </style>
-              </Box>
-            ) : displayList.length === 0 ? (
+            {displayList.length === 0 ? (
               <Box
                 sx={{
                   // height: "70vh",
