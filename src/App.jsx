@@ -17,6 +17,7 @@ import SubjectChapterForm from "./SubjectChapterForm/SubjectChapterForm";
 import SubjectCategories from "./SubjectCategories/SubjectCategories";
 import PublicRoute from "./GlobalComponent/PublicRoute.js";
 import NotFound from "./pages/NotFound.js";
+import HomePageRedirect from "./pages/HomePageRedirect.js";
 // import SubjectCategories from './SubjectCategories/'
 
 function App() {
@@ -34,18 +35,12 @@ function App() {
             </PublicRoute>
           }
         />
-        {/* <Route
+        <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <InitialDataContextProvider>
-                <MeiliDataContextProvide>
-                  <Index />
-                </MeiliDataContextProvide>
-              </InitialDataContextProvider>
-            </ProtectedRoute>
+            <HomePageRedirect />
           }
-        /> */}
+        />
 
         {/* t-categories */}
         <Route
