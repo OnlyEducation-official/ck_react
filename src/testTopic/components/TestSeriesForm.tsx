@@ -48,7 +48,6 @@ const TestSeriesForm = () => {
     },
   });
   const { qid } = useParams(); // qid will be string | undefined
-  console.log("errors: ", errors);
 
   useSlugGenerator<TestSeriesSchemaType>({
     watch,
@@ -77,12 +76,7 @@ const TestSeriesForm = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
-      console.log("item: ", item);
 
-      console.log(
-        "slug: item.test_series_subject?.data.slug: ",
-        item.test_series_subject?.data.attributes.slug
-      );
       // Load fetched data into form
       reset({
         name: item?.name ?? "",
@@ -115,7 +109,6 @@ const TestSeriesForm = () => {
   const isActive = watch("is_active");
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
-    console.log("data: ", data);
     try {
       const url = qid
         ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
@@ -129,8 +122,6 @@ const TestSeriesForm = () => {
         },
         body: JSON.stringify({ data }),
       });
-      console.log("token: ", token);
-      console.log("response: ", response);
 
       const result = await response.json();
       const success = await toastResponse(
@@ -149,7 +140,6 @@ const TestSeriesForm = () => {
       toast.error("Something went wrong!");
     }
   };
-  console.log("watch", watch());
 
   return (
     <Box

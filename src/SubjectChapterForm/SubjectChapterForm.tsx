@@ -91,9 +91,7 @@ const SubjectChapterForm: React.FC = () => {
       });
 
       const json = await res.json();
-      console.log("json: ", json);
       const item = json?.data?.attributes;
-      console.log("item: ", item);
       reset({
         name: item?.name ?? "",
         slug: item?.slug ?? null,
@@ -125,7 +123,6 @@ const SubjectChapterForm: React.FC = () => {
   });
 
   const onSubmit = async (data: TestSchemaType) => {
-    console.log("FORM SUBMITTED:", data);
     try {
       const isEdit = Boolean(qid);
       const url = isEdit

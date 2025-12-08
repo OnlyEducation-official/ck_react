@@ -28,14 +28,7 @@ function App() {
 
       <Routes>
         <Route path="*" element={<NotFound />} />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<HomePageRedirect />} />
 
         {/* t-categories */}

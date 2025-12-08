@@ -12,6 +12,7 @@ import { optionTypeData, QuestionOptionType } from "./data.js";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
+
 export default function FormStructure() {
   const { qid } = useParams();
   const navigate = useNavigate();
@@ -44,8 +45,6 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
-  console.log("watch: ", watch());
-  console.log("errors: ", errors);
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
@@ -62,16 +61,11 @@ export default function FormStructure() {
       });
 
       const json = await res.json();
-      console.log("json: ", json);
       const item = json.data;
 
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
-      // console.log(
-      //   "attr.test_series_subject_category?.data: ",
-      //   attr.
-      // );
 
       return {
         /** SIMPLE FIELDS */
@@ -143,7 +137,6 @@ export default function FormStructure() {
     loadQuestion();
   }, [qid, reset]);
 
-  // console.log('watch: ', watch());
   const onSubmit = async (data: any) => {
     try {
       const isEdit = Boolean(qid);

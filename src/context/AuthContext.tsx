@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
+import { toastResponse } from "@/util/toastResponse";
+import { toast } from "react-toastify";
 
 interface User {
   id: number;
@@ -55,8 +57,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       const tokenExpiryInfo = getTokenExpiryInfo(
         decoded.exp * 1000 - Date.now()
       );
-      console.log("tokenExpiryInfo: ", tokenExpiryInfo);
-      console.log("decoded: ", decoded);
       return decoded.exp * 1000 < Date.now();
     } catch {
       return true;
@@ -88,19 +88,19 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // -------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch("https://admin.onlyeducation.co.in/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      console.log("email, password: ", email, password);
+      const response = await fetch(
+        "https://admin.onlyeducation.co.in/admin/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      // if (!toastOk) return false;
       const res = await response.json();
-      console.log("res: ", res);
-
       if (!response.ok) {
         console.error("Login failed:", res);
         return false;
@@ -129,6 +129,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("Login error:", error);
+      toast.error("Something went wrong. Try again.");
       return false;
     }
   };

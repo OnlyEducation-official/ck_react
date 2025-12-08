@@ -69,7 +69,6 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const [searchResults, setSearchResults] = useState<TopicHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
-  console.log('searchLoading: ', searchLoading);
 
   const [pageState, setPageState] = useState({
     page: 1,

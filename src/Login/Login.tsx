@@ -16,6 +16,10 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import Cookies from "js-cookie";
+import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { toastResponse } from "@/util/toastResponse.js";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -27,6 +31,13 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
   const { login } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
+  const token = Cookies.get("auth_token");
+  const navigate = useNavigate();
+
+  if (token) {
+    // 🔥 If already logged in, redirect to homepage or dashboard
+    return <Navigate to="/questions-list" replace />;
+  }
 
   const {
     register,
@@ -38,8 +49,18 @@ export default function Login() {
 
   const onSubmit = async (data: LoginForm) => {
     const success = await login(data.email, data.password);
-    if (success) window.location.href = "/questions-list";
-    else alert("Invalid credentials");
+    if (success) {
+      toast.success("Login successful", {
+        draggable: true,
+        position: "top-center",
+        autoClose: 1800,
+      });
+      navigate("/questions-list");
+    } else {
+      toast.error("Login failed");
+    }
+    // if (success)
+    // else alert("Invalid credentials");
   };
 
   return (

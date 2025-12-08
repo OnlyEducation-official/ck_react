@@ -6,7 +6,7 @@ export const toastResponse = async (
   successMsg: string,
   fallbackErrorMsg: string
 ) => {
-   let errorText = fallbackErrorMsg;
+  let errorText = fallbackErrorMsg;
 
   try {
     // Try to parse JSON error
@@ -50,6 +50,7 @@ export const toastResponse = async (
   if (!res.ok) {
     toast.error(errorText || fallbackErrorMsg, {
       position: "top-center",
+      draggable: true,
       autoClose: 1800,
     });
     return false;
@@ -58,6 +59,7 @@ export const toastResponse = async (
   // ✅ Success case
   toast.success(successMsg, {
     position: "top-center",
+    draggable: true,
     autoClose: 1800,
   });
 

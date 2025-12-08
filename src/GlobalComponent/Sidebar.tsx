@@ -14,34 +14,50 @@ import { Link, useLocation } from "react-router-dom";
 import { IconButton, Stack, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  FolderTree,
+  FileText,
+  Grid3x3,
+  BookOpen,
+  BookMarked,
+  HelpCircle,
+  List as ListIcon,
+} from "lucide-react";
 const sidebarData = [
   {
     label: "Exams Category",
     url: "/test-exams-category-list",
+    icon: FolderTree,
   },
   {
     label: "Exam",
     url: "/exams-list",
+    icon: FileText,
   },
   {
     label: "Subject Category",
     url: "/test-subject-category",
+    icon: Grid3x3,
   },
   {
     label: "Subject",
     url: "/test-subject-category-list",
+    icon: BookOpen,
   },
   {
     label: "Subject Chapter",
     url: "/test-chapter-list",
+    icon: BookMarked,
   },
   {
     label: "Questions",
     url: "/questions-list",
+    icon: HelpCircle,
   },
   {
     label: "Topic",
     url: "/test-topic-list",
+    icon: ListIcon,
   },
 ];
 
@@ -98,30 +114,37 @@ export default function Sidebar() {
 
       <Divider />
       <List>
-        {sidebarData.map((obj, index) => (
-          <ListItem key={obj.label} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={obj.url}
-              selected={location.pathname === obj.url} // <-- Active highlight
-              sx={{
-                "&.Mui-selected": {
-                  backgroundColor: "#1976d2",
-                  color: "white",
-                  "& .MuiListItemIcon-root": { color: "white" },
-                },
-                "&.Mui-selected:hover": {
-                  backgroundColor: "#115293",
-                },
-              }}
-            >
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={obj.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {sidebarData.map((obj, index) => {
+          const Icons = obj.icon || BookOpen;
+          return (
+            <ListItem key={obj.label} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={obj.url}
+                selected={location.pathname === obj.url} // <-- Active highlight
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#1976d2",
+                    color: "white",
+                    "& .MuiListItemIcon-root": { color: "white" },
+                  },
+                  "&.Mui-selected:hover": {
+                    backgroundColor: "#115293",
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <Icons
+                    size={25}
+                    color={location.pathname === obj.url ? "white" : "black"}
+                  />
+                  {/* {index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+                </ListItemIcon>
+                <ListItemText primary={obj.label} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
       {/* 
             <List>

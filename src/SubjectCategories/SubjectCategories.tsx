@@ -19,8 +19,6 @@ import { slugify, useSlugGenerator } from "../hooks/useSlugGenerator";
 import { toastResponse } from "../util/toastResponse";
 import { toast } from "react-toastify";
 
-// import SimpleTextField from "./SimpleTextField";
-// import OptimizedTopicSearch from "./OptimizedTopicSearch";
 
 // ----------------------------
 // ZOD SCHEMA
@@ -85,8 +83,6 @@ export default function SubjectCategories() {
       // test_series_questions: [],
     },
   });
-  console.log("errors: ", errors);
-  console.log("watch: ", watch());
 
   const nameValue = watch("name");
   useEffect(() => {
@@ -109,14 +105,7 @@ export default function SubjectCategories() {
       });
 
       const json = await res.json();
-      console.log("json: ", json);
       const item = json?.data?.attributes;
-      // console.log(
-      //   "item: ",
-      //   item.test_series_subject?.data.map(
-      //     (item: any) => item?.attributes?.name
-      //   )
-      // );
 
       reset({
         name: item?.name ?? "",
@@ -158,7 +147,6 @@ export default function SubjectCategories() {
   });
 
   const onSubmit = async (data: TestSchemaType) => {
-    console.log("FORM SUBMITTED:", data);
     try {
       const isEdit = Boolean(qid);
       const url = isEdit
@@ -166,7 +154,6 @@ export default function SubjectCategories() {
             import.meta.env.VITE_BASE_URL
           }test-series-subject-categories/${qid}`
         : `${import.meta.env.VITE_BASE_URL}test-series-subject-categories`;
-      // test-series-subjects
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
@@ -402,23 +389,3 @@ export default function SubjectCategories() {
   );
 }
 
-// {
-//     data: {
-//         name: string
-//         slug: string
-//         is_active : false,
-//         test_series_subject: {
-//             id : number,
-//             name : string,
-//         }
-//         test_series_chapters: [{
-//             id : number,
-//             name : string,
-//         }]
-//         test_series_questions: [{
-//             id : number,
-//             name : string,
-//         }]
-
-//     }
-// }

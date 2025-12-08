@@ -59,7 +59,6 @@ const TopicSearchBar = <
 
   // addDropItem
   const {} = UseMeiliDataContext();
-  // console.log("fieldName: ", fieldName);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -71,7 +70,6 @@ const TopicSearchBar = <
       try {
         setLoading(true);
         const hits = await searchTopics(query, routeName);
-        console.log("hits: ", hits);
         setResults(hits);
       } catch (err) {
         console.error("Meilisearch error:", err);
@@ -87,7 +85,6 @@ const TopicSearchBar = <
   const handleSelect = (topic: TopicHit) => {
     const title =
       topic.title || topic.name || topic.slug || `Topic #${topic.id}`;
-    console.log("currentValue: ", topic);
     // setValue(fieldName, topic.id as TSchema[TField]);
     if (dropdownType === "multi") {
       const currentValue = watch(fieldName) as unknown as number[];

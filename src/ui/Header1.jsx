@@ -12,8 +12,8 @@ import InputBase from "@mui/material/InputBase";
 import Sidebar from "../GlobalComponent/Sidebar";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import LoginIcon from '@mui/icons-material/Login';
-import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -59,7 +59,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 function DrawerAppBar() {
   const { token, logout } = useContext(AuthContext);
-  console.log("token: ", token);
   const navBtn = [
     {
       label: "Exams Category",
@@ -147,7 +146,7 @@ function DrawerAppBar() {
                     to={btn.url}
                     key={index}
                     sx={{
-                      fontSize: '15px',
+                      fontSize: "15px",
                       flexGrow: 1,
                       display: { xs: "none", md: "block" },
                       fontWeight: 600,
@@ -182,15 +181,17 @@ function DrawerAppBar() {
                 <Sidebar />
               </Box>
             </Box>
-            <IconButton onClick={() => logout()} sx={{ marginInlineStart: 2 }}>
+            <IconButton
+              onClick={() => logout()}
+              sx={{ marginInlineStart: { md: 2 } }}
+            >
               {token ? (
                 <Tooltip title="Logout">
-
-                  <LogoutIcon sx={{ color: 'white' }} />
+                  <LogoutIcon sx={{ color: "white" }} />
                 </Tooltip>
               ) : (
                 <Tooltip title="Login">
-                  <LoginIcon sx={{ color: 'white' }} />
+                  <LoginIcon sx={{ color: "white" }} />
                 </Tooltip>
               )}
             </IconButton>

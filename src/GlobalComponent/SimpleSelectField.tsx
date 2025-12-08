@@ -48,8 +48,6 @@ const SimpleSelectField = <T extends FieldValues>({
     return o.value;
   });
 
-  // console.log(ok)
-
   return (
     <Controller
       name={name}
