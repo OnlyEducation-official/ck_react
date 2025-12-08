@@ -179,6 +179,10 @@ export default function FormStructure() {
   };
   // deleteDropItem
 
+  const triggerFn = () => {
+    trigger("options");
+  };
+
   return (
     <Box
       sx={{ marginBlockStart: 6, bgcolor: "background.paper" }}
@@ -226,6 +230,55 @@ export default function FormStructure() {
             errors={errors?.subject_tag?.message}
           />
         </Grid>
+
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Category
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="single"
+            fieldName="test_series_subject_category"
+            routeName="test-series-subject-categorie"
+            setValue={setValue}
+            watch={watch}
+            errors={errors?.test_series_subject_category?.message}
+          />
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Chapters
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <OptimizedTopicSearch
+            dropdownType="multi"
+            fieldName="test_series_chapters"
+            routeName="test-series-chapter"
+            setValue={setValue}
+            watch={watch}
+            errors={errors?.test_series_chapters?.message}
+          />
+        </Grid>
+
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {" "}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -261,6 +314,7 @@ export default function FormStructure() {
             // label="Test Series Topic"
             options={optionTypeData}
             rules={{ required: "Please select a Topic" }}
+            myCallBackFn={() => trigger("options")}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -321,52 +375,6 @@ export default function FormStructure() {
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_exams?.message}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Subject Chapters
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
-          </Typography>
-          <OptimizedTopicSearch
-            dropdownType="multi"
-            fieldName="test_series_chapters"
-            routeName="test-series-chapter"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_chapters?.message}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Subject Category
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
-          </Typography>
-          <OptimizedTopicSearch
-            dropdownType="single"
-            fieldName="test_series_subject_category"
-            routeName="test-series-subject-categorie"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_subject_category?.message}
           />
         </Grid>
         {/* ---------- QUESTION FIELD ---------- */}

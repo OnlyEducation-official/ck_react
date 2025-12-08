@@ -80,9 +80,8 @@ const SubjectChapterForm: React.FC = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-chapters/${qid}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-chapters/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -183,7 +182,8 @@ const SubjectChapterForm: React.FC = () => {
           borderColor: "primary.main",
         }}
       >
-        Add Chapter
+        {qid ? "Edit Chapter" : "Add Chapter"}
+
       </Typography>
 
       <Grid
@@ -256,30 +256,7 @@ const SubjectChapterForm: React.FC = () => {
           />
         </Grid> */}
 
-        {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Subject Category
-            {/* <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography> */}
-          </Typography>
-          <OptimizedTopicSearch
-            label=""
-            routeName="test-series-subject-categorie"
-            dropdownType="single"
-            fieldName="test_series_subject_category"
-            watch={watch}
-            setValue={setValue}
-            placeholder="Search Category…"
-          />
-        </Grid>
+
         {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -299,6 +276,31 @@ const SubjectChapterForm: React.FC = () => {
             routeName="test-series-subject"
             dropdownType="single"
             fieldName="test_series_subject"
+            watch={watch}
+            setValue={setValue}
+            placeholder="Search Category…"
+          />
+        </Grid>
+
+        {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Subject Category
+            {/* <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography> */}
+          </Typography>
+          <OptimizedTopicSearch
+            label=""
+            routeName="test-series-subject-categorie"
+            dropdownType="single"
+            fieldName="test_series_subject_category"
             watch={watch}
             setValue={setValue}
             placeholder="Search Category…"
@@ -363,7 +365,7 @@ const SubjectChapterForm: React.FC = () => {
               },
             }}
           >
-            Submit
+            {qid ? "Update" : "Create"}
           </Button>
         </Grid>
       </Grid>

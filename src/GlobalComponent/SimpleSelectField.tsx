@@ -29,6 +29,7 @@ interface SimpleSelectFieldProps<T extends FieldValues> {
   rules?: RegisterOptions; // ✅ support validation rules
   isOptionEqualToValue?: (a: Option, b: Option) => boolean; // ✅ optional prop
   noneOption?: boolean;
+  myCallBackFn?: () => void;
 }
 
 const SimpleSelectField = <T extends FieldValues>({
@@ -41,6 +42,7 @@ const SimpleSelectField = <T extends FieldValues>({
   fullWidth = true,
   rules,
   noneOption = false,
+  myCallBackFn,
 }: SimpleSelectFieldProps<T>) => {
   let ok = options.filter((o) => {
     return o.value;
@@ -134,8 +136,8 @@ const SimpleSelectField = <T extends FieldValues>({
                 ? field.value
                   ? field.value
                   : noneOption
-                  ? ""
-                  : 0
+                    ? ""
+                    : 0
                 : field.value
             }
             slotProps={{
@@ -157,6 +159,10 @@ const SimpleSelectField = <T extends FieldValues>({
                 field.onChange(Number(e.target.value));
               } else {
                 field.onChange(e.target.value);
+              }
+
+              if (myCallBackFn) {
+                myCallBackFn();
               }
             }}
           >

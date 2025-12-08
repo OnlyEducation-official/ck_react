@@ -41,6 +41,7 @@ export const QuestionSchema = z
   })
   .superRefine((fieldName, ctx) => {
     const options = fieldName.options;
+    const optiionType = fieldName.option_type;
     if (options.length < 3) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
@@ -57,5 +58,21 @@ export const QuestionSchema = z
         path: ["options"],
       });
     }
+
+    const checkOptionAsPerOptionType = options.filter((o) => o.is_correct === true);
+    if (optiionType === "single_select" && checkOptionAsPerOptionType.length > 1) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "Please mark at least one option as correct.",
+        path: ["options"],
+      });
+    } else if (optiionType === "multi_select" && checkOptionAsPerOptionType.length <= 1) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "Please mark at least two or more options as correct.",
+        path: ["options"],
+      });
+    }
+
   });
 export type QuestionSchemaType = z.infer<typeof QuestionSchema>;
