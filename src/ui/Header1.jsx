@@ -6,12 +6,14 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Link, useLocation } from "react-router-dom";
-import { Button, Container, Stack } from "@mui/material";
+import { Button, Container, IconButton, Stack, Tooltip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Sidebar from "../GlobalComponent/Sidebar";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -68,15 +70,15 @@ function DrawerAppBar() {
       url: "/exams-list",
     },
     {
-      label: "Subject Category",
-      url: "/test-subject-category-list",
-    },
-    {
       label: "Subject",
       url: "/test-subject-list",
     },
     {
-      label: "Subject Chapter",
+      label: "Category",
+      url: "/test-subject-category-list",
+    },
+    {
+      label: "Chapter",
       url: "/test-chapter-list",
     },
     {
@@ -136,15 +138,16 @@ function DrawerAppBar() {
               >
                 ONLY TEST
               </Typography>
-              <Stack direction={"row"} gap={3}>
+              <Stack direction={"row"} sx={{ columnGap: { md: 2, lg: 3 } }}>
                 {navBtn.map((btn, index) => (
                   <Typography
-                    variant="subtitle1"
+                    variant="subtitle2"
                     noWrap
                     component={Link}
                     to={btn.url}
                     key={index}
                     sx={{
+                      fontSize: '15px',
                       flexGrow: 1,
                       display: { xs: "none", md: "block" },
                       fontWeight: 600,
@@ -154,7 +157,7 @@ function DrawerAppBar() {
                           : "common.black",
                       textDecoration: "none",
                       position: "relative",
-                      px: 2,
+                      px: 1,
                       py: 1,
                       "&::after": {
                         content: '""',
@@ -179,11 +182,24 @@ function DrawerAppBar() {
                 <Sidebar />
               </Box>
             </Box>
-            <Button
+            <IconButton onClick={() => logout()} sx={{ marginInlineStart: 2 }}>
+              {token ? (
+                <Tooltip title="Logout">
+
+                  <LogoutIcon sx={{ color: 'white' }} />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Login">
+                  <LoginIcon sx={{ color: 'white' }} />
+                </Tooltip>
+              )}
+            </IconButton>
+            {/* <Button
               onClick={() => logout()}
               sx={{
                 px: 3.5,
-                py: 1.4,
+                py: 1,
+                marginInlineStart: 3,
                 borderRadius: 3,
                 fontWeight: 700,
                 textTransform: "none",
@@ -210,7 +226,7 @@ function DrawerAppBar() {
               }}
             >
               {token ? "Logout" : "Login"}
-            </Button>
+            </Button> */}
           </Toolbar>
         </Container>
       </AppBar>

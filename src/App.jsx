@@ -16,6 +16,7 @@ import ProtectedRoute from "./GlobalComponent/ProtectedRoute";
 import SubjectChapterForm from "./SubjectChapterForm/SubjectChapterForm";
 import SubjectCategories from "./SubjectCategories/SubjectCategories";
 import PublicRoute from "./GlobalComponent/PublicRoute.js";
+import NotFound from "./pages/NotFound.js";
 // import SubjectCategories from './SubjectCategories/'
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <DrawerAppBar />
       <ToastContainer position="top-center" autoClose={2000} />
       <Routes>
+        <Route path="*" element={<NotFound />} />
         <Route
           path="/login"
           element={
