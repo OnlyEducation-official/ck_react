@@ -32,6 +32,6 @@ export const useSlugGenerator = <T extends FieldValues>({
 
   useEffect(() => {
     if (!value) return;
-    setValue(target, slugify(String(value)) as any);
+    setValue(target, slugify(String(value)) as any, { shouldValidate: true });
   }, [value, setValue, target]);
 };

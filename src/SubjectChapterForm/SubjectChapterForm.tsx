@@ -80,8 +80,9 @@ const SubjectChapterForm: React.FC = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }test-series-chapters/${qid}?populate=*`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }test-series-chapters/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -183,7 +184,6 @@ const SubjectChapterForm: React.FC = () => {
         }}
       >
         {qid ? "Edit Chapter" : "Add Chapter"}
-
       </Typography>
 
       <Grid
@@ -216,8 +216,11 @@ const SubjectChapterForm: React.FC = () => {
         </Grid>
 
         {/* ------------------------------ SLUG ------------------------------ */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        <Grid size={{ xs: 12, md: 6 }} sx={{ cursor: "not-allowed !important" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, cursor: "not-allowed !important" }}
+          >
             Slug
             <Typography
               variant="subtitle1"
@@ -233,7 +236,7 @@ const SubjectChapterForm: React.FC = () => {
           <SimpleTextField
             control={control}
             name="slug"
-            label="Slug"
+            label=""
             disabled
             rules={{ required: "Slug is required" }}
           />
@@ -255,7 +258,6 @@ const SubjectChapterForm: React.FC = () => {
             placeholder="Search Question…"
           />
         </Grid> */}
-
 
         {/* ------------------------------ SUBJECT CATEGORY (DROPDOWN) ------------------------------ */}
         <Grid size={{ xs: 12, md: 6 }}>
