@@ -88,7 +88,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // -------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch("http://localhost:1337/admin/login", {
+      const response = await fetch("https://admin.onlyeducation.co.in/admin/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
