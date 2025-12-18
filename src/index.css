@@ -37,3 +37,7 @@
 .my-editor .ck-content {
   min-height: 5em !important;
 }
+
+.wrs_tickContainer {
+  display: none !important;
+}
