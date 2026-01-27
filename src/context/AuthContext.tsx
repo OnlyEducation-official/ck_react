@@ -16,7 +16,7 @@ interface JwtPayload {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: String | null;
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -28,11 +28,11 @@ export const AuthContext = createContext<AuthContextType>({
   token: null,
   loading: true,
   login: async () => false,
-  logout: () => {},
+  logout: () => { },
 });
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<String | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,6 +71,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     // const savedUser = localStorage.getItem("auth_user");
     const savedToken = Cookies.get("auth_token");
     const savedUser = Cookies.get("auth_user");
+    console.log("savedUser:", savedUser)
     if (savedToken) {
       if (isTokenExpired(savedToken)) {
         logout();
@@ -87,30 +88,41 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // 🔐 LOGIN FUNCTION
   // -------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
+
     try {
-      const response = await fetch(
-        "https://admin.onlyeducation.co.in/admin/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-      // if (!toastOk) return false;
-      const res = await response.json();
-      if (!response.ok) {
-        console.error("Login failed:", res);
-        return false;
+      const res = await fetch("http://localhost:1337/api/auth/local", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          identifier: email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      console.log("status:", res.status);
+      console.log("data:", data);
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || "Login failed");
       }
 
-      const token = res.data.token;
-      const user = res.data.user;
+      // // ✅ Role restriction
+      // if (data?.user?.role?.name !== "Test Series Teachers Authentication") {
+      //   throw new Error("Access denied: Not a Test Series teacher");
+      // }
 
-      // Save token + user
-      Cookies.set("auth_token", token, {
+      // // ✅ Store JWT only if teacher
+      const jwt = data.jwt;
+      const user = data.user.email;
+      console.log("auth_user:", user)
+
+      if (!jwt) {
+        throw new Error("Login failed: JWT missing in response");
+      }
+
+      Cookies.set("auth_token", jwt, {
         expires: 7, // days
         secure: true,
         sameSite: "strict",
@@ -120,18 +132,66 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         secure: true,
         sameSite: "strict",
       });
-      //   localStorage.setItem("auth_token", token);
-      //   localStorage.setItem("auth_user", JSON.stringify(user));
 
-      setToken(token);
+      localStorage.setItem("auth_token", jwt);
+      localStorage.setItem("auth_user", JSON.stringify(user));
+
+      setToken(jwt);
       setUser(user);
 
       return true;
+
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Something went wrong. Try again.");
       return false;
     }
+
+    // try {
+    //   const response = await fetch(
+    //     "https://admin.onlyeducation.co.in/admin/login",
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+    //       },
+    //       body: JSON.stringify({ email, password }),
+    //     }
+    //   );
+    //   // if (!toastOk) return false;
+    //   const res = await response.json();
+    //   if (!response.ok) {
+    //     console.error("Login failed:", res);
+    //     return false;
+    //   }
+
+    //   const token = res.data.token;
+    //   const user = res.data.user;
+
+    //   // Save token + user
+    // Cookies.set("auth_token", token, {
+    //   expires: 7, // days
+    //   secure: true,
+    //   sameSite: "strict",
+    // });
+    // Cookies.set("auth_user", JSON.stringify(user), {
+    //   expires: 7,
+    //   secure: true,
+    //   sameSite: "strict",
+    // });
+    // localStorage.setItem("auth_token", token);
+    // localStorage.setItem("auth_user", JSON.stringify(user));
+
+    // setToken(token);
+    // setUser(user);
+
+    // return true;
+    // } catch (error) {
+    // console.error("Login error:", error);
+    // toast.error("Something went wrong. Try again.");
+    // return false;
+    // }
   };
 
   // -------------------------------------------

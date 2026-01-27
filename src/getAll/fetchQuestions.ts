@@ -64,6 +64,7 @@ export default async function fetchQuestions<T = any>(
     }
 
     const json = await response.json();
+    console.log("json:", json)
     return json as StrapiResponse<T[]>;
   } catch (error) {
     console.error("Error fetching questions:", error);
