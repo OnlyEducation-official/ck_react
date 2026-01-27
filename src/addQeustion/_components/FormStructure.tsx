@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuestionSchema, type QuestionSchemaType } from "../QuestionSchema.js";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { toastResponse } from "../../util/toastResponse.js";
 import { toast } from "react-toastify";
 import OptimizedTopicSearch from "./OptimizedTopicSearch.js";
@@ -12,8 +12,10 @@ import { optionTypeData, QuestionOptionType } from "./data.js";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
+import { AuthContext } from "@/context/AuthContext.js";
 
 export default function FormStructure() {
+  const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -137,9 +139,37 @@ export default function FormStructure() {
     loadQuestion();
   }, [qid, reset]);
 
+  console.log("errors:", errors)
+
   const onSubmit = async (data: any) => {
     try {
       const isEdit = Boolean(qid);
+
+      let newObjSpread = {};
+
+      if (!isEdit) {
+
+        newObjSpread = {
+          createdby: user,
+          createdat: new Date().toISOString()
+        };
+
+      } else {
+
+        newObjSpread = {
+          updatedby: user,
+          updatedat: new Date().toISOString()
+        };
+
+      }
+
+      data = {
+        ...data,
+        ...newObjSpread
+      }
+
+      console.log("Add Question Form:", data)
+
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
         : `${import.meta.env.VITE_BASE_URL}t-questions`;
@@ -158,7 +188,7 @@ export default function FormStructure() {
           : "Created  Question Form Successfully!",
         qid ? "Update  Question Form Failed!" : "Create Question Form Failed!"
       );
-      const datas = await response.json();
+      // const datas = await response.json();
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
       if (!qid) {
