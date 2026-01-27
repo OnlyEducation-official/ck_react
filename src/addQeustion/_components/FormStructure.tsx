@@ -48,38 +48,38 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
-  function extractImages(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return [...doc.querySelectorAll("img")]
-      .map((img) => img.src)
-      .filter((src) => src.startsWith("data:image"));
-  }
-  function extractImagesWithAlt(html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const images = doc.querySelectorAll("img");
+  // function extractImages(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   return [...doc.querySelectorAll("img")]
+  //     .map((img) => img.src)
+  //     .filter((src) => src.startsWith("data:image"));
+  // }
+  // function extractImagesWithAlt(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   const images = doc.querySelectorAll("img");
 
-    const imageMap = {};
+  //   const imageMap = {};
 
-    images.forEach((img, index) => {
-      const alt = img.getAttribute("alt")?.trim();
-      const src = img.getAttribute("src");
+  //   images.forEach((img, index) => {
+  //     const alt = img.getAttribute("alt")?.trim();
+  //     const src = img.getAttribute("src");
 
-      if (!src?.startsWith("data:image")) return;
+  //     if (!src?.startsWith("data:image")) return;
 
-      // Fallback key if alt is missing
-      const key = alt && alt.length > 0 ? alt : `image_${index + 1}`;
+  //     // Fallback key if alt is missing
+  //     const key = alt && alt.length > 0 ? alt : `image_${index + 1}`;
 
-      imageMap[key] = src;
-    });
+  //     imageMap[key] = src;
+  //   });
 
-    return imageMap;
-  }
+  //   return imageMap;
+  // }
   // const dataIOmag = extractImages(watch("question_title"));
-  const dataIOmag = extractImagesWithAlt(watch("question_title"));
+  // const dataIOmag = extractImagesWithAlt(watch("question_title"));
   // console.log('watch("question_title"): ', watch("question_title"));
   // const rawBase64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
 
-  console.log("dataIOmag: ", dataIOmag);
+  // console.log("dataIOmag: ", dataIOmag);
   // console.log("watch: ", watch("question_title"));
 
   useEffect(() => {
