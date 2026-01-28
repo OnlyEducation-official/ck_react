@@ -38,6 +38,8 @@ import { UploadAdapterPlugin } from "./ckeditorUploadAdapter";
 import { ImageIdPlugin } from "./imageIdPlugin";
 
 const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
+  const [editorError, setEditorError] = React.useState(null);
+  console.log('editorError: ', editorError);
   // use watch if provided, else fallback to value prop
   const currentValue = typeof watch === "function" ? watch(name) : value;
   const latestValue = useRef(currentValue ?? "");
@@ -212,6 +214,18 @@ const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
         onChange={(_, editor) => {
           const data = editor.getData();
           handleEditorChange(data);
+        }}
+        onError={(error, { willEditorRestart }) => {
+          console.error("CKEditor onError:", error);
+
+          if (willEditorRestart) {
+            console.warn("Editor will restart due to error");
+          }
+
+          if (error?.message?.includes("license-key")) {
+            // Show custom UI
+            setEditorError("CKEditor license expired");
+          }
         }}
       />
     </div>

@@ -12,9 +12,8 @@ import { optionTypeData, QuestionOptionType } from "./data.js";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
-// import FileUploadSection from "../components/FileUploadSection.js";
-import FileUploadSection2 from "../components/FileUploadSection2";
-
+import FileUploadSection2 from "../components/FileUploadSection2.js";
+// import FileUploadSection2 from "../components/FileUploadThree.js";
 
 export default function FormStructure() {
   const { qid } = useParams();
@@ -27,7 +26,7 @@ export default function FormStructure() {
     reset,
     trigger,
     formState: { errors },
-  } = useForm({
+  } = useForm<QuestionSchemaType>({
     defaultValues: {
       subject_tag: [],
       test_series_topic: [],
@@ -45,9 +44,13 @@ export default function FormStructure() {
         { option_label: "D", option: "", is_correct: false },
       ],
       question_title: "",
+      question_image: [],
     },
     resolver: zodResolver(QuestionSchema),
   });
+  console.log("watch: ", watch("question_image"));
+  console.log("errors: ", errors);
+
   // function extractImages(html) {
   //   const doc = new DOMParser().parseFromString(html, "text/html");
   //   return [...doc.querySelectorAll("img")]
@@ -105,6 +108,8 @@ export default function FormStructure() {
       const attr = item.attributes;
 
       return {
+        //TODO: check image upload later
+        question_image: [],
         /** SIMPLE FIELDS */
         difficulty: attr.difficulty?.toLowerCase(), // "easy" | "medium" | "hard"
         explanation: attr.explanation ?? "",
@@ -471,7 +476,11 @@ export default function FormStructure() {
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           {/* <FileUploadSection /> */}
-          <FileUploadSection2 />
+          <FileUploadSection2
+            // control={control}
+            // watch={watch}
+            // setValue={setValue}
+          />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           <Button
