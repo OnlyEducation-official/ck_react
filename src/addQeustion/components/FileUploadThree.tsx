@@ -26,6 +26,8 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useFieldArray, useForm } from "react-hook-form";
+import { QuestionSchemaType } from "../QuestionSchema";
+import { file } from "zod";
 
 /* ===============================
    CONSTANTS
@@ -149,7 +151,7 @@ export default function FileUploadSection2({
     name: "question_image",
   });
 
-  const images = watch("question_image");
+  const images: QuestionSchemaType['question_image']  = watch("question_image");
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {
@@ -183,6 +185,7 @@ export default function FileUploadSection2({
         invalidFiles.push(file.name);
         return;
       }
+      console.log('file', file);
 
       append({
         file,
@@ -254,25 +257,26 @@ export default function FileUploadSection2({
 
     try {
       const formData = new FormData();
-      if (images.length === 1) {
+      const myData = images ? images.filter((img) => img && img.file) : [];
+      console.log('myData', myData);
+      if (myData.length === 1) {
         // 🔥 SINGLE IMAGE
-        const file = images[0]?.file;
+        const file = myData[0]?.file;
         if (!file) throw new Error("Invalid file");
-
+        
         // ⚠️ MUST match multer.single("file")
         formData.append("file", file);
       } else {
         // 🔥 MULTIPLE IMAGES
-        images.forEach((img: UploadImage) => {
-          if (img.file) {
+        myData.forEach((img: UploadImage) => {
             // ⚠️ MUST match multer.array("files")
             formData.append("files", img.file);
-          }
         });
+        console.log('formData: ', formData);
       }
-
+      
       const res = await fetch(
-        images.length === 1
+        myData.length === 1
           ? "http://localhost:5000/api/s3/upload/single"
           : "http://localhost:5000/api/s3/upload/multiple",
         { method: "POST", body: formData },
@@ -281,13 +285,27 @@ export default function FileUploadSection2({
 
       const json = await res.json();
 
-      const uploaded = images.length === 1 ? [{ url: json.url }] : json.files;
+      const uploaded = images.length === 0 && myData.length === 1 ? [{ url: json.url }] : myData.length === 1 ? [{ url: json.url }] : json.files;
 
-      uploaded.forEach((item: any, index: number) => {
-        update(index, {
-          url: item.url,
-        });
-      });
+      const myTempData = images.map((img, i) => ({
+        file: img?.file || null,
+        index: i,
+        dummy: img?.dummy || false
+      }));
+      console.log('myTempData', myTempData);
+      myTempData.filter((item) => item.file).forEach((img, i) => {
+        console.log('12345', i);
+        if (img.dummy) return;
+        console.log('12345', i);
+        update(img.index, { url: uploaded[i].url, dummy: 'i' });
+      })
+
+      // images.forEach((item: any, index: number) => {
+      //   if (!item.file) return;
+      //   update(index, {
+      //     url: item.url,
+      //   });
+      // });
 
       setSuccess("Images uploaded successfully");
     } catch {

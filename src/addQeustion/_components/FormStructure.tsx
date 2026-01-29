@@ -12,8 +12,8 @@ import { optionTypeData, QuestionOptionType } from "./data.js";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
-import FileUploadSection2 from "../components/FileUploadSection2.js";
-// import FileUploadSection2 from "../components/FileUploadThree.js";
+// import FileUploadSection2 from "../components/FileUploadSection2.js";
+import FileUploadSection2 from "../components/FileUploadThree.js";
 
 export default function FormStructure() {
   const { qid } = useParams();
@@ -477,9 +477,9 @@ export default function FormStructure() {
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           {/* <FileUploadSection /> */}
           <FileUploadSection2
-            // control={control}
-            // watch={watch}
-            // setValue={setValue}
+            control={control}
+            watch={watch}
+            setValue={setValue}
           />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
