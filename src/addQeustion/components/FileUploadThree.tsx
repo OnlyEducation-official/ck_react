@@ -36,12 +36,20 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/jpg",
   "image/webp",
 ];
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB
 export const ALLOWED_EXTENSIONS_TEXT = "PNG, JPG, JPEG, WEBP";
 
 /* ===============================
    TYPES
 ================================ */
+export interface UploadImage {
+  file?: File;
+  url?: string;
+  previewUrl?: string;
+  id?: number | string;
+  uploading?: boolean;
+  deleting?: boolean;
+}
 interface UploadItem {
   id: number;
   file: File;
@@ -134,8 +142,8 @@ export default function FileUploadSection2({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   console.log("previewImage: ", previewImage);
 
-  const [files, setFiles] = useState<UploadItem[]>([]);
-  console.log("files: ", files);
+  // const [files, setFiles] = useState<UploadItem[]>([]);
+  // console.log("files: ", files);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +156,22 @@ export default function FileUploadSection2({
     control,
     name: "question_image",
   });
+  const startProgressAnimation = () => {
+    setProgress(0);
 
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        // Stop at 90% until upload finishes
+        if (prev >= 90) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + Math.floor(Math.random() * 5) + 1;
+      });
+    }, 1000);
+
+    return interval;
+  };
   const images = watch("question_image");
   useEffect(() => {
     if (success || error) {
@@ -245,54 +268,104 @@ export default function FileUploadSection2({
      UPLOAD (SINGLE / MULTIPLE)
   ================================ */
   const handleUpload = async () => {
-    if (!images.length) {
+    if (!images?.length) {
       setError("Please select at least one image");
       return;
     }
 
+    /**
+     * 1️⃣ Extract pending images with original index
+     *    (ONLY images that still need upload)
+     */
+    type PendingImage = {
+      img: UploadImage;
+      index: number;
+    };
+
+    const pendingImages: PendingImage[] = (images as UploadImage[])
+      .map((img, index) => ({ img, index }))
+      .filter(
+        ({ img }) => !!img.file && !!img.url && img.url.startsWith("blob:"),
+      );
+
+    if (pendingImages.length === 0) {
+      setError("All images are already uploaded");
+      return;
+    }
+
     setLoading(true);
+    const progressInterval = startProgressAnimation();
 
     try {
       const formData = new FormData();
-      if (images.length === 1) {
-        // 🔥 SINGLE IMAGE
-        const file = images[0]?.file;
-        if (!file) throw new Error("Invalid file");
 
-        // ⚠️ MUST match multer.single("file")
-        formData.append("file", file);
+      /**
+       * 2️⃣ Build FormData based on pending count
+       */
+      if (pendingImages.length === 1) {
+        formData.append("file", pendingImages[0].img.file as File);
       } else {
-        // 🔥 MULTIPLE IMAGES
-        images.forEach((img: UploadImage) => {
-          if (img.file) {
-            // ⚠️ MUST match multer.array("files")
-            formData.append("files", img.file);
-          }
+        pendingImages.forEach(({ img }) => {
+          formData.append("files", img.file as File);
         });
       }
 
-      const res = await fetch(
-        images.length === 1
+      /**
+       * 3️⃣ Select API dynamically
+       */
+      const endpoint =
+        pendingImages.length === 1
           ? "http://localhost:5000/api/s3/upload/single"
-          : "http://localhost:5000/api/s3/upload/multiple",
-        { method: "POST", body: formData },
-      );
-      console.log("res: ", res);
+          : "http://localhost:5000/api/s3/upload/multiple";
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
 
       const json = await res.json();
 
-      const uploaded = images.length === 1 ? [{ url: json.url }] : json.files;
+      /**
+       * 4️⃣ Normalize backend response
+       */
+      type UploadedResult = {
+        url: string;
+        id?: string;
+      };
 
-      uploaded.forEach((item: any, index: number) => {
+      const uploadedResults: UploadedResult[] =
+        pendingImages.length === 1
+          ? [{ url: json.url, id: json.id }]
+          : json.files;
+
+      /**
+       * 5️⃣ Map uploaded URLs back to correct form indices
+       *    (FIXES bug case 4)
+       */
+      pendingImages.forEach(({ index }, i) => {
+        const uploaded = uploadedResults[i];
+        if (!uploaded) return;
+
         update(index, {
-          url: item.url,
+          ...images[index],
+          url: uploaded.url,
+          id: uploaded.id,
+          file: undefined, // 🚫 prevents re-upload
         });
       });
-
+      // ✅ Finish progress cleanly
+      setProgress(100);
+      setTimeout(() => setProgress(0), 1000);
       setSuccess("Images uploaded successfully");
-    } catch {
+    } catch (err) {
+      console.error(err);
+      setProgress(0);
       setError("Upload failed");
     } finally {
+      clearInterval(progressInterval);
+
       setLoading(false);
     }
   };
@@ -399,6 +472,7 @@ export default function FileUploadSection2({
               <TableBody>
                 {fields.map((field, index) => {
                   const image = images?.[index];
+                  console.log("image: ", image);
                   if (!image) return null;
 
                   const isUploaded = image.url?.startsWith("http");
@@ -486,7 +560,7 @@ export default function FileUploadSection2({
           </TableContainer>
         )}
 
-        {loading && (
+        {loading && progress > 0 && (
           <Box sx={{ width: "100%" }}>
             <LinearProgress
               variant="determinate"
