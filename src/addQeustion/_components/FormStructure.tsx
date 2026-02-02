@@ -13,6 +13,8 @@ import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
 import { AuthContext } from "@/context/AuthContext.js";
+import { getAuditFields } from "@/util/audit.js";
+import AuditModalButton from "@/util/AuditInfoCard.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -44,6 +46,10 @@ export default function FormStructure() {
         { option_label: "D", option: "", is_correct: false },
       ],
       question_title: "",
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: ""
     },
     resolver: zodResolver(QuestionSchema),
   });
@@ -69,8 +75,13 @@ export default function FormStructure() {
 
       const attr = item.attributes;
 
+
       return {
         /** SIMPLE FIELDS */
+        createdAt: attr.createdAt,
+        updatedAt: attr.updatedAt,
+        createdby: attr.createdby,
+        updatedby: attr.updatedby,
         difficulty: attr.difficulty?.toLowerCase(), // "easy" | "medium" | "hard"
         explanation: attr.explanation ?? "",
         option_type: attr.option_type ?? "single_select",
@@ -139,36 +150,16 @@ export default function FormStructure() {
     loadQuestion();
   }, [qid, reset]);
 
-  console.log("errors:", errors)
-
   const onSubmit = async (data: any) => {
     try {
       const isEdit = Boolean(qid);
 
-      let newObjSpread = {};
-
-      if (!isEdit) {
-
-        newObjSpread = {
-          createdby: user,
-          createdat: new Date().toISOString()
-        };
-
-      } else {
-
-        newObjSpread = {
-          updatedby: user,
-          updatedat: new Date().toISOString()
-        };
-
-      }
+      const audit = getAuditFields(isEdit, user);
 
       data = {
         ...data,
-        ...newObjSpread
+        ...audit
       }
-
-      console.log("Add Question Form:", data)
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -195,6 +186,7 @@ export default function FormStructure() {
         reset();
         navigate("/questions-list");
       }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -217,18 +209,29 @@ export default function FormStructure() {
         spacing={2}
         sx={{ marginBlockStart: 10, paddingInline: 3, paddingBlockEnd: 5 }}
       >
-        <Grid container size={12}>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: "bold",
-              pl: 2,
-              borderLeft: "6px solid",
-              borderColor: "primary.main",
-            }}
-          >
-            {qid ? "Edit Question Form " : "Add Question Form "}
-          </Typography>
+        <Grid container size={12} spacing={2} alignItems="center">
+          <Grid size={12}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                pl: 2,
+                borderLeft: "6px solid",
+                borderColor: "primary.main",
+              }}
+            >
+              {qid ? "Edit Question Form" : "Add Question Form"}
+            </Typography>
+          </Grid>
+
+          <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+            <AuditModalButton
+              createdby={watch('createdby')}
+              createdat={watch('createdAt')}
+              updatedby={watch('updatedby')}
+              updatedat={watch('updatedAt')}
+            />
+          </Grid>
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>

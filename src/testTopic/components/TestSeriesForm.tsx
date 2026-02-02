@@ -24,9 +24,11 @@ import SimpleMultiAutoComplete from "../../GlobalComponent/SimpleMultiAutoComple
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext.js";
+import { getAuditFields } from "@/util/audit";
+import AuditModalButton from "@/util/AuditInfoCard";
 
 const TestSeriesForm = () => {
-  const { token, logout } = useContext(AuthContext);
+  const { token, logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const {
     control,
@@ -45,6 +47,10 @@ const TestSeriesForm = () => {
       test_series_subject: [],
       test_series_subject_category: [],
       test_series_chapter: [],
+      createdby: "",
+      updatedby: "",
+      createdAt:"",
+      updatedAt:""
     },
   });
   const { qid } = useParams(); // qid will be string | undefined
@@ -63,10 +69,10 @@ const TestSeriesForm = () => {
     if (!qid) return; // no qid → create mode → don't fetch data
 
     const fetchData = async () => {
-      const res = await fetch(
-        `${
-          import.meta.env.VITE_BASE_URL
-        }t-topics/${qid}?[fields][0]=name&[fields][1]=slug&[fields][2]=is_active&[fields][3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=true&populate[test_series_chapter][fields]=true`,
+
+      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=true&populate[test_series_chapter][fields]=true&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedat`
+
+      const res = await fetch(url,
         {
           headers: {
             Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
@@ -77,8 +83,14 @@ const TestSeriesForm = () => {
       const json = await res.json();
       const item = json?.data?.attributes;
 
+      console.log("item:", item)
+
       // Load fetched data into form
       reset({
+        createdAt:item.createdAt,
+        updatedAt:item.updatedAt,
+        createdby: item.createdby,
+        updatedby: item.updatedby,
         name: item?.name ?? "",
         order: item?.order ?? 0,
         slug: item?.slug ?? null,
@@ -110,22 +122,31 @@ const TestSeriesForm = () => {
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
     try {
-      const url = qid
-        ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}` // UPDATE
-        : `${import.meta.env.VITE_BASE_URL}t-topics`; // CREATE
-      const response = await fetch(url, {
-        method: qid ? "PUT" : "POST",
+      const isEdit = Boolean(qid);
+
+      data = {
+        ...data,
+        ...getAuditFields(isEdit, user)
+      }
+
+      const url = isEdit
+        ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}`
+        : `${import.meta.env.VITE_BASE_URL}t-topics`;
+
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
           Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
         },
-        body: JSON.stringify({ data }),
+        body: JSON.stringify({
+          data: data,
+        }),
       });
 
-      const result = await response.json();
+      const result = await res.json();
       const success = await toastResponse(
-        response,
+        res,
         qid ? "Updated Topic Successfully!" : "Created Topic Successfully!",
         qid ? "Update Topic Failed!" : "Create Topic Failed!"
       );
@@ -135,6 +156,7 @@ const TestSeriesForm = () => {
         reset();
         navigate("/test-topic-list");
       }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -152,18 +174,34 @@ const TestSeriesForm = () => {
       component="form"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Typography
-        variant="h5"
-        sx={{
-          mb: { xs: 2, md: 4 },
-          fontWeight: "bold",
-          pl: 2,
-          borderLeft: "6px solid",
-          borderColor: "primary.main",
-        }}
-      >
-        {qid ? "Edit Topic" : "Add Topic"}
-      </Typography>
+
+
+      <Grid container size={12} spacing={2} alignItems="center">
+        <Grid size={12}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {qid ? "Edit Topic" : "Add Topic"}
+
+          </Typography>
+        </Grid>
+
+        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <AuditModalButton
+            createdby={watch('createdby')}
+            createdat={watch('createdAt')}
+            updatedby={watch('updatedby')}
+            updatedat={watch('updatedAt')}
+          />
+        </Grid>
+      </Grid>
+
 
       <Grid container spacing={3}>
         {/* NAME */}

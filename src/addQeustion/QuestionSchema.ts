@@ -4,6 +4,10 @@ import { ZodIssueCode } from "zod/v3";
 export const QuestionSchema = z
   .object({
     // question_title: z.string().min(1, "Question title is required"),
+    createdby:z.string(),
+    updatedby:z.string(),
+    createdAt:z.string(),
+    updatedAt:z.string(),
     difficulty: z.enum(["easy", "medium", "hard"]),
     explanation: z.string()
       .min(1, "Explanation is required.")

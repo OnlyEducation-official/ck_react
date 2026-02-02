@@ -10,10 +10,11 @@ import { Button, Container, IconButton, Stack, Tooltip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Sidebar from "../GlobalComponent/Sidebar";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AuthDropdown from "./AuthDropdown"
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -81,157 +82,108 @@ function DrawerAppBar() {
       url: "/test-chapter-list",
     },
     {
-      label: "Questions",
-      url: "/questions-list",
-    },
-    {
       label: "Topic",
       url: "/test-topic-list",
     },
+    {
+      label: "Questions",
+      url: "/questions-list",
+    }
   ];
   const location = useLocation();
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar component="nav" sx={{ "& .MuiToolbar-root": { padding: 0 } }}>
-        <Container maxWidth="xl">
-          <Toolbar
-            sx={{
-              minHeight: 64,
-              px: { xs: 2, sm: 3 },
-              backgroundColor: "primary.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              {/* <IconButton
-                            size="large"
-                            edge="start"
-                            color="inherit"
-                            aria-label="open drawer"
-                            sx={{ mr: 2 }}
-                        >
-                            <MenuIcon />
-                        </IconButton> */}
-              <Typography
-                variant="h5"
-                noWrap
-                component={Link}
-                to={"/questions-list"}
+    <>
+      {token && (
+        <Box sx={{ display: "flex" }}>
+          <CssBaseline />
+
+          <AppBar component="nav" sx={{ "& .MuiToolbar-root": { padding: 0 } }}>
+            <Container maxWidth="xl">
+              <Toolbar
                 sx={{
-                  display: { xs: "block" },
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  color: "white",
+                  minHeight: 64,
+                  px: { xs: 2, sm: 3 },
+                  backgroundColor: "primary.main",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                ONLY TEST
-              </Typography>
-              <Stack direction={"row"} sx={{ columnGap: { md: 2, lg: 3 } }}>
-                {navBtn.map((btn, index) => (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
                   <Typography
-                    variant="subtitle2"
+                    variant="h5"
                     noWrap
                     component={Link}
-                    to={btn.url}
-                    key={index}
+                    to="/questions-list"
                     sx={{
-                      fontSize: "15px",
-                      flexGrow: 1,
-                      display: { xs: "none", md: "block" },
                       fontWeight: 600,
-                      color:
-                        location.pathname === btn.url
-                          ? "common.white"
-                          : "common.black",
                       textDecoration: "none",
-                      position: "relative",
-                      px: 1,
-                      py: 1,
-                      "&::after": {
-                        content: '""',
-                        position: "absolute",
-                        width: "0%",
-                        height: "2px",
-                        bottom: 0,
-                        left: 0,
-                        backgroundColor: "black",
-                        transition: "width 0.3s ease",
-                      },
-                      "&:hover::after": {
-                        width: "100%",
-                      },
+                      color: "white",
                     }}
                   >
-                    {btn.label}
+                    ONLY TEST
                   </Typography>
-                ))}
-              </Stack>
-              <Box sx={{ display: { xs: "flex", md: "none" } }}>
-                <Sidebar />
-              </Box>
-            </Box>
-            <IconButton
-              onClick={() => logout()}
-              sx={{ marginInlineStart: { md: 2 } }}
-            >
-              {token ? (
-                <Tooltip title="Logout">
-                  <LogoutIcon sx={{ color: "white" }} />
-                </Tooltip>
-              ) : (
-                <Tooltip title="Login">
-                  <LoginIcon sx={{ color: "white" }} />
-                </Tooltip>
-              )}
-            </IconButton>
-            {/* <Button
-              onClick={() => logout()}
-              sx={{
-                px: 3.5,
-                py: 1,
-                marginInlineStart: 3,
-                borderRadius: 3,
-                fontWeight: 700,
-                textTransform: "none",
-                fontSize: "1rem",
-                letterSpacing: "0.3px",
-                color: "#fff",
-                background: token
-                  ? "linear-gradient(135deg, #34d399, #059669)" // Logout → Green
-                  : "linear-gradient(135deg, #a78bfa, #7c3aed)",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
-                transition: "all 0.25s ease",
 
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 14px rgba(0,0,0,0.18)",
-                  background: token
-                    ? "linear-gradient(135deg, #059669, #047857)"
-                    : "linear-gradient(135deg, #7c3aed, #5b21b6)",
-                },
+                  <Stack direction="row" sx={{ columnGap: { md: 2, lg: 3 } }}>
+                    {navBtn.map((btn, index) => (
+                      <Typography
+                        key={index}
+                        variant="subtitle2"
+                        component={Link}
+                        to={btn.url}
+                        sx={{
+                          fontSize: "15px",
+                          display: { xs: "none", md: "block" },
+                          fontWeight: 600,
+                          color:
+                            location.pathname === btn.url
+                              ? "common.white"
+                              : "common.black",
+                          textDecoration: "none",
+                          position: "relative",
+                          px: 1,
+                          py: 1,
+                          "&::after": {
+                            content: '""',
+                            position: "absolute",
+                            width: "0%",
+                            height: "2px",
+                            bottom: 0,
+                            left: 0,
+                            backgroundColor: "black",
+                            transition: "width 0.3s ease",
+                          },
+                          "&:hover::after": {
+                            width: "100%",
+                          },
+                        }}
+                      >
+                        {btn.label}
+                      </Typography>
+                    ))}
+                  </Stack>
 
-                "&:active": {
-                  transform: "scale(0.97)",
-                },
-              }}
-            >
-              {token ? "Logout" : "Login"}
-            </Button> */}
-          </Toolbar>
-        </Container>
-      </AppBar>
-    </Box>
+                  <Box sx={{ display: { xs: "flex", md: "none" } }}>
+                    <Sidebar />
+                  </Box>
+                </Box>
+
+                <AuthDropdown />
+              </Toolbar>
+            </Container>
+          </AppBar>
+        </Box>
+      )}
+    </>
+
   );
 }
 

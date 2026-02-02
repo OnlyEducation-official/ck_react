@@ -18,11 +18,14 @@ import {
 } from "../../validation/testSeriesExamCategorySchema";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useInitialDataContext from "../../addQeustion/_components/InitalContext";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useSlugGenerator } from "../../hooks/useSlugGenerator";
 import { slugify } from "../../testSubject/components/TestSubjectForm";
 import { toastResponse } from "../../util/toastResponse";
 import { toast } from "react-toastify";
+import { getAuditFields } from "@/util/audit";
+import { AuthContext } from "@/context/AuthContext";
+import AuditModalButton from "@/util/AuditInfoCard";
 
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
@@ -31,6 +34,8 @@ const iconOptions: Option[] = [
 ];
 
 const TestExamCategoriesForm = () => {
+  const { user } = useContext(AuthContext);
+
   const navigate = useNavigate();
   const {
     control,
@@ -47,6 +52,10 @@ const TestExamCategoriesForm = () => {
       description: "",
       order: 0,
       is_active: true,
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: ""
     },
   });
 
@@ -67,10 +76,9 @@ const TestExamCategoriesForm = () => {
     if (!id) return; // CREATE mode
 
     const fetchItem = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true`;
-
+      const url = `${import.meta.env.VITE_BASE_URL
+        }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true&fields[5]=createdAt&fields[6]=updatedAt&fields[7]=createdby&fields[8]=updatedby`;
+      console.log("url:", url)
       const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
@@ -80,12 +88,18 @@ const TestExamCategoriesForm = () => {
       const json = await res.json();
       const item = json.data;
 
+      console.log("item:",item)
+
       reset({
         name: item?.attributes?.name,
         slug: item?.attributes?.slug,
         description: item?.attributes?.description,
         order: item?.attributes?.order,
         is_active: item?.attributes?.is_active,
+        createdAt: item?.attributes?.createdAt,
+        updatedAt: item?.attributes?.updatedAt,
+        createdby: item?.attributes?.createdby,
+        updatedby: item?.attributes?.updatedby,
       });
     };
 
@@ -100,7 +114,14 @@ const TestExamCategoriesForm = () => {
 
   const onSubmit = async (data: any) => {
     try {
+
       const isEdit = Boolean(id);
+
+      data = {
+        ...data,
+        ...getAuditFields(isEdit, user)
+      }
+
       const res = await fetch(
         isEdit
           ? `${import.meta.env.VITE_BASE_URL}t-categories/${id}`
@@ -116,6 +137,7 @@ const TestExamCategoriesForm = () => {
           }),
         }
       );
+
       const success = await toastResponse(
         res,
         id
@@ -130,11 +152,15 @@ const TestExamCategoriesForm = () => {
         reset();
         navigate("/test-exams-category-list");
       }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
   };
+
+  console.log("loloo:", watch())
+
 
   return (
     <Box
@@ -145,18 +171,33 @@ const TestExamCategoriesForm = () => {
         paddingBlock: 4,
       }}
     >
-      <Typography
-        variant="h5"
-        sx={{
-          mb: { xs: 2, md: 4 },
-          fontWeight: "bold",
-          pl: 2,
-          borderLeft: "6px solid",
-          borderColor: "primary.main",
-        }}
-      >
-        {id ? "Edit Exam Category" : "Add Exam Category"}
-      </Typography>
+
+
+      <Grid container size={12} spacing={2} alignItems="center">
+        <Grid size={12}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {id ? "Edit Exam Category" : "Add Exam Category"}
+
+          </Typography>
+        </Grid>
+
+        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <AuditModalButton
+            createdby={watch('createdby')}
+            createdat={watch('createdAt')}
+            updatedby={watch('updatedby')}
+            updatedat={watch('updatedAt')}
+          />
+        </Grid>
+      </Grid>
 
       <Box component={"form"} onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>

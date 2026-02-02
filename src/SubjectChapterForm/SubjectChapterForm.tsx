@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,10 +18,17 @@ import { slugify, useSlugGenerator } from "../hooks/useSlugGenerator";
 import { useNavigate, useParams } from "react-router-dom";
 import { toastResponse } from "../util/toastResponse";
 import { toast } from "react-toastify";
+import { getAuditFields } from "@/util/audit";
+import { AuthContext } from "@/context/AuthContext";
+import AuditModalButton from "@/util/AuditInfoCard";
 // ------------------------
 // ZOD SCHEMA
 // ------------------------
 const TestSchema = z.object({
+  createdby: z.string(),
+  updatedby: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   is_active: z.boolean(),
@@ -47,6 +54,7 @@ type TestSchemaType = z.infer<typeof TestSchema>;
 // FORM COMPONENT
 // ------------------------
 const SubjectChapterForm: React.FC = () => {
+  const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -68,6 +76,10 @@ const SubjectChapterForm: React.FC = () => {
       // },
       test_series_subject_category: [],
       test_series_subject: [],
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: ""
     },
   });
   const nameValue = watch("name");
@@ -80,9 +92,8 @@ const SubjectChapterForm: React.FC = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-chapters/${qid}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-chapters/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -108,12 +119,18 @@ const SubjectChapterForm: React.FC = () => {
             id: item.test_series_subject?.data.id,
           },
         ],
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        createdby: item.createdby,
+        updatedby: item.updatedby,
         // is_active: item?.isActive ?? true,
       });
     };
 
     fetchData();
   }, [qid, reset]);
+
+  console.log(watch())
 
   useSlugGenerator({
     setValue: setValue,
@@ -124,7 +141,16 @@ const SubjectChapterForm: React.FC = () => {
 
   const onSubmit = async (data: TestSchemaType) => {
     try {
+
       const isEdit = Boolean(qid);
+
+      const audit = getAuditFields(isEdit, user);
+
+      data = {
+        ...data,
+        ...audit
+      }
+
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}test-series-chapters/${qid}`
         : `${import.meta.env.VITE_BASE_URL}test-series-chapters`;
@@ -169,19 +195,33 @@ const SubjectChapterForm: React.FC = () => {
         paddingBlock: 4,
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight={700}
-        sx={{
-          mb: { xs: 2, md: 4 },
-          fontWeight: "bold",
-          pl: 2,
-          borderLeft: "6px solid",
-          borderColor: "primary.main",
-        }}
-      >
-        {qid ? "Edit Chapter" : "Add Chapter"}
-      </Typography>
+
+
+      <Grid container size={12} spacing={2} alignItems="center">
+        <Grid size={12}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {qid ? "Edit Chapter" : "Add Chapter"}
+
+          </Typography>
+        </Grid>
+
+        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <AuditModalButton
+            createdby={watch('createdby')}
+            createdat={watch('createdAt')}
+            updatedby={watch('updatedby')}
+            updatedat={watch('updatedAt')}
+          />
+        </Grid>
+      </Grid>
 
       <Grid
         // component="form"

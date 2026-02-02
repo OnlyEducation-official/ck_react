@@ -2,6 +2,10 @@
 import { z } from "zod";
 
 export const TestSeriesSchema = z.object({
+  createdby: z.string(),
+  updatedby: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   order: z.union([z.literal(0), z.literal(1)]),

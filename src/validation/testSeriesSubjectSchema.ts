@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 export const TestSchema = z.object({
+  createdby: z.string(),
+  updatedby: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
   name: z.string().min(1, "Name is required"),
   slug: z.string().nullable().optional(),
   order: z.number().nullable().optional(),

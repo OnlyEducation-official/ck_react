@@ -10,15 +10,19 @@ import {
   examsSchema,
   ExamsSchemaType,
 } from "../../validation/testSeriesExamSchema";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { slugify } from "../../testSubject/components/TestSubjectForm";
 import OptimizedTopicSearch from "../../addQeustion/_components/OptimizedTopicSearch";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { toastResponse } from "../../util/toastResponse";
+import { getAuditFields } from "@/util/audit";
+import { AuthContext } from "@/context/AuthContext";
+import AuditModalButton from "@/util/AuditInfoCard";
 
 export default function TestExamFormStructure() {
+  const { user } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -33,36 +37,62 @@ export default function TestExamFormStructure() {
     reset,
   } = useForm({
     defaultValues: {
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: "",
       title: "",
       slug: null,
       description: "",
       test_series_category: 0,
-      // test_series_questions: 0,
       marking_negative: 0,
       marking_positive: 0,
       timer: 0,
       test_series_subjects: [],
       difficulty: "Easy",
-      test_series_topics: [],
+      test_series_topics: []
     },
     resolver: zodResolver(examsSchema),
   });
 
+  console.log("errors", errors, user)
+
+
   const onSubmitt = async (data: ExamsSchemaType) => {
     try {
-      const url = id
-        ? `${import.meta.env.VITE_BASE_URL}t-exams/${id}` // UPDATE
-        : `${import.meta.env.VITE_BASE_URL}t-exams`; // CREATE
-      const response = fetch(`${url}`, {
-        method: id ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-        },
-        body: JSON.stringify({ data: data }),
-      });
+
+      const isEdit = Boolean(id);
+
+      // console.log("audit:", isEdit)
+
+      const audit = getAuditFields(isEdit, user);
+
+
+      data = {
+        ...data,
+        ...audit
+      }
+
+      console.log("submit:", data)
+
+      const res = await fetch(
+        isEdit
+          ? `${import.meta.env.VITE_BASE_URL}t-exams/${id}`
+          : `${import.meta.env.VITE_BASE_URL}t-exams`,
+        {
+          method: isEdit ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          },
+          body: JSON.stringify({
+            data: data,
+          }),
+        }
+      );
+
       const success = await toastResponse(
-        await response,
+        await res,
         id
           ? "Updated Exam Form Successfully!"
           : "Created Exam Form Successfully!",
@@ -70,10 +100,11 @@ export default function TestExamFormStructure() {
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
-      if(!id) {
+      if (!id) {
         reset();
         navigate("/exams-list");
-      } 
+      }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -81,12 +112,19 @@ export default function TestExamFormStructure() {
   };
 
   useEffect(() => {
+    if (!id) return; // CREATE MODE
+
     const fetchData = async () => {
       try {
+
         setIsLoading(true);
-        const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL
-          }t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`,
+
+        // let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`
+        let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name&fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=timer&fields[4]=marking_negative&fields[5]=marking_positive&fields[6]=createdAt&fields[7]=updatedAt&fields[8]=difficulty&fields[9]=createdby&fields[10]=updatedby`
+
+        console.log(url)
+
+        const response = await fetch(url,
           {
             headers: {
               "Content-Type": "application/json",
@@ -95,9 +133,17 @@ export default function TestExamFormStructure() {
             },
           }
         );
+
         const { data } = await response.json();
 
+        console.log("data:", data)
+
+
         reset({
+          createdby: data?.attributes?.createdby,
+          updatedby: data?.attributes?.updatedby,
+          createdAt: data?.attributes?.createdAt,
+          updatedAt: data?.attributes?.updatedAt,
           title: data?.attributes?.title,
           slug: data?.attributes?.slug,
           description: data?.attributes?.description,
@@ -139,6 +185,8 @@ export default function TestExamFormStructure() {
     setValue("slug", slugify(watch("title")));
   }, [watch("title"), setValue]);
 
+  // console.log("watch:", watch(), errors)
+
   return (
     <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
       <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
@@ -146,19 +194,32 @@ export default function TestExamFormStructure() {
           container
           spacing={2}
         >
-          <Grid container size={12} sx={{ height: "fit-content" }}>
-            <Typography
-              variant="h5"
-              sx={{
-                mb: { xs: 2, md: 4 },
-                fontWeight: "bold",
-                pl: 2,
-                borderLeft: "6px solid",
-                borderColor: "primary.main",
-              }}
-            >
-              {id ? "Edit Exam " : "Add Exam "}
-            </Typography>
+
+
+          <Grid container size={12} spacing={2} alignItems="center">
+            <Grid size={12}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  pl: 2,
+                  borderLeft: "6px solid",
+                  borderColor: "primary.main",
+                }}
+              >
+                {id ? "Edit Exam " : "Add Exam "}
+
+              </Typography>
+            </Grid>
+
+            <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+              <AuditModalButton
+                createdby={watch('createdby')}
+                createdat={watch('createdAt')}
+                updatedby={watch('updatedby')}
+                updatedat={watch('updatedAt')}
+              />
+            </Grid>
           </Grid>
 
           <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -324,7 +385,7 @@ export default function TestExamFormStructure() {
               rules={{ required: "Please select a Topic" }}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+          {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
             <OptimizedTopicSearch
               routeName="t-topic"
               dropdownType="multi"
@@ -335,7 +396,7 @@ export default function TestExamFormStructure() {
               label="Select Topic"
               required={false}
             />
-          </Grid>
+          </Grid> */}
           {/* <pre>{JSON.stringify(watch("test_series_topics"), null, 2)}</pre> */}
           <Grid size={12} sx={{ textAlign: "start", paddingBlock: 2 }}>
             <Button
