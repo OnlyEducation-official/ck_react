@@ -9,10 +9,10 @@ import {
 export const QuestionSchema = z
   .object({
     // question_title: z.string().min(1, "Question title is required"),
-    createdby:z.string(),
-    updatedby:z.string(),
-    createdAt:z.string(),
-    updatedAt:z.string(),
+    createdby: z.string(),
+    updatedby: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
     difficulty: z.enum(["easy", "medium", "hard"]),
     explanation: z
       .string()
@@ -50,22 +50,33 @@ export const QuestionSchema = z
       .string()
       .min(1, "Question is required.")
       .min(19, "Question must be at least 10 characters long."),
-    question_image: z.array(
-      z
-        .object({
-          file: z
-            .instanceof(File, { message: "Image is required" })
-            .refine((file) => ALLOWED_IMAGE_TYPES.includes(file.type as any), {
-              message: `Only ${ALLOWED_EXTENSIONS_TEXT} files are allowed`,
-            })
-            .refine((file) => file.size <= MAX_IMAGE_SIZE, {
-              message: "Image must be smaller than 5MB",
-            }),
-          url: z.string().url().optional(),
-          deleting: z.boolean().optional(),
-        })
-        .optional(),
-    ).max(10, "You can upload up to 10 images only."),
+    question_image: z
+      .array(
+        z
+          .object({
+            file: z
+              .instanceof(File, { message: "Image is required" })
+              .refine(
+                (file) => ALLOWED_IMAGE_TYPES.includes(file.type as any),
+                {
+                  message: `Only ${ALLOWED_EXTENSIONS_TEXT} files are allowed`,
+                },
+              )
+              .refine((file) => file.size <= MAX_IMAGE_SIZE, {
+                message: "Image must be smaller than 5MB",
+              })
+              .nullable()
+              .optional(),
+            url: z.string().url().optional(),
+            deleting: z.boolean().optional(),
+          })
+          .refine((data) => data.url || data.file, {
+            message: "Image is required",
+            path: ["file"],
+          })
+          .optional(),
+      )
+      .optional(),
   })
   .superRefine((fieldName, ctx) => {
     const options = fieldName.options;

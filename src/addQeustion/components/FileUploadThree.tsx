@@ -238,7 +238,7 @@ export default function FileUploadSection2({
 
       const key = extractS3KeyFromUrl(target.url!);
 
-      await fetch("http://localhost:5000/api/s3/delete", {
+      await fetch(`${import.meta.env.VITE_AWS_BASE_URL}s3/delete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key }),
@@ -303,7 +303,7 @@ export default function FileUploadSection2({
        * 2️⃣ Build FormData based on pending count
        */
       if (pendingImages.length === 1) {
-        formData.append("file", pendingImages[0].img.file as File);
+        formData.append("file", pendingImages[0]?.img.file as File);
       } else {
         pendingImages.forEach(({ img }) => {
           formData.append("files", img.file as File);
@@ -315,8 +315,8 @@ export default function FileUploadSection2({
        */
       const endpoint =
         pendingImages.length === 1
-          ? "http://localhost:5000/api/s3/upload/single"
-          : "http://localhost:5000/api/s3/upload/multiple";
+          ? `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/single`
+          : `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/multiple`;
 
       const res = await fetch(endpoint, {
         method: "POST",

@@ -52,7 +52,7 @@ export default function FormStructure() {
       createdby: "",
       updatedby: "",
       createdAt: "",
-      updatedAt: ""
+      updatedAt: "",
     },
     resolver: zodResolver(QuestionSchema),
   });
@@ -100,7 +100,7 @@ export default function FormStructure() {
     ): Promise<QuestionSchemaType> => {
       const url = `${
         import.meta.env.VITE_BASE_URL
-      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -110,15 +110,24 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
+      console.log("item: ", item);
 
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
-
+      // console.log(
+      //   "attr: ",
+      //   attr.question_image.map((img: { id: number; url: string }) => {
+      //     return { url: img.url };
+      //   }),
+      // );
 
       return {
         //TODO: check image upload later
-        question_image: [],
+        question_image:
+          attr?.question_image?.map((img: { id: number; url: string }) => {
+            return { url: img.url, file: null };
+          }) ?? [],
         /** SIMPLE FIELDS */
         createdAt: attr.createdAt,
         updatedAt: attr.updatedAt,
@@ -129,7 +138,6 @@ export default function FormStructure() {
         option_type: attr.option_type ?? "single_select",
         hint: attr.hint ?? "",
         question_title: attr.question_title ?? "",
-
         /** SUBJECT TAG → single object in API, array in schema */
         subject_tag: attr.subject_tag?.data
           ? [
@@ -200,8 +208,8 @@ export default function FormStructure() {
 
       data = {
         ...data,
-        ...audit
-      }
+        ...audit,
+      };
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -228,7 +236,6 @@ export default function FormStructure() {
         reset();
         navigate("/questions-list");
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -266,12 +273,17 @@ export default function FormStructure() {
             </Typography>
           </Grid>
 
-          <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <Grid
+            sx={{
+              display: "flex",
+              justifyContent: { xs: "flex-start", md: "flex-end" },
+            }}
+          >
             <AuditModalButton
-              createdby={watch('createdby')}
-              createdat={watch('createdAt')}
-              updatedby={watch('updatedby')}
-              updatedat={watch('updatedAt')}
+              createdby={watch("createdby")}
+              createdat={watch("createdAt")}
+              updatedby={watch("updatedby")}
+              updatedat={watch("updatedAt")}
             />
           </Grid>
         </Grid>
@@ -542,3 +554,18 @@ export default function FormStructure() {
     </Box>
   );
 }
+
+// [
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019730844-98675b18-4ef4-4ed9-9ebd-6fcc56ff67f2.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019732572-bfb2c3a1-b877-4ff8-8aa0-5f427ceb8082.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019733774-afd6e8be-846c-4827-8ab9-7b0c446444c8.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019734074-cf261d5f-32cf-434b-b248-afee160579af.webp",
+//   },
+// ];
