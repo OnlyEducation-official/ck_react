@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { ZodIssueCode } from "zod/v3";
+import {
+  ALLOWED_EXTENSIONS_TEXT,
+  ALLOWED_IMAGE_TYPES,
+  MAX_IMAGE_SIZE,
+} from "./components/FileUploadSection2";
 
 export const QuestionSchema = z
   .object({
@@ -9,14 +14,16 @@ export const QuestionSchema = z
     createdAt:z.string(),
     updatedAt:z.string(),
     difficulty: z.enum(["easy", "medium", "hard"]),
-    explanation: z.string()
+    explanation: z
+      .string()
       .min(1, "Explanation is required.")
       .min(17, "Explanation must be at least 10 characters long."),
     option_type: z.enum(["single_select", "multi_select", "input_box"]),
     subject_tag: z
       .array(z.object({ id: z.number(), name: z.string() }))
       .min(1, "Subject is required"),
-    hint: z.string()
+    hint: z
+      .string()
       .min(1, "Hint is required.")
       .min(19, "Hint must be at least 10 characters long."),
     test_series_exams: z
@@ -37,11 +44,28 @@ export const QuestionSchema = z
         option_label: z.string().min(1, "Option label is required"),
         option: z.string().min(1, "Option text is required"),
         is_correct: z.boolean(),
-      })
+      }),
     ),
-    question_title: z.string()
+    question_title: z
+      .string()
       .min(1, "Question is required.")
       .min(19, "Question must be at least 10 characters long."),
+    question_image: z.array(
+      z
+        .object({
+          file: z
+            .instanceof(File, { message: "Image is required" })
+            .refine((file) => ALLOWED_IMAGE_TYPES.includes(file.type as any), {
+              message: `Only ${ALLOWED_EXTENSIONS_TEXT} files are allowed`,
+            })
+            .refine((file) => file.size <= MAX_IMAGE_SIZE, {
+              message: "Image must be smaller than 5MB",
+            }),
+          url: z.string().url().optional(),
+          deleting: z.boolean().optional(),
+        })
+        .optional(),
+    ).max(10, "You can upload up to 10 images only."),
   })
   .superRefine((fieldName, ctx) => {
     const options = fieldName.options;
@@ -63,20 +87,27 @@ export const QuestionSchema = z
       });
     }
 
-    const checkOptionAsPerOptionType = options.filter((o) => o.is_correct === true);
-    if (optiionType === "single_select" && checkOptionAsPerOptionType.length > 1) {
+    const checkOptionAsPerOptionType = options.filter(
+      (o) => o.is_correct === true,
+    );
+    if (
+      optiionType === "single_select" &&
+      checkOptionAsPerOptionType.length > 1
+    ) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "Please mark at least one option as correct.",
         path: ["options"],
       });
-    } else if (optiionType === "multi_select" && checkOptionAsPerOptionType.length <= 1) {
+    } else if (
+      optiionType === "multi_select" &&
+      checkOptionAsPerOptionType.length <= 1
+    ) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "Please mark at least two or more options as correct.",
         path: ["options"],
       });
     }
-
   });
 export type QuestionSchemaType = z.infer<typeof QuestionSchema>;

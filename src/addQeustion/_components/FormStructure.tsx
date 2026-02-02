@@ -15,6 +15,8 @@ import MainEditor from "../components/MainEditor.jsx";
 import { AuthContext } from "@/context/AuthContext.js";
 import { getAuditFields } from "@/util/audit.js";
 import AuditModalButton from "@/util/AuditInfoCard.js";
+// import FileUploadSection2 from "../components/FileUploadSection2.js";
+import FileUploadSection2 from "../components/FileUploadThree.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -28,7 +30,7 @@ export default function FormStructure() {
     reset,
     trigger,
     formState: { errors },
-  } = useForm({
+  } = useForm<QuestionSchemaType>({
     defaultValues: {
       subject_tag: [],
       test_series_topic: [],
@@ -46,6 +48,7 @@ export default function FormStructure() {
         { option_label: "D", option: "", is_correct: false },
       ],
       question_title: "",
+      question_image: [],
       createdby: "",
       updatedby: "",
       createdAt: "",
@@ -53,14 +56,51 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
+  console.log("watch: ", watch("question_image"));
+  console.log("errors: ", errors);
+
+  // function extractImages(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   return [...doc.querySelectorAll("img")]
+  //     .map((img) => img.src)
+  //     .filter((src) => src.startsWith("data:image"));
+  // }
+  // function extractImagesWithAlt(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   const images = doc.querySelectorAll("img");
+
+  //   const imageMap = {};
+
+  //   images.forEach((img, index) => {
+  //     const alt = img.getAttribute("alt")?.trim();
+  //     const src = img.getAttribute("src");
+
+  //     if (!src?.startsWith("data:image")) return;
+
+  //     // Fallback key if alt is missing
+  //     const key = alt && alt.length > 0 ? alt : `image_${index + 1}`;
+
+  //     imageMap[key] = src;
+  //   });
+
+  //   return imageMap;
+  // }
+  // const dataIOmag = extractImages(watch("question_title"));
+  // const dataIOmag = extractImagesWithAlt(watch("question_title"));
+  // console.log('watch("question_title"): ', watch("question_title"));
+  // const rawBase64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
+
+  // console.log("dataIOmag: ", dataIOmag);
+  // console.log("watch: ", watch("question_title"));
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
     const fetchQuestionById = async (
-      qid: number
+      qid: number,
     ): Promise<QuestionSchemaType> => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -77,6 +117,8 @@ export default function FormStructure() {
 
 
       return {
+        //TODO: check image upload later
+        question_image: [],
         /** SIMPLE FIELDS */
         createdAt: attr.createdAt,
         updatedAt: attr.updatedAt,
@@ -91,21 +133,21 @@ export default function FormStructure() {
         /** SUBJECT TAG → single object in API, array in schema */
         subject_tag: attr.subject_tag?.data
           ? [
-            {
-              id: attr.subject_tag.data.id,
-              name: attr.subject_tag.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.subject_tag.data.id,
+                name: attr.subject_tag.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TOPIC → Strapi returns single, schema requires an array */
         test_series_topic: attr.test_series_topic?.data
           ? [
-            {
-              id: attr.test_series_topic.data.id,
-              name: attr.test_series_topic.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_topic.data.id,
+                name: attr.test_series_topic.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TEST SERIES EXAMS → many-to-many array */
@@ -118,15 +160,15 @@ export default function FormStructure() {
           (chapter: any) => ({
             id: chapter.id,
             name: chapter.attributes.name,
-          })
+          }),
         ),
         test_series_subject_category: attr.test_series_subject_category?.data
           ? [
-            {
-              id: attr.test_series_subject_category.data.id,
-              name: attr.test_series_subject_category.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_subject_category.data.id,
+                name: attr.test_series_subject_category.data.attributes.name,
+              },
+            ]
           : [],
 
         /** OPTIONS → already perfect for your UI */
@@ -177,7 +219,7 @@ export default function FormStructure() {
         qid
           ? "Updated  Question Form Successfully!"
           : "Created  Question Form Successfully!",
-        qid ? "Update  Question Form Failed!" : "Create Question Form Failed!"
+        qid ? "Update  Question Form Failed!" : "Create Question Form Failed!",
       );
       // const datas = await response.json();
       if (!success) return; // ❌ stop if failed
@@ -464,6 +506,14 @@ export default function FormStructure() {
               {errors?.explanation?.message}
             </FormHelperText>
           )}
+        </Grid>
+        <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
+          {/* <FileUploadSection /> */}
+          <FileUploadSection2
+            control={control}
+            watch={watch}
+            setValue={setValue}
+          />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           <Button
