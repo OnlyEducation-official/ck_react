@@ -19,7 +19,8 @@ import { AuthContext } from "@/context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AuthDropdown() {
-  const { token, logout } = React.useContext(AuthContext);
+  const { token, logout, user } = React.useContext(AuthContext);
+  // console.log("user: ", user);
 
   // Replace these with your real values/functions
   // const token = true; // boolean or string
@@ -30,7 +31,8 @@ export default function AuthDropdown() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+  const handleOpen = (e: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
@@ -43,15 +45,25 @@ export default function AuthDropdown() {
     // login();
   };
 
-
-
   return (
     <>
       <Tooltip title={token ? "Account" : "Login"}>
         <IconButton onClick={handleOpen} sx={{ ml: { md: 2 } }}>
           {token ? (
-            <Avatar sx={{ width: 34, height: 34 }}>
-              <PersonIcon fontSize="small" />
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: "common.white",
+                color: "primary.main",
+                fontWeight: "bold",
+                typography: "h5",
+              }}
+            >
+              {user?.trim()?.at(0)?.toUpperCase() ?? (
+                <PersonIcon fontSize="small" />
+              )}
+              {/* <PersonIcon fontSize="small" /> */}
             </Avatar>
           ) : (
             <LoginIcon sx={{ color: "white" }} />
@@ -90,26 +102,27 @@ export default function AuthDropdown() {
                 to="/profile"
                 sx={{
                   fontSize: "15px",
-                  flexGrow: 1,
-                  display: { xs: "none", md: "block" },
+                  // flexGrow: 1,
+                  // display: { xs: "none", md: "block" },
                   fontWeight: 600,
+                  color: "black",
                   textDecoration: "none",
-                  position: "relative",
-                  px: 1,
-                  py: 1,
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    width: "0%",
-                    height: "2px",
-                    bottom: 0,
-                    left: 0,
-                    backgroundColor: "black",
-                    transition: "width 0.3s ease",
-                  },
-                  "&:hover::after": {
-                    width: "100%",
-                  },
+                  // position: "relative",
+                  // px: 1,
+                  // py: 1,
+                  // "&::after": {
+                  //   content: '""',
+                  //   position: "absolute",
+                  //   width: "0%",
+                  //   height: "2px",
+                  //   bottom: 0,
+                  //   left: 0,
+                  //   backgroundColor: "black",
+                  //   transition: "width 0.3s ease",
+                  // },
+                  // "&:hover::after": {
+                  //   width: "100%",
+                  // },
                 }}
               >
                 Profile

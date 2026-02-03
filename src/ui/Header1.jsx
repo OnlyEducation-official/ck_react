@@ -10,7 +10,7 @@ import { Button, Container, IconButton, Stack, Tooltip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import InputBase from "@mui/material/InputBase";
 import Sidebar from "../GlobalComponent/Sidebar";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -59,7 +59,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function DrawerAppBar() {
-  const { token, logout } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const navBtn = [
     {
       label: "Exams Category",
