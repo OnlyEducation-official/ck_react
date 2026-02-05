@@ -1,4 +1,3 @@
-
 .katex-block {
   display: block;
   margin: 10px 0;
@@ -40,4 +39,45 @@
 
 .wrs_tickContainer {
   display: none !important;
+}
+
+.ck-content h1 {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+}
+
+.ck-content h2 {
+  font-size: 1.875rem; /* 30px */
+  font-weight: 600;
+}
+
+.ck-content h3 {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+}
+
+.ck-content h4 {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 600;
+}
+
+.ck-content h5 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 500;
+}
+
+.ck-content h6 {
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
+}
+.ck-content .image-style-side {
+  float: right;
+  margin-left: 1.5rem;
+  max-width: 50%;
+}
+
+.ck-content .image-style-inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.5rem;
 }

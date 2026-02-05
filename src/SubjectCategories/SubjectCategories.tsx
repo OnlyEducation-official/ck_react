@@ -14,10 +14,13 @@ import {
 import OptimizedTopicSearch from "../addQeustion/_components/OptimizedTopicSearch";
 import SimpleTextField from "../GlobalComponent/SimpleTextField";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { slugify, useSlugGenerator } from "../hooks/useSlugGenerator";
 import { toastResponse } from "../util/toastResponse";
 import { toast } from "react-toastify";
+import { getAuditFields } from "@/util/audit";
+import { AuthContext } from "@/context/AuthContext";
+import AuditModalButton from "@/util/AuditInfoCard";
 
 
 // ----------------------------
@@ -49,6 +52,10 @@ const TestSchema = z.object({
         .optional()
     )
     .optional(),
+  createdby: z.string(),
+  updatedby: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 
   // test_series_questions: z
   //   .array(
@@ -63,6 +70,7 @@ const TestSchema = z.object({
 type TestSchemaType = z.infer<typeof TestSchema>;
 
 export default function SubjectCategories() {
+  const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -80,6 +88,10 @@ export default function SubjectCategories() {
       is_active: true,
       test_series_subject: [],
       test_series_chapters: [],
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: ""
       // test_series_questions: [],
     },
   });
@@ -94,9 +106,8 @@ export default function SubjectCategories() {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-subject-categories/${qid}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-subject-categories/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -113,11 +124,11 @@ export default function SubjectCategories() {
         is_active: item?.is_active ?? false,
         test_series_subject: item?.test_series_subject?.data
           ? [
-              {
-                name: item?.test_series_subject?.data?.attributes?.name,
-                id: item?.test_series_subject?.data.id,
-              },
-            ]
+            {
+              name: item?.test_series_subject?.data?.attributes?.name,
+              id: item?.test_series_subject?.data.id,
+            },
+          ]
           : [],
         test_series_chapters: item?.test_series_chapters?.data.map(
           (chapter: any) => ({
@@ -125,6 +136,10 @@ export default function SubjectCategories() {
             id: chapter?.id,
           })
         ),
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        createdby: item.createdby,
+        updatedby: item.updatedby,
         // {
         //   name: item?.test_series_chapters?.data.map(
         //     (item: any) => item?.attributes?.name
@@ -148,11 +163,19 @@ export default function SubjectCategories() {
 
   const onSubmit = async (data: TestSchemaType) => {
     try {
+
       const isEdit = Boolean(qid);
+
+      const audit = getAuditFields(isEdit, user);
+
+      data = {
+        ...data,
+        ...audit
+      }
+
       const url = isEdit
-        ? `${
-            import.meta.env.VITE_BASE_URL
-          }test-series-subject-categories/${qid}`
+        ? `${import.meta.env.VITE_BASE_URL
+        }test-series-subject-categories/${qid}`
         : `${import.meta.env.VITE_BASE_URL}test-series-subject-categories`;
 
       const res = await fetch(url, {
@@ -190,18 +213,35 @@ export default function SubjectCategories() {
   return (
     <Card sx={{ borderRadius: 3, p: 2, marginBlockStart: 7 }} elevation={0}>
       <CardContent>
-        <Typography
-          variant="h5"
-          sx={{
-            mb: { xs: 2, md: 4 },
-            fontWeight: "bold",
-            pl: 2,
-            borderLeft: "6px solid",
-            borderColor: "primary.main",
-          }}
-        >
-          {qid ? "Edit Subject Category" : "Add Subject Category"}
-        </Typography>
+
+
+        <Grid container size={12} spacing={2} alignItems="center">
+          <Grid size={12}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                pl: 2,
+                borderLeft: "6px solid",
+                borderColor: "primary.main",
+              }}
+            >
+              {qid ? "Edit Subject Category" : "Add Subject Category"}
+
+            </Typography>
+          </Grid>
+
+          <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+            <AuditModalButton
+              createdby={watch('createdby')}
+              createdat={watch('createdAt')}
+              updatedby={watch('updatedby')}
+              updatedat={watch('updatedAt')}
+            />
+          </Grid>
+        </Grid>
+
+
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
@@ -283,18 +323,9 @@ export default function SubjectCategories() {
             </Grid>
 
             {/* ---------------- CHAPTERS (multi) ---------------- */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 Chapters
-                {/* <Typography
-                  variant="subtitle1"
-                  component="span"
-                  color="error"
-                  fontWeight={700}
-                  marginLeft={0.2}
-                >
-                  *
-                </Typography> */}
               </Typography>
               <OptimizedTopicSearch
                 label=""
@@ -305,7 +336,7 @@ export default function SubjectCategories() {
                 setValue={setValue}
                 placeholder="Search chapters..."
               />
-            </Grid>
+            </Grid> */}
 
             {/* ---------------- QUESTIONS (multi) ---------------- */}
             {/* <Grid size={{ xs: 12, md: 6 }}>

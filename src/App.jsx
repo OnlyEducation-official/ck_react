@@ -18,6 +18,7 @@ import SubjectCategories from "./SubjectCategories/SubjectCategories";
 import PublicRoute from "./GlobalComponent/PublicRoute.js";
 import NotFound from "./pages/NotFound.js";
 import HomePageRedirect from "./pages/HomePageRedirect.js";
+import UserProfilePage from "./profile/UserProfilePage.js"
 // import SubjectCategories from './SubjectCategories/'
 
 function App() {
@@ -266,6 +267,18 @@ function App() {
           }
         />
         {/* t-exams */}
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <InitialDataContextProvider>
+                {" "}
+                <UserProfilePage />{" "}
+              </InitialDataContextProvider>
+            </ProtectedRoute>
+          }
+        />
 
         {/* <Route
           path="/edit/:id"

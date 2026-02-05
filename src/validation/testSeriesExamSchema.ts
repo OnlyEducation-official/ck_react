@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 export const examsSchema = z.object({
+  createdby: z.string(),
+  updatedby: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
   title: z.string().min(1, "Title is required"),
   slug: z.string().nullable().optional(),
   description: z.string().min(1, "Title is required"),
@@ -35,6 +39,6 @@ export const examsSchema = z.object({
       id: z.number().optional(),
       name: z.string().optional(),
     }).optional()
-  ).optional(),
+  ).optional()
 });
 export type ExamsSchemaType = z.infer<typeof examsSchema>;

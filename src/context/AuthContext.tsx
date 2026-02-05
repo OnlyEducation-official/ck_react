@@ -16,7 +16,7 @@ interface JwtPayload {
 }
 
 interface AuthContextType {
-  user: String | null;
+  user: string | null;
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -32,7 +32,7 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<String | null>(null);
+  const [user, setUser] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -13,6 +13,10 @@ import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import MainEditor from "../components/MainEditor.jsx";
 import { AuthContext } from "@/context/AuthContext.js";
+import { getAuditFields } from "@/util/audit.js";
+import AuditModalButton from "@/util/AuditInfoCard.js";
+// import FileUploadSection2 from "../components/FileUploadSection2.js";
+import FileUploadSection2 from "../components/FileUploadThree.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -26,7 +30,7 @@ export default function FormStructure() {
     reset,
     trigger,
     formState: { errors },
-  } = useForm({
+  } = useForm<QuestionSchemaType>({
     defaultValues: {
       subject_tag: [],
       test_series_topic: [],
@@ -44,17 +48,59 @@ export default function FormStructure() {
         { option_label: "D", option: "", is_correct: false },
       ],
       question_title: "",
+      question_image: [],
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: "",
     },
     resolver: zodResolver(QuestionSchema),
   });
+  console.log("watch: ", watch("question_image"));
+  console.log("errors: ", errors);
+
+  // function extractImages(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   return [...doc.querySelectorAll("img")]
+  //     .map((img) => img.src)
+  //     .filter((src) => src.startsWith("data:image"));
+  // }
+  // function extractImagesWithAlt(html) {
+  //   const doc = new DOMParser().parseFromString(html, "text/html");
+  //   const images = doc.querySelectorAll("img");
+
+  //   const imageMap = {};
+
+  //   images.forEach((img, index) => {
+  //     const alt = img.getAttribute("alt")?.trim();
+  //     const src = img.getAttribute("src");
+
+  //     if (!src?.startsWith("data:image")) return;
+
+  //     // Fallback key if alt is missing
+  //     const key = alt && alt.length > 0 ? alt : `image_${index + 1}`;
+
+  //     imageMap[key] = src;
+  //   });
+
+  //   return imageMap;
+  // }
+  // const dataIOmag = extractImages(watch("question_title"));
+  // const dataIOmag = extractImagesWithAlt(watch("question_title"));
+  // console.log('watch("question_title"): ', watch("question_title"));
+  // const rawBase64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
+
+  // console.log("dataIOmag: ", dataIOmag);
+  // console.log("watch: ", watch("question_title"));
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
     const fetchQuestionById = async (
-      qid: number
+      qid: number,
     ): Promise<QuestionSchemaType> => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -64,37 +110,52 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
+      console.log("item: ", item);
 
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
+      // console.log(
+      //   "attr: ",
+      //   attr.question_image.map((img: { id: number; url: string }) => {
+      //     return { url: img.url };
+      //   }),
+      // );
 
       return {
+        //TODO: check image upload later
+        question_image:
+          attr?.question_image?.map((img: { id: number; url: string }) => {
+            return { url: img.url, file: null };
+          }) ?? [],
         /** SIMPLE FIELDS */
+        createdAt: attr.createdAt,
+        updatedAt: attr.updatedAt,
+        createdby: attr.createdby,
+        updatedby: attr.updatedby,
         difficulty: attr.difficulty?.toLowerCase(), // "easy" | "medium" | "hard"
         explanation: attr.explanation ?? "",
         option_type: attr.option_type ?? "single_select",
         hint: attr.hint ?? "",
         question_title: attr.question_title ?? "",
-
         /** SUBJECT TAG → single object in API, array in schema */
         subject_tag: attr.subject_tag?.data
           ? [
-            {
-              id: attr.subject_tag.data.id,
-              name: attr.subject_tag.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.subject_tag.data.id,
+                name: attr.subject_tag.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TOPIC → Strapi returns single, schema requires an array */
         test_series_topic: attr.test_series_topic?.data
           ? [
-            {
-              id: attr.test_series_topic.data.id,
-              name: attr.test_series_topic.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_topic.data.id,
+                name: attr.test_series_topic.data.attributes.name,
+              },
+            ]
           : [],
 
         /** TEST SERIES EXAMS → many-to-many array */
@@ -107,15 +168,15 @@ export default function FormStructure() {
           (chapter: any) => ({
             id: chapter.id,
             name: chapter.attributes.name,
-          })
+          }),
         ),
         test_series_subject_category: attr.test_series_subject_category?.data
           ? [
-            {
-              id: attr.test_series_subject_category.data.id,
-              name: attr.test_series_subject_category.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_subject_category.data.id,
+                name: attr.test_series_subject_category.data.attributes.name,
+              },
+            ]
           : [],
 
         /** OPTIONS → already perfect for your UI */
@@ -139,36 +200,16 @@ export default function FormStructure() {
     loadQuestion();
   }, [qid, reset]);
 
-  console.log("errors:", errors)
-
   const onSubmit = async (data: any) => {
     try {
       const isEdit = Boolean(qid);
 
-      let newObjSpread = {};
-
-      if (!isEdit) {
-
-        newObjSpread = {
-          createdby: user,
-          createdat: new Date().toISOString()
-        };
-
-      } else {
-
-        newObjSpread = {
-          updatedby: user,
-          updatedat: new Date().toISOString()
-        };
-
-      }
+      const audit = getAuditFields(isEdit, user);
 
       data = {
         ...data,
-        ...newObjSpread
-      }
-
-      console.log("Add Question Form:", data)
+        ...audit,
+      };
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -186,7 +227,7 @@ export default function FormStructure() {
         qid
           ? "Updated  Question Form Successfully!"
           : "Created  Question Form Successfully!",
-        qid ? "Update  Question Form Failed!" : "Create Question Form Failed!"
+        qid ? "Update  Question Form Failed!" : "Create Question Form Failed!",
       );
       // const datas = await response.json();
       if (!success) return; // ❌ stop if failed
@@ -217,18 +258,34 @@ export default function FormStructure() {
         spacing={2}
         sx={{ marginBlockStart: 10, paddingInline: 3, paddingBlockEnd: 5 }}
       >
-        <Grid container size={12}>
-          <Typography
-            variant="h5"
+        <Grid container size={12} spacing={2} alignItems="center">
+          <Grid size={12}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                pl: 2,
+                borderLeft: "6px solid",
+                borderColor: "primary.main",
+              }}
+            >
+              {qid ? "Edit Question Form" : "Add Question Form"}
+            </Typography>
+          </Grid>
+
+          <Grid
             sx={{
-              fontWeight: "bold",
-              pl: 2,
-              borderLeft: "6px solid",
-              borderColor: "primary.main",
+              display: "flex",
+              justifyContent: { xs: "flex-start", md: "flex-end" },
             }}
           >
-            {qid ? "Edit Question Form " : "Add Question Form "}
-          </Typography>
+            <AuditModalButton
+              createdby={watch("createdby")}
+              createdat={watch("createdAt")}
+              updatedby={watch("updatedby")}
+              updatedat={watch("updatedAt")}
+            />
+          </Grid>
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -463,6 +520,14 @@ export default function FormStructure() {
           )}
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
+          {/* <FileUploadSection /> */}
+          <FileUploadSection2
+            control={control}
+            watch={watch}
+            setValue={setValue}
+          />
+        </Grid>
+        <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           <Button
             variant="contained"
             type="submit"
@@ -489,3 +554,18 @@ export default function FormStructure() {
     </Box>
   );
 }
+
+// [
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019730844-98675b18-4ef4-4ed9-9ebd-6fcc56ff67f2.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019732572-bfb2c3a1-b877-4ff8-8aa0-5f427ceb8082.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019733774-afd6e8be-846c-4827-8ab9-7b0c446444c8.webp",
+//   },
+//   {
+//     url: "https://test-series-db.s3.amazonaws.com/1770019734074-cf261d5f-32cf-434b-b248-afee160579af.webp",
+//   },
+// ];

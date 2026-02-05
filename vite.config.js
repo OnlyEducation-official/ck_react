@@ -17,4 +17,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"), // ✅ This now works
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://proxy-event.ckeditor.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 });

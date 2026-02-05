@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -19,6 +19,9 @@ import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { toastResponse } from "../../util/toastResponse";
+import AuditModalButton from "@/util/AuditInfoCard";
+import { AuthContext } from "@/context/AuthContext";
+import { getAuditFields } from "@/util/audit";
 
 export const slugify = (text: string): string => {
   return text
@@ -35,6 +38,7 @@ const TestSubjectForm = () => {
   const {
     data: { tExamsData },
   } = useInitialDataContext();
+  const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -51,6 +55,10 @@ const TestSubjectForm = () => {
       slug: null,
       order: 0,
       isActive: true,
+      createdby: "",
+      updatedby: "",
+      createdAt: "",
+      updatedAt: ""
     },
   });
 
@@ -65,9 +73,8 @@ const TestSubjectForm = () => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }test-series-subjects/${qid}?populate=*`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }test-series-subjects/${qid}?populate=*`;
 
       const res = await fetch(url, {
         headers: {
@@ -82,6 +89,10 @@ const TestSubjectForm = () => {
         order: item?.order ?? 0,
         slug: item?.slug ?? null,
         isActive: item?.is_active ?? true,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        createdby: item.createdby,
+        updatedby: item.updatedby,
         // is_active: item?.isActive ?? true,
       });
     };
@@ -90,13 +101,26 @@ const TestSubjectForm = () => {
   }, [qid, reset]);
   const isActive = watch("isActive");
 
+
+  console.log(errors)
   const onSubmit = async (data: TestSchemaType) => {
+
     try {
+
+      console.log("data : ", data)
+
       const isEdit = Boolean(qid);
+
+      const audit = getAuditFields(isEdit, user);
+
+      data = {
+        ...data,
+        ...audit
+      }
+
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${qid}`
         : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
-      // test-series-subjects
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
@@ -115,12 +139,13 @@ const TestSubjectForm = () => {
         " subject is Failed"
       );
       const json = await res.json();
-      if (!success) return; // ❌ stop if failed
-      // 👉 Your next steps (optional)
+      if (!success) return;
+
       if (!qid) {
         reset();
         navigate("/test-subject-list");
       }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -136,18 +161,33 @@ const TestSubjectForm = () => {
         paddingBlock: 4,
       }}
     >
-      <Typography
-        variant="h5"
-        sx={{
-          mb: { xs: 2, md: 4 },
-          fontWeight: "bold",
-          pl: 2,
-          borderLeft: "6px solid",
-          borderColor: "primary.main",
-        }}
-      >
-        {qid ? "Edit Subject" : "Add Subject"}
-      </Typography>
+
+
+      <Grid container size={12} spacing={2} alignItems="center">
+        <Grid size={12}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              pl: 2,
+              borderLeft: "6px solid",
+              borderColor: "primary.main",
+            }}
+          >
+            {qid ? "Edit Subject" : "Add Subject"}
+
+          </Typography>
+        </Grid>
+
+        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <AuditModalButton
+            createdby={watch('createdby')}
+            createdat={watch('createdAt')}
+            updatedby={watch('updatedby')}
+            updatedat={watch('updatedAt')}
+          />
+        </Grid>
+      </Grid>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
