@@ -116,6 +116,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       // // ✅ Store JWT only if teacher
       const jwt = data.jwt;
       const user = data.user.email;
+      const id = data.user.id;
       console.log("auth_user:", user)
 
       if (!jwt) {
@@ -135,6 +136,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem("auth_token", jwt);
       localStorage.setItem("auth_user", JSON.stringify(user));
+      localStorage.setItem("auth_user_id", JSON.stringify(id));
 
       setToken(jwt);
       setUser(user);
@@ -146,52 +148,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       toast.error("Something went wrong. Try again.");
       return false;
     }
-
-    // try {
-    //   const response = await fetch(
-    //     "https://admin.onlyeducation.co.in/admin/login",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
-    //       },
-    //       body: JSON.stringify({ email, password }),
-    //     }
-    //   );
-    //   // if (!toastOk) return false;
-    //   const res = await response.json();
-    //   if (!response.ok) {
-    //     console.error("Login failed:", res);
-    //     return false;
-    //   }
-
-    //   const token = res.data.token;
-    //   const user = res.data.user;
-
-    //   // Save token + user
-    // Cookies.set("auth_token", token, {
-    //   expires: 7, // days
-    //   secure: true,
-    //   sameSite: "strict",
-    // });
-    // Cookies.set("auth_user", JSON.stringify(user), {
-    //   expires: 7,
-    //   secure: true,
-    //   sameSite: "strict",
-    // });
-    // localStorage.setItem("auth_token", token);
-    // localStorage.setItem("auth_user", JSON.stringify(user));
-
-    // setToken(token);
-    // setUser(user);
-
-    // return true;
-    // } catch (error) {
-    // console.error("Login error:", error);
-    // toast.error("Something went wrong. Try again.");
-    // return false;
-    // }
   };
 
   // -------------------------------------------

@@ -1,7 +1,8 @@
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format, parse, isValid } from "date-fns";
-const DATE_FORMAT = "dd/MM/yyyy";
+// const DATE_FORMAT = "dd/MM/yyyy";
+const DATE_FORMAT = "yyyy/MM/dd";
 type GlobalDateFieldProps<TFieldValues extends FieldValues> = {
   name: Path<TFieldValues>;
   control: Control<TFieldValues>;
