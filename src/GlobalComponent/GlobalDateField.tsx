@@ -33,6 +33,7 @@ export function GlobalDateField<TFieldValues extends FieldValues>({
             format={DATE_FORMAT} // 👈 display format
             value={isValid(parsedValue) ? parsedValue : null}
             onChange={(date: Date | null) => {
+              console.log("date: ", date);
               field.onChange(date ? format(date, DATE_FORMAT) : null);
             }}
             slotProps={{

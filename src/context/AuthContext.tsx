@@ -88,6 +88,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // 🔐 LOGIN FUNCTION
   // -------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
+    
+    console.log("login function", email,password)
 
     try {
       const res = await fetch("http://localhost:1337/api/auth/local", {
@@ -98,15 +100,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           password,
         }),
       });
-
+      console.log("res:", res)
       const data = await res.json();
 
       console.log("status:", res.status);
       console.log("data:", data);
 
-      if (!res.ok) {
-        throw new Error(data?.error?.message || "Login failed");
-      }
+      // if (!res.ok) {
+      //   throw new Error(data?.error?.message || "Login failed");
+      // }
 
       // // ✅ Role restriction
       // if (data?.user?.role?.name !== "Test Series Teachers Authentication") {

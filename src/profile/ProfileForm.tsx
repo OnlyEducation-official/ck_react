@@ -28,23 +28,21 @@ import { AuthContext } from "@/context/AuthContext.js";
 import { format, parseISO, isValid } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { toastResponse } from "@/util/toastResponse.js";
+import GlobalTextField from "@/GlobalComponent/GlobalTextField";
 
 type user = {
-  "teacher_name": string | null,
-  "teacher_surname": string | null,
-  "teacher_bio": string | null,
-  "teacher_contact": number | null,
-  "teacher_email": string | null,
-  "teacher_dob": Date | null
-}
-
+  teacher_name: string | null;
+  teacher_surname: string | null;
+  teacher_bio: string | null;
+  teacher_contact: number | null;
+  teacher_email: string | null;
+  teacher_dob: Date | null;
+};
 
 export default function ProfileForm() {
-
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
   const [user, setUser] = useState<user | null>(null);
-
 
   const {
     control,
@@ -56,138 +54,166 @@ export default function ProfileForm() {
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: "",
-      surname: "",
-      bio: "",
-      contact: "",
-      email: "",
-      dob: "",
+      teacher_name: "",
+      teacher_surname: "",
+      teacher_bio: "",
+      teacher_contact: "",
+      teacher_email: "",
+      teacher_dob: "",
+      teacher_gender: "",
+      // picture: null,
     },
   });
 
   const GENDER_OPTIONS = [
-    { value: "male", label: "Male" },
-    { value: "female", label: "Female" },
-    { value: "other", label: "Other" },
+    { value: "Male", label: "Male" },
+    { value: "Female", label: "Female" },
+    { value: "Other", label: "Other" },
   ];
 
-  const photoFile = useWatch({
-    control,
-    name: "photo",
-  });
+  // const photoFile = useWatch({
+  //   control,
+  //   name: "picture",
+  // });
+  console.log("watch: ", watch());
 
   const [preview, setPreview] = useState<string | null>(null);
   const jwt_token = localStorage.getItem("auth_token");
+  const auth_user_id = localStorage.getItem("auth_user_id");
   const navigate = useNavigate();
 
-
   useEffect(() => {
-
-
     const fetchItem = async () => {
-
       if (jwt_token === "") return;
 
-
-      let url = `${import.meta.env.VITE_BASE_URL}users/me?fields[0]=teacher_name&fields[1]=teacher_surname&fields[2]=teacher_bio&fields[3]=teacher_contact&fields[4]=teacher_email&fields[5]=teacher_dob&fields[6]=teacher_gender`
+      let url = `${import.meta.env.VITE_BASE_URL}users/me?fields[0]=teacher_name&fields[1]=teacher_surname&fields[2]=teacher_bio&fields[3]=teacher_contact&fields[4]=teacher_email&fields[5]=teacher_dob&fields[6]=teacher_gender`;
 
       const res = await fetch(url, {
         headers: {
+          // method: "PUT",
           Authorization: `Bearer ${jwt_token}`,
         },
       });
 
       const json = await res.json();
+      // console.log("json: ", json);
 
-      console.log("item:", json)
+      // console.log("item:", json);
+      // console.log("json.teacher_dob: ", json.picture);
 
       reset({
-        name: json.teacher_name,
-        surname: json.teacher_surname,
-        bio: json.teacher_bio,
-        contact: json.teacher_contact,
-        email: json.teacher_email,
-        dob: json.teacher_dob
-          ? format(parseISO(json.teacher_dob), 'dd/MM/yyyy')
+        teacher_name: json.teacher_name,
+        teacher_surname: json.teacher_surname,
+        teacher_bio: json.teacher_bio,
+        teacher_contact: json.teacher_contact,
+        teacher_email: json.teacher_email,
+        teacher_dob: json.teacher_dob
+          ? format(parseISO(json.teacher_dob), "yyyy/MM/dd")
           : undefined,
-        gender: json.teacher_gender
+        teacher_gender: json.teacher_gender,
+        // picture: json.picture,
       });
     };
 
     fetchItem();
   }, []);
 
-  useEffect(() => {
-    if (!photoFile) {
-      setPreview(null);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!photoFile) {
+  //     setPreview(null);
+  //     return;
+  //   }
 
-    const objectUrl = URL.createObjectURL(photoFile);
-    setPreview(objectUrl);
+  //   const objectUrl = URL.createObjectURL(photoFile);
+  //   setPreview(objectUrl);
 
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [photoFile]);
+  //   return () => URL.revokeObjectURL(objectUrl);
+  // }, [photoFile]);
 
   const onSubmit = async (data: ProfileFormValues) => {
+    // console.log("FORM DATA", data);
 
-    console.log("FORM DATA", data);
+    const payload = {
+      teacher_name: data.teacher_name || null,
+      teacher_surname: data.teacher_surname || null,
+      teacher_bio: data.teacher_bio || null,
+      teacher_contact: data.teacher_contact
+        ? String(data.teacher_contact)
+        : null,
+      teacher_email: data.teacher_email || null,
+      teacher_dob: data.teacher_dob
+        ? format(new Date(data.teacher_dob), "yyyy-MM-dd")
+        : null,
+      teacher_gender: data.teacher_gender || null,
+    };
 
     try {
+      if (!jwt_token) return;
 
-      // const url = `${import.meta.env.VITE_BASE_URL}users/me`
+      const url = `${import.meta.env.VITE_BASE_URL}users/${auth_user_id}`;
 
-      // if (jwt_token === "") return;
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${jwt_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload), // ✅ FIXED
+      });
 
-      // const response = await fetch(url, {
-      //   method: "PUT",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${jwt_token}`,
-      //   },
-      //   body: JSON.stringify({ data: data }),
-      // });
-      // const success = await toastResponse(
-      //   response,
-      //   "Profile Updated!!",
-      //   "Profile Updated!!"
-      // );
+      console.log("response: ", response);
 
-      // if (!success) {
-      //   return
-      // } else {
-      //   reset();
-      //   navigate("/profile");
-      // }
+      if (!response.ok) {
+        const err = await response.json();
+        console.error("Strapi error:", err);
+        throw new Error("Update failed");
+      }
 
+      toast.success("Profile Updated!");
+      // reset(payload);
+      navigate("/profile");
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
-
   };
 
-
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: "100%" }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ width: "100%" }}
+    >
       <Typography variant="h6" mb={2} fontWeight="bold">
         User Details
       </Typography>
 
       <Grid container spacing={{ xs: 2, md: 3 }}>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <SimpleTextField name="name" control={control} label="First Name" />
+          <GlobalTextField
+            name="teacher_name"
+            control={control}
+            label="First Name"
+          />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <SimpleTextField name="surname" control={control} label="Surname" />
+          <GlobalTextField
+            name="teacher_surname"
+            control={control}
+            label="Surname"
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <GlobalDateField name="dob" control={control} label="Date of Birth" />
+          <GlobalDateField
+            name="teacher_dob"
+            control={control}
+            label="Date of Birth"
+          />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
           <Controller
-            name="gender"
+            name="teacher_gender"
             control={control}
             rules={{ required: "Gender is required" }}
             render={({ field, fieldState }) => (
@@ -205,7 +231,7 @@ export default function ProfileForm() {
                   </MenuItem>
 
                   {GENDER_OPTIONS.map((opt) => (
-                    <MenuItem key={opt.value} value={watch('gender') === opt.label ? watch('gender') : opt.value}>
+                    <MenuItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </MenuItem>
                   ))}
@@ -219,8 +245,8 @@ export default function ProfileForm() {
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
-          <SimpleTextField
-            name="bio"
+          <GlobalTextField
+            name="teacher_bio"
             control={control}
             label="Personal Bio"
             type="textarea"
@@ -245,7 +271,7 @@ export default function ProfileForm() {
             type="number"
           /> */}
           <Controller
-            name="contact"
+            name="teacher_contact"
             control={control}
             render={({ field }) => (
               <MuiTelInput
@@ -260,8 +286,8 @@ export default function ProfileForm() {
                 label="Phone Number"
                 placeholder="eg: 9876543210"
                 disableDropdown
-                error={!!errors?.contact}
-                helperText={errors.contact?.message}
+                error={!!errors?.teacher_contact}
+                helperText={errors.teacher_contact?.message}
                 forceCallingCode
                 sx={{
                   "& input": {
@@ -286,66 +312,10 @@ export default function ProfileForm() {
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <SimpleTextField
-            name="email"
+            name="teacher_email"
             control={control}
             label="Email"
             type="email"
-          />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Controller
-            name="photo"
-            control={control}
-            rules={{
-              required: "Photo is required",
-              validate: (file: File | null) =>
-                file && file.type.startsWith("image/")
-                  ? true
-                  : "Only image files are allowed",
-            }}
-            render={({ field, fieldState }) => (
-              <Stack spacing={2}>
-                <MuiFileInput
-                  {...field}
-                  value={field.value || null}
-                  onChange={(file) => field.onChange(file)}
-                  label="Upload Photo"
-                  placeholder="Choose an image"
-                  inputProps={{ accept: "image/*" }}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  fullWidth
-                />
-
-                {/* ✅ Responsive Image Preview */}
-                {preview && (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems={{ xs: "center", sm: "flex-start" }}
-                  >
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ mb: 1 }}
-                    >
-                      Preview
-                    </Typography>
-
-                    <Avatar
-                      src={preview}
-                      sx={{
-                        width: { xs: 96, sm: 120, md: 140 },
-                        height: { xs: 96, sm: 120, md: 140 },
-                        borderRadius: "50%",
-                        border: "1px solid",
-                        borderColor: "divider",
-                      }}
-                    />
-                  </Box>
-                )}
-              </Stack>
-            )}
           />
         </Grid>
 
