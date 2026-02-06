@@ -11,42 +11,49 @@ export const profileFormSchema = z.object({
   name: z.string().min(2, "Name is required"),
   surname: z.string().min(2, "Surname is required"),
   dob: z
-    .string({
-      error: "Date of Birth is required",
-    })
-    .refine(
-      (value) => {
-        const parsed = parse(value, DATE_FORMAT, new Date());
-        return isValid(parsed);
-      },
-      {
+  .string()
+  .optional()
+  .superRefine((value, ctx) => {
+    if (!value || !value.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Date of Birth is required",
+      });
+      return;
+    }
+
+    const parsed = parse(value, DATE_FORMAT, new Date());
+
+    if (!isValid(parsed)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
         message: "Invalid date format (DD/MM/YYYY)",
-      },
-    )
-    .refine(
-      (value) => {
-        const parsed = parse(value, DATE_FORMAT, new Date());
-        return !isAfter(parsed, new Date());
-      },
-      {
+      });
+      return;
+    }
+
+    if (isAfter(parsed, new Date())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
         message: "Date of Birth cannot be in the future",
-      },
-    )
-    .refine(
-      (value) => {
-        const parsed = parse(value, DATE_FORMAT, new Date());
-        return differenceInYears(new Date(), parsed) >= 18;
-      },
-      {
+      });
+      return;
+    }
+
+    if (differenceInYears(new Date(), parsed) < 18) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
         message: "You must be at least 18 years old",
-      },
-    ),
+      });
+    }
+  }),
+
   gender: z
     .string()
-    .refine((val) => ["male", "female", "other"].includes(val), {
+    .refine((val) => ["Male", "Memale", "Other"].includes(val), {
       message: "Gender is required",
     }),
-  bio: z.string().min(10, "Bio must be at least 10 characters"),
+  bio: z.string().min(2 , "Bio must be at least 10 characters"),
 
   contact: z.string().refine(
     (value) => {

@@ -40,18 +40,20 @@ const InitialDataContext = createContext<InitDataContextType | null>(null);
 // };
 
 const fetchDataFunc = async (url: string) => {
+
+  const jwt_token = localStorage.getItem("auth_token");
+
+  
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       Authorization:
-        `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        `Bearer ${jwt_token}`,
     },
   });
   const data = await response.json();
   return data;
 };
-
-
 
 export function InitialDataContextProvider({
   children,

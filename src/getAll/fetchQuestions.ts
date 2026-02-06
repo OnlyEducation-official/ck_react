@@ -47,6 +47,9 @@ export default async function fetchQuestions<T = any>(
   routeName: string,
   page: number
 ): Promise<StrapiResponse<T[]> | null> {
+
+  let jwt_token =  localStorage.getItem("auth_token");
+
   const url = `${import.meta.env.VITE_BASE_URL}${routeName}?pagination[page]=${page}&pagination[pageSize]=10`;
 
   try {
@@ -54,7 +57,7 @@ export default async function fetchQuestions<T = any>(
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+        Authorization: `Bearer ${jwt_token}`,
       },
     });
 

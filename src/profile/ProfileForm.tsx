@@ -17,20 +17,41 @@ import {
   MenuItem,
   FormHelperText,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { MuiTelInput } from "mui-tel-input";
 import { MuiFileInput } from "mui-file-input";
 import GlobalModal from "@/GlobalComponent/GlobalModal";
 import { GlobalDateField } from "@/GlobalComponent/GlobalDateField";
+import { toast } from "react-toastify";
+import { AuthContext } from "@/context/AuthContext.js";
+import { format, parseISO, isValid } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { toastResponse } from "@/util/toastResponse.js";
+
+type user = {
+  "teacher_name": string | null,
+  "teacher_surname": string | null,
+  "teacher_bio": string | null,
+  "teacher_contact": number | null,
+  "teacher_email": string | null,
+  "teacher_dob": Date | null
+}
+
+
 export default function ProfileForm() {
+
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
+  const [user, setUser] = useState<user | null>(null);
+
+
   const {
     control,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -43,13 +64,12 @@ export default function ProfileForm() {
       dob: "",
     },
   });
-  //                 if (e.target.files?.[0]) {
+
   const GENDER_OPTIONS = [
     { value: "male", label: "Male" },
     { value: "female", label: "Female" },
     { value: "other", label: "Other" },
   ];
-  console.log("watch: ", watch());
 
   const photoFile = useWatch({
     control,
@@ -57,6 +77,45 @@ export default function ProfileForm() {
   });
 
   const [preview, setPreview] = useState<string | null>(null);
+  const jwt_token = localStorage.getItem("auth_token");
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+
+
+    const fetchItem = async () => {
+
+      if (jwt_token === "") return;
+
+
+      let url = `${import.meta.env.VITE_BASE_URL}users/me?fields[0]=teacher_name&fields[1]=teacher_surname&fields[2]=teacher_bio&fields[3]=teacher_contact&fields[4]=teacher_email&fields[5]=teacher_dob&fields[6]=teacher_gender`
+
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwt_token}`,
+        },
+      });
+
+      const json = await res.json();
+
+      console.log("item:", json)
+
+      reset({
+        name: json.teacher_name,
+        surname: json.teacher_surname,
+        bio: json.teacher_bio,
+        contact: json.teacher_contact,
+        email: json.teacher_email,
+        dob: json.teacher_dob
+          ? format(parseISO(json.teacher_dob), 'dd/MM/yyyy')
+          : undefined,
+        gender: json.teacher_gender
+      });
+    };
+
+    fetchItem();
+  }, []);
 
   useEffect(() => {
     if (!photoFile) {
@@ -69,9 +128,45 @@ export default function ProfileForm() {
 
     return () => URL.revokeObjectURL(objectUrl);
   }, [photoFile]);
-  const onSubmit = (data: ProfileFormValues) => {
+
+  const onSubmit = async (data: ProfileFormValues) => {
+
     console.log("FORM DATA", data);
+
+    try {
+
+      // const url = `${import.meta.env.VITE_BASE_URL}users/me`
+
+      // if (jwt_token === "") return;
+
+      // const response = await fetch(url, {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${jwt_token}`,
+      //   },
+      //   body: JSON.stringify({ data: data }),
+      // });
+      // const success = await toastResponse(
+      //   response,
+      //   "Profile Updated!!",
+      //   "Profile Updated!!"
+      // );
+
+      // if (!success) {
+      //   return
+      // } else {
+      //   reset();
+      //   navigate("/profile");
+      // }
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong!");
+    }
+
   };
+
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: "100%" }}>
@@ -110,7 +205,7 @@ export default function ProfileForm() {
                   </MenuItem>
 
                   {GENDER_OPTIONS.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value}>
+                    <MenuItem key={opt.value} value={watch('gender') === opt.label ? watch('gender') : opt.value}>
                       {opt.label}
                     </MenuItem>
                   ))}
