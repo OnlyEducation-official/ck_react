@@ -23,6 +23,8 @@ import {
   TableCellProperties,
   TableColumnResize,
   FontSize,
+  List,
+  ListProperties,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import MathType from "@wiris/mathtype-ckeditor5/dist/index.js";
@@ -39,7 +41,7 @@ import { ImageIdPlugin } from "./imageIdPlugin";
 
 const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
   const [editorError, setEditorError] = React.useState(null);
-  console.log('editorError: ', editorError);
+  console.log("editorError: ", editorError);
   // use watch if provided, else fallback to value prop
   const currentValue = typeof watch === "function" ? watch(name) : value;
   const latestValue = useRef(currentValue ?? "");
@@ -89,6 +91,8 @@ const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
             ImageInsert, // ✅ REQUIRED
             AutoImage, // ✅ REQUIRED
             // Tables ✅
+            List,
+            ListProperties,
             Table,
             TableToolbar,
             TableProperties,
@@ -105,6 +109,8 @@ const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
             "redo",
             "heading", // ✅ H1–H6 dropdown
             "fontSize", // ✅
+            "bulletedList", // ✅ unordered list
+            "numberedList", // ✅ ordered list
             "|",
             "bold",
             "MathType",

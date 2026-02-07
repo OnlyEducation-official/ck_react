@@ -58,8 +58,8 @@ export default function FormStructure() {
     resolver: zodResolver(QuestionSchema),
   });
 
-  const jwt_token = GetJwt()
-  
+  const jwt_token = GetJwt();
+  console.log("jwt_token: ", jwt_token);
 
   // function extractImages(html) {
   //   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -203,6 +203,7 @@ export default function FormStructure() {
   }, [qid, reset]);
 
   const onSubmit = async (data: any) => {
+    console.log("data: ", data);
     try {
       const isEdit = Boolean(qid);
 
@@ -413,28 +414,6 @@ export default function FormStructure() {
             rules={{ required: "Please select a Topic" }}
           />
         </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          {/* <SimpleSelectField /> */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Hint
-            <Typography
-              variant="subtitle1"
-              component="span"
-              color="error"
-              fontWeight={700}
-              marginLeft={0.2}
-            >
-              *
-            </Typography>
-          </Typography>
-          <SimpleTextField
-            name="hint"
-            control={control}
-            // label="Test Series Topic"
-            // options={difficultyOptions}
-            rules={{ required: "Please select a Topic" }}
-          />
-        </Grid>
         {/* Test series Exam */}
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
@@ -520,6 +499,27 @@ export default function FormStructure() {
               {errors?.explanation?.message}
             </FormHelperText>
           )}
+        </Grid>
+        <Grid size={12}>
+          {/* <SimpleSelectField /> */}
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Hint
+            <Typography
+              variant="subtitle1"
+              component="span"
+              color="error"
+              fontWeight={700}
+              marginLeft={0.2}
+            >
+              *
+            </Typography>
+          </Typography>
+          <MainEditor
+            name="hint"
+            setValue={setValue}
+            watch={watch}
+            value={watch("hint")}
+          />
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           {/* <FileUploadSection /> */}

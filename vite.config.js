@@ -18,6 +18,11 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // ✅ allows access from same network
+    port: 5173,
+    cors: {
+      origin: "*", // ⚠️ dev only
+    },
     proxy: {
       "/api": {
         target: "https://proxy-event.ckeditor.com",
