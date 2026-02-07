@@ -92,7 +92,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     console.log("login function", email,password)
 
     try {
-      const res = await fetch("http://localhost:1337/api/auth/local", {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}auth/local`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
