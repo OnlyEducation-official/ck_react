@@ -22,6 +22,7 @@ import { toastResponse } from "../../util/toastResponse";
 import AuditModalButton from "@/util/AuditInfoCard";
 import { AuthContext } from "@/context/AuthContext";
 import { getAuditFields } from "@/util/audit";
+import { GetJwt } from "@/util/utils";
 
 export const slugify = (text: string): string => {
   return text
@@ -63,6 +64,8 @@ const TestSubjectForm = () => {
   });
 
   const nameValue = watch("name");
+  const jwt_token = GetJwt()
+  
 
   useEffect(() => {
     if (!nameValue) return;
@@ -78,7 +81,7 @@ const TestSubjectForm = () => {
 
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
       });
 
@@ -126,7 +129,7 @@ const TestSubjectForm = () => {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
           data: data,

@@ -75,7 +75,6 @@ export default function ProfileForm() {
   //   control,
   //   name: "picture",
   // });
-  console.log("watch: ", watch());
 
   const [preview, setPreview] = useState<string | null>(null);
   const jwt_token = localStorage.getItem("auth_token");
@@ -131,14 +130,15 @@ export default function ProfileForm() {
   // }, [photoFile]);
 
   const onSubmit = async (data: ProfileFormValues) => {
-    // console.log("FORM DATA", data);
+    console.log("FORM DATA", jwt_token);
+    console.log("FORM DATA", data);
 
     const payload = {
       teacher_name: data.teacher_name || null,
       teacher_surname: data.teacher_surname || null,
       teacher_bio: data.teacher_bio || null,
       teacher_contact: data.teacher_contact
-        ? String(data.teacher_contact)
+        ? data.teacher_contact.replace(/\D/g, '').slice(-10)
         : null,
       teacher_email: data.teacher_email || null,
       teacher_dob: data.teacher_dob
@@ -209,6 +209,7 @@ export default function ProfileForm() {
             name="teacher_dob"
             control={control}
             label="Date of Birth"
+            
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>

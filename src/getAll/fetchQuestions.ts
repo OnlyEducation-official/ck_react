@@ -9,7 +9,7 @@
 //       method: "GET",
 //       headers: {
 //         "Content-Type": "application/json",
-//         Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+//         Authorization: `Bearer ${jwt_token}`,
 //       },
 //     });
 

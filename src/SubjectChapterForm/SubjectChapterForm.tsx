@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
+import { GetJwt } from "@/util/utils";
 // ------------------------
 // ZOD SCHEMA
 // ------------------------
@@ -88,6 +89,9 @@ const SubjectChapterForm: React.FC = () => {
     setValue("slug", slugify(nameValue));
   }, [nameValue, setValue]);
 
+  const jwt_token = GetJwt()
+  
+
   useEffect(() => {
     if (!qid) return; // create mode
 
@@ -97,7 +101,7 @@ const SubjectChapterForm: React.FC = () => {
 
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
       });
 
@@ -160,7 +164,7 @@ const SubjectChapterForm: React.FC = () => {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
           data: data,

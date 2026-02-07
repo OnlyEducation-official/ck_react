@@ -20,6 +20,7 @@ import { toastResponse } from "../../util/toastResponse";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
+import { GetJwt } from "@/util/utils";
 
 export default function TestExamFormStructure() {
   const { user } = useContext(AuthContext);
@@ -55,9 +56,8 @@ export default function TestExamFormStructure() {
     resolver: zodResolver(examsSchema),
   });
 
-  console.log("errors", errors, user)
-
-
+  const jwt_token = GetJwt()
+  
   const onSubmitt = async (data: ExamsSchemaType) => {
     try {
 
@@ -83,7 +83,7 @@ export default function TestExamFormStructure() {
           method: isEdit ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+            Authorization: `Bearer ${jwt_token}`,
           },
           body: JSON.stringify({
             data: data,
@@ -129,7 +129,7 @@ export default function TestExamFormStructure() {
             headers: {
               "Content-Type": "application/json",
 
-              Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+              Authorization: `Bearer ${jwt_token}`,
             },
           }
         );

@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
+import { GetJwt } from "@/util/utils";
 
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
@@ -60,6 +61,7 @@ const TestExamCategoriesForm = () => {
   });
 
   const { id } = useParams(); // id or undefined
+  const jwt_token = GetJwt()
 
   useSlugGenerator<TestSeriesExamType>({
     watch,
@@ -81,7 +83,7 @@ const TestExamCategoriesForm = () => {
       console.log("url:", url)
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
       });
 
@@ -130,7 +132,7 @@ const TestExamCategoriesForm = () => {
           method: isEdit ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+            Authorization: `Bearer ${jwt_token}`,
           },
           body: JSON.stringify({
             data: data,

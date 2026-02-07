@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
+import { GetJwt } from "@/util/utils";
 
 
 // ----------------------------
@@ -97,6 +98,8 @@ export default function SubjectCategories() {
   });
 
   const nameValue = watch("name");
+  const jwt_token = GetJwt()
+  
   useEffect(() => {
     if (!nameValue) return;
     setValue("slug", slugify(nameValue));
@@ -111,7 +114,7 @@ export default function SubjectCategories() {
 
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
       });
 
@@ -182,7 +185,7 @@ export default function SubjectCategories() {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
           data: data,

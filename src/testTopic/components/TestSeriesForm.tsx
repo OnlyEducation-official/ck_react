@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext.js";
 import { getAuditFields } from "@/util/audit";
 import AuditModalButton from "@/util/AuditInfoCard";
+import { GetJwt } from "@/util/utils";
 
 const TestSeriesForm = () => {
   const { token, logout, user } = useContext(AuthContext);
@@ -65,6 +66,9 @@ const TestSeriesForm = () => {
     data: { subjectTagData },
   } = useInitialDataContext();
 
+  const jwt_token = GetJwt()
+  
+
   useEffect(() => {
     if (!qid) return; // no qid → create mode → don't fetch data
 
@@ -75,7 +79,7 @@ const TestSeriesForm = () => {
       const res = await fetch(url,
         {
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+            Authorization: `Bearer ${jwt_token}`,
           },
         }
       );
@@ -137,7 +141,7 @@ const TestSeriesForm = () => {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({
           data: data,

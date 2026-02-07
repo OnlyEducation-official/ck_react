@@ -17,6 +17,7 @@ import { getAuditFields } from "@/util/audit.js";
 import AuditModalButton from "@/util/AuditInfoCard.js";
 // import FileUploadSection2 from "../components/FileUploadSection2.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
+import { GetJwt } from "@/util/utils.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -56,8 +57,9 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
-  console.log("watch: ", watch("question_image"));
-  console.log("errors: ", errors);
+
+  const jwt_token = GetJwt()
+  
 
   // function extractImages(html) {
   //   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -104,7 +106,7 @@ export default function FormStructure() {
 
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
       });
 
@@ -218,7 +220,7 @@ export default function FormStructure() {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_STRAPI_BEARER}`,
+          Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify({ data: data }),
       });

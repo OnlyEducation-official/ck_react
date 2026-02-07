@@ -1,8 +1,9 @@
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format, parse, isValid } from "date-fns";
-// const DATE_FORMAT = "dd/MM/yyyy";
+
 const DATE_FORMAT = "yyyy/MM/dd";
+
 type GlobalDateFieldProps<TFieldValues extends FieldValues> = {
   name: Path<TFieldValues>;
   control: Control<TFieldValues>;
@@ -30,10 +31,11 @@ export function GlobalDateField<TFieldValues extends FieldValues>({
           <DatePicker
             label={label}
             disableFuture={disableFuture}
-            format={DATE_FORMAT} // 👈 display format
+            format={DATE_FORMAT}
+            views={["year", "month", "day"]}
+            openTo="year"
             value={isValid(parsedValue) ? parsedValue : null}
-            onChange={(date: Date | null) => {
-              console.log("date: ", date);
+            onChange={(date) => {
               field.onChange(date ? format(date, DATE_FORMAT) : null);
             }}
             slotProps={{
