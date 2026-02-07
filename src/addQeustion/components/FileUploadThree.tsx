@@ -140,14 +140,14 @@ export default function FileUploadSection2({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  console.log("previewImage: ", previewImage);
+  // console.log("previewImage: ", previewImage);
 
   // const [files, setFiles] = useState<UploadItem[]>([]);
   // console.log("files: ", files);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  console.log("error: ", error);
+  // console.log("error: ", error);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -472,7 +472,7 @@ export default function FileUploadSection2({
               <TableBody>
                 {fields.map((field, index) => {
                   const image = images?.[index];
-                  console.log("image: ", image);
+                  // console.log("image: ", image);
                   if (!image) return null;
 
                   const isUploaded = image.url?.startsWith("http");

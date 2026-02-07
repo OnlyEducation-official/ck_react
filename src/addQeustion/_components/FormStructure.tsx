@@ -57,9 +57,10 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
+  // console.log("errors: ", errors);
 
   const jwt_token = GetJwt();
-  console.log("jwt_token: ", jwt_token);
+  // console.log("jwt_token: ", jwt_token);
 
   // function extractImages(html) {
   //   const doc = new DOMParser().parseFromString(html, "text/html");
@@ -112,7 +113,7 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
-      console.log("item: ", item);
+      // console.log("item: ", item);
 
       if (!item) throw new Error("Question not found");
 
@@ -203,16 +204,34 @@ export default function FormStructure() {
   }, [qid, reset]);
 
   const onSubmit = async (data: any) => {
-    console.log("data: ", data);
+    // console.log("data: ", data);
     try {
       const isEdit = Boolean(qid);
 
       const audit = getAuditFields(isEdit, user);
-
-      data = {
+      const question_image = data?.question_image?.map((img: any) => {
+        return {
+          url: img.url,
+        };
+      });
+      const wholeData = {
         ...data,
+        question_image,
+      };
+      data = {
+        ...wholeData,
         ...audit,
       };
+      // console.log("data: ", data);
+
+      // test_series_topic: attr.test_series_topic?.data
+      //   ? [
+      //       {
+      //         id: attr.test_series_topic.data.id,
+      //         name: attr.test_series_topic.data.attributes.name,
+      //       },
+      //     ]
+      //   : [],
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
