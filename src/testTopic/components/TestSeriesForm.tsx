@@ -73,7 +73,7 @@ const TestSeriesForm = () => {
 
     const fetchData = async () => {
 
-      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=qid&populate[test_series_chapters][fields]=qid&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedat`
+      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=qid&populate[test_series_chapters][fields]=qid&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedAt`
 
       const res = await fetch(url,
         {
@@ -85,6 +85,8 @@ const TestSeriesForm = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
+      
+      console.log(item)
 
       // Load fetched data into form
       reset({
@@ -121,14 +123,18 @@ const TestSeriesForm = () => {
   }, [qid, reset]);
   const isActive = watch("is_active");
 
+  console.log(errors)
+
   const onSubmit = async (data: TestSeriesSchemaType) => {
     try {
       const isEdit = Boolean(qid);
 
+      console.log(isEdit)
       data = {
         ...data,
         ...getAuditFields(isEdit, user)
       }
+
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}`
