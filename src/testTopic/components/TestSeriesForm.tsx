@@ -47,7 +47,7 @@ const TestSeriesForm = () => {
       is_active: true,
       test_series_subject: [],
       test_series_subject_category: [],
-      test_series_chapter: [],
+      test_series_chapters: [],
       createdby: "",
       updatedby: "",
       createdAt:"",
@@ -66,15 +66,14 @@ const TestSeriesForm = () => {
     data: { subjectTagData },
   } = useInitialDataContext();
 
-  const jwt_token = GetJwt()
-  
+  const jwt_token = GetJwt()  
 
   useEffect(() => {
     if (!qid) return; // no qid → create mode → don't fetch data
 
     const fetchData = async () => {
 
-      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=true&populate[test_series_chapter][fields]=true&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedat`
+      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=qid&populate[test_series_chapters][fields]=qid&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedat`
 
       const res = await fetch(url,
         {
@@ -86,8 +85,6 @@ const TestSeriesForm = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
-
-      console.log("item:", item)
 
       // Load fetched data into form
       reset({
@@ -111,12 +108,12 @@ const TestSeriesForm = () => {
             id: item.test_series_subject_category?.data.id,
           },
         ],
-        test_series_chapter: [
-          {
-            name: item.test_series_chapter?.data.attributes.name,
-            id: item.test_series_chapter?.data.id,
-          },
-        ],
+        test_series_chapters: item.test_series_chapters?.data?.map(
+          (chapter: any) => ({
+            id: chapter.id,
+            name: chapter.attributes.name,
+          }),
+        ),
       });
     };
 
@@ -166,6 +163,7 @@ const TestSeriesForm = () => {
       toast.error("Something went wrong!");
     }
   };
+
 
   return (
     <Box
@@ -331,7 +329,7 @@ const TestSeriesForm = () => {
           </Typography>
           <OptimizedTopicSearch
             dropdownType="multi"
-            fieldName="test_series_chapter"
+            fieldName="test_series_chapters"
             routeName="test-series-chapter"
             setValue={setValue}
             watch={watch}

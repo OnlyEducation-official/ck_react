@@ -31,7 +31,7 @@ export const TestSeriesSchema = z.object({
         .optional()
     )
     .optional(),
-  test_series_chapter: z
+  test_series_chapters: z
     .array(
       z
         .object({
