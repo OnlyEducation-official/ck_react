@@ -90,7 +90,7 @@ const SubjectChapterForm: React.FC = () => {
   }, [nameValue, setValue]);
 
   const jwt_token = GetJwt()
-  
+
 
   useEffect(() => {
     if (!qid) return; // create mode
@@ -107,22 +107,26 @@ const SubjectChapterForm: React.FC = () => {
 
       const json = await res.json();
       const item = json?.data?.attributes;
+
+      console.log(item)
+      console.log('item.test_series_subject_category?.data?.attributes?.name: ', item.test_series_subject_category?.data);
+
       reset({
         name: item?.name ?? "",
         slug: item?.slug ?? null,
         is_active: item?.is_active ?? true,
-        test_series_subject_category: [
+        test_series_subject_category: item.test_series_subject_category?.data?.attributes?.name ? [
           {
-            name: item.test_series_subject_category?.data.attributes.name,
-            id: item.test_series_subject_category?.data.id,
+            name: item.test_series_subject_category?.data?.attributes?.name,
+            id: item.test_series_subject_category?.data?.id,
           },
-        ],
-        test_series_subject: [
+        ] : [],
+        test_series_subject: item.test_series_subject?.data?.attributes?.name ? [
           {
-            name: item.test_series_subject?.data.attributes.name,
-            id: item.test_series_subject?.data.id,
+            name: item.test_series_subject?.data?.attributes?.name,
+            id: item.test_series_subject?.data?.id,
           },
-        ],
+        ] : [],
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         createdby: item.createdby,

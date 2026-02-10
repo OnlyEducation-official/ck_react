@@ -71,7 +71,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     // const savedUser = localStorage.getItem("auth_user");
     const savedToken = Cookies.get("auth_token");
     const savedUser = Cookies.get("auth_user");
-    console.log("savedUser:", savedUser)
     if (savedToken) {
       if (isTokenExpired(savedToken)) {
         logout();
@@ -88,8 +87,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   // 🔐 LOGIN FUNCTION
   // -------------------------------------------
   const login = async (email: string, password: string): Promise<boolean> => {
-    
-    console.log("login function", email,password)
 
     try {
       const res = await fetch(`${import.meta.env.VITE_BASE_URL}auth/local`, {
@@ -100,26 +97,24 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           password,
         }),
       });
-      console.log("res:", res)
+
       const data = await res.json();
-
-      console.log("status:", res.status);
-      console.log("data:", data);
-
-      // if (!res.ok) {
-      //   throw new Error(data?.error?.message || "Login failed");
-      // }
-
-      // // ✅ Role restriction
-      // if (data?.user?.role?.name !== "Test Series Teachers Authentication") {
-      //   throw new Error("Access denied: Not a Test Series teacher");
-      // }
-
-      // // ✅ Store JWT only if teacher
       const jwt = data.jwt;
       const user = data.user.email;
       const id = data.user.id;
-      console.log("auth_user:", user)
+
+      const res1 = await fetch(
+        `${import.meta.env.VITE_BASE_URL}users/me?populate=role&fields[0]=id`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+
+      const user1 = await res1.json();
+
+      const role_type = user1.role.type
 
       if (!jwt) {
         throw new Error("Login failed: JWT missing in response");
@@ -139,6 +134,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("auth_token", jwt);
       localStorage.setItem("auth_user", JSON.stringify(user));
       localStorage.setItem("auth_user_id", JSON.stringify(id));
+      localStorage.setItem("role_type", JSON.stringify(role_type));
 
       setToken(jwt);
       setUser(user);

@@ -9,13 +9,15 @@ import {
   Pagination,
   TextField,
   LinearProgress,
+  IconButton,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getResourceByPath } from "../util/resource.js";
 import { searchTopics, type TopicHit } from "../util/topicSearch.js";
 import fetchQuestions from "./fetchQuestions.js";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import HtmlWithMathRenderer from "../GlobalComponent/QuestionRenderer.js";
+import { GetJwt, GetRoleType } from "@/util/utils.js";
 
 export enum RoutesEnum {
   CATEGORIES = "t-categories",
@@ -64,6 +66,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const resource = getResourceByPath(location?.pathname);
+  const jwt_token = GetJwt()
 
   const [list, setList] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<TopicHit[]>([]);
@@ -77,6 +80,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   });
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [afterDelete, setAfterDelete] = useState(false);
   const searchTimer = useRef<number | null>(null);
 
   // Load Strapi Data
@@ -98,7 +102,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
     }
 
     load();
-  }, [routeName, pageState.page, searchQuery]);
+  }, [routeName, pageState.page, searchQuery, afterDelete]);
 
   // Handle Meili search
   const handleSearch = (value: string) => {
@@ -184,6 +188,36 @@ export default function GetAllList({ routeName, lol, title }: Props) {
     displayList = searchResults.slice(start, end);
   } else {
     displayList = list;
+  }
+
+  const handleDelete = async (id: number) => {
+    console.log(id, routeName)
+
+    try {
+
+      // let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`
+      let url = `${import.meta.env.VITE_BASE_URL}${routeName}/${id}`;
+
+      console.log(url)
+
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt_token}`,
+        },
+      });
+
+      if(response.status === 200){
+        setAfterDelete(!afterDelete)
+      }
+
+      console.log("data:", response)
+
+    } catch (error) {
+      console.error(error);
+    }
+
   }
 
   return (
@@ -311,13 +345,10 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                       py: { xs: 1.5, md: 1.75 },
                       px: { xs: 2, md: 2.5 },
                       display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
+                      alignItems: "flex-start",
                       gap: 2,
                       borderBottom:
-                        index === displayList.length - 1
-                          ? "none"
-                          : "1px solid #eee",
+                        index === displayList.length - 1 ? "none" : "1px solid #eee",
                       transition: "0.25s ease",
                       "&:hover": {
                         bgcolor: "action.hover",
@@ -325,14 +356,14 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                       },
                     }}
                   >
+                    {/* LEFT CONTENT */}
                     <Box
                       sx={{
                         display: "flex",
+                        flexDirection: "column",
                         gap: 2,
                         flex: 1,
-                        flexDirection: "column",
                         minWidth: 0,
-                        width: "100%",
                       }}
                     >
                       <Typography
@@ -362,7 +393,6 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                          width: "100%",
                         }}
                       >
                         <Typography variant="subtitle1" color="text.secondary">
@@ -375,26 +405,31 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                             alignItems: "center",
                             color: "primary.main",
                             fontWeight: 600,
-                            cursor: "pointer",
-                            transition: "0.25s ease",
-                            "&:hover": { color: "primary.dark" },
                           }}
                         >
-                          <Typography variant="subtitle2">
-                            View details
-                          </Typography>
-                          <Box
-                            component="span"
-                            sx={{
-                              ml: 0.5,
-                              fontSize: { xs: "1rem", md: "1.1rem" },
-                            }}
-                          >
-                            →
-                          </Box>
+                          <Typography variant="subtitle2">View details</Typography>
+                          <Box component="span" sx={{ ml: 0.5 }}>→</Box>
                         </Box>
                       </Box>
                     </Box>
+
+                    {/* RIGHT DELETE BUTTON */}
+                    {
+                      GetRoleType() &&
+                      <IconButton
+                        edge="end"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation(); // 🔴 IMPORTANT
+                          handleDelete(item.id);
+                        }}
+                        sx={{
+                          mt: 0.5,
+                        }}
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    }
                   </ListItemButton>
                 );
               })
