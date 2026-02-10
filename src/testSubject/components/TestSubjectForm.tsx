@@ -22,7 +22,7 @@ import { toastResponse } from "../../util/toastResponse";
 import AuditModalButton from "@/util/AuditInfoCard";
 import { AuthContext } from "@/context/AuthContext";
 import { getAuditFields } from "@/util/audit";
-import { GetJwt } from "@/util/utils";
+import { GetJwt, GetRoleType } from "@/util/utils";
 
 export const slugify = (text: string): string => {
   return text
@@ -312,6 +312,7 @@ const TestSubjectForm = () => {
                   boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
                 },
               }}
+              disabled={!GetRoleType()}
             >
               {qid ? "Update" : "Submit"}
             </Button>

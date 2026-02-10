@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
-import { GetJwt } from "@/util/utils";
+import { GetJwt, GetRoleType } from "@/util/utils";
 
 const iconOptions: Option[] = [
   { value: "math", label: "Math Icon" },
@@ -327,6 +327,7 @@ const TestExamCategoriesForm = () => {
                   boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
                 },
               }}
+              disabled={!GetRoleType()}
             >
               {id ? "Update" : "Submit"}
             </Button>

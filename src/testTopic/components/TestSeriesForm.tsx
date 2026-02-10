@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext.js";
 import { getAuditFields } from "@/util/audit";
 import AuditModalButton from "@/util/AuditInfoCard";
-import { GetJwt } from "@/util/utils";
+import { GetJwt, GetRoleType } from "@/util/utils";
 
 const TestSeriesForm = () => {
   const { token, logout, user } = useContext(AuthContext);
@@ -421,6 +421,7 @@ const TestSeriesForm = () => {
                 boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
               },
             }}
+            disabled={!GetRoleType()}
           >
             {qid ? "Update" : "Submit"}
           </Button>

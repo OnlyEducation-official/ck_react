@@ -21,7 +21,7 @@ import { toast } from "react-toastify";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
-import { GetJwt } from "@/util/utils";
+import { GetJwt, GetRoleType } from "@/util/utils";
 // ------------------------
 // ZOD SCHEMA
 // ------------------------
@@ -411,6 +411,7 @@ const SubjectChapterForm: React.FC = () => {
                 boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
               },
             }}
+            disabled={!GetRoleType()}
           >
             {qid ? "Update" : "Create"}
           </Button>

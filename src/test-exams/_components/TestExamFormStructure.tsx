@@ -20,7 +20,7 @@ import { toastResponse } from "../../util/toastResponse";
 import { getAuditFields } from "@/util/audit";
 import { AuthContext } from "@/context/AuthContext";
 import AuditModalButton from "@/util/AuditInfoCard";
-import { GetJwt } from "@/util/utils";
+import { GetJwt, GetRoleType } from "@/util/utils";
 
 export default function TestExamFormStructure() {
   const { user } = useContext(AuthContext);
@@ -417,6 +417,7 @@ export default function TestExamFormStructure() {
                   boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
                 },
               }}
+              disabled={!GetRoleType()}
             >
               {id ? "Update Exam " : "Create Exam "}
             </Button>

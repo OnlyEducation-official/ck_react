@@ -289,6 +289,8 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                 fontWeight: 600,
                 width: { xs: 250 },
               }}
+              // disabled={routeName === RoutesEnum.QUESTIONS ? false : GetRoleType()}
+              disabled={GetRoleType() ? false : routeName === RoutesEnum.QUESTIONS ? false : true}
             >
               Add New {resource?.labels?.singular}
             </Button>
