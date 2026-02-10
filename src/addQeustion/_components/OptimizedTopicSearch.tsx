@@ -362,7 +362,7 @@ const OptimizedTopicSearch = <
             <TextField
               {...textFieldProps}
               fullWidth
-              size="small"
+              size="medium"
               label=""
               // error={Boolean(errorMessage)}
               placeholder={placeholder}

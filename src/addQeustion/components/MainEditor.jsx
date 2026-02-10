@@ -41,13 +41,11 @@ import { ImageIdPlugin } from "./imageIdPlugin";
 
 const MainEditor = ({ name, setValue, watch, value, debounceMs = 400 }) => {
   const [editorError, setEditorError] = React.useState(null);
-  console.log("editorError: ", editorError);
   // use watch if provided, else fallback to value prop
   const currentValue = typeof watch === "function" ? watch(name) : value;
   const latestValue = useRef(currentValue ?? "");
   const debounceTimer = useRef(null);
 
-  console.log("currentValue: ", currentValue);
   useEffect(() => {
     latestValue.current = currentValue ?? "";
   }, [currentValue]);
