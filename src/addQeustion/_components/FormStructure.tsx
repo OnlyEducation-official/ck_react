@@ -1,5 +1,5 @@
 import { Box, Button, FormHelperText, Grid, TextField, Typography } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuestionSchema, type QuestionSchemaType } from "../QuestionSchema.js";
@@ -33,7 +33,7 @@ export default function FormStructure() {
     formState: { errors },
   } = useForm<QuestionSchemaType>({
     defaultValues: {
-      input_box:"",
+      input_box: '',
       subject_tag: [],
       test_series_topic: [],
       difficulty: "easy",
@@ -118,10 +118,8 @@ export default function FormStructure() {
 
       const attr = item.attributes;
 
-      console.log("1",attr.input_box)
-
       return {
-        input_box:attr?.input_box,
+        input_box: attr?.input_box,
         question_image:
           attr?.question_image?.map((img: { id: number; url: string }) => {
             return { url: img.url, file: null };
@@ -246,6 +244,7 @@ export default function FormStructure() {
   };
 
   console.log(errors)
+  console.log(watch())
 
   return (
     <Box
@@ -482,13 +481,54 @@ export default function FormStructure() {
             </Grid>
             :
             <Grid size={12}>
-              <SimpleTextField
-                label=""
+              <Controller
                 name="input_box"
                 control={control}
-                rules={{ required: "Please enter in input field" }}
+                rules={{
+                  required: "Please enter a number",
+                  validate: (val) => {
+                    const strVal = String(val);
+                    if (["-", ".", "-."].includes(strVal)) return "Incomplete number";
+                    if (isNaN(Number(strVal))) return "Invalid number";
+                    return true;
+                  }
+                }}
+                render={({ field: { onChange, value, ...field }, fieldState: { error } }) => (
+                  <div style={{ marginBottom: '10px' }}>
+                    <input
+                      {...field}
+                      value={value ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^-?\d*\.?\d*$/.test(val) || val === "") {
+                          onChange(val);
+                        }
+                      }}
+                      placeholder="0.00"
+                      style={{
+                        width: '100%',         // Makes it fill the container width
+                        padding: '12px 16px',  // Adds internal space (height/girth)
+                        fontSize: '1.2rem',    // Makes the text larger
+                        borderRadius: '8px',   // Optional: makes it look modern
+                        border: error ? '2px solid red' : '1px solid #ccc',
+                        boxSizing: 'border-box' // Prevents width overflow
+                      }}
+                    />
+                    {error && (
+                      <span style={{
+                        color: 'red',
+                        fontSize: '0.875rem',
+                        display: 'block',
+                        marginTop: '4px'
+                      }}>
+                        {error.message}
+                      </span>
+                    )}
+                  </div>
+                )}
               />
             </Grid>
+
         }
 
         <Grid size={12}>
@@ -570,7 +610,7 @@ export default function FormStructure() {
           </Button>
         </Grid>
       </Grid>
-    </Box>
+    </Box >
   );
 }
 
