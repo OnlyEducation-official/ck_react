@@ -1,4 +1,4 @@
-import { Box, Button, FormHelperText, Grid, Typography } from "@mui/material";
+import { Box, Button, FormHelperText, Grid, TextField, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +33,7 @@ export default function FormStructure() {
     formState: { errors },
   } = useForm<QuestionSchemaType>({
     defaultValues: {
+      input_box:"",
       subject_tag: [],
       test_series_topic: [],
       difficulty: "easy",
@@ -117,9 +118,10 @@ export default function FormStructure() {
 
       const attr = item.attributes;
 
-      console.log(attr)
+      console.log("1",attr.input_box)
 
       return {
+        input_box:attr?.input_box,
         question_image:
           attr?.question_image?.map((img: { id: number; url: string }) => {
             return { url: img.url, file: null };
@@ -207,6 +209,7 @@ export default function FormStructure() {
         ...wholeData,
         ...audit,
       };
+      console.log(wholeData)
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -241,6 +244,8 @@ export default function FormStructure() {
       setIsSubmitting(false);
     }
   };
+
+  console.log(errors)
 
   return (
     <Box
@@ -464,15 +469,28 @@ export default function FormStructure() {
         </Grid>
 
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        <Grid size={12}>
-          <OptionsFieldArray
-            control={control}
-            setValue={setValue}
-            watch={watch}
-            errors={errors}
-            trigger={trigger}
-          />
-        </Grid>
+        {
+          watch('option_type') !== 'input_box' ?
+            <Grid size={12}>
+              <OptionsFieldArray
+                control={control}
+                setValue={setValue}
+                watch={watch}
+                errors={errors}
+                trigger={trigger}
+              />
+            </Grid>
+            :
+            <Grid size={12}>
+              <SimpleTextField
+                label=""
+                name="input_box"
+                control={control}
+                rules={{ required: "Please enter in input field" }}
+              />
+            </Grid>
+        }
+
         <Grid size={12}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Explaination

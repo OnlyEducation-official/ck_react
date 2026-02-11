@@ -28,13 +28,12 @@ export const difficultyOptions = [
 export const optionTypeData = [
     { label: "Single Select", value: "single_select" },
     { label: "Multi Select", value: "multi_select" },
-    // { label: "Single Select", value: "single_select" },
+    { label: "Input Box", value: "input_box" },
 ];
 export const QuestionOptionType = [
     { label: "Easy", value: "easy" },
     { label: "Medium", value: "medium" },
     { label: "Hard", value: "hard" },
-    // { label: "Single Select", value: "single_select" },
 ];
 
 export const optionLabel = [
