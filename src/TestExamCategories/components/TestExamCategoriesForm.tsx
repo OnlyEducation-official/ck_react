@@ -55,13 +55,14 @@ const TestExamCategoriesForm = () => {
       is_active: true,
       createdby: "",
       updatedby: "",
+      total_marks: 0,
       createdAt: "",
-      updatedAt: ""
+      updatedAt: "",
     },
   });
 
   const { id } = useParams(); // id or undefined
-  const jwt_token = GetJwt()
+  const jwt_token = GetJwt();
 
   useSlugGenerator<TestSeriesExamType>({
     watch,
@@ -78,9 +79,10 @@ const TestExamCategoriesForm = () => {
     if (!id) return; // CREATE mode
 
     const fetchItem = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true&fields[5]=createdAt&fields[6]=updatedAt&fields[7]=createdby&fields[8]=updatedby`;
-      console.log("url:", url)
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true&fields[5]=createdAt&fields[6]=updatedAt&fields[7]=createdby&fields[8]=updatedby&fields[9]=total_marks`;
+      console.log("url:", url);
       const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${jwt_token}`,
@@ -90,13 +92,14 @@ const TestExamCategoriesForm = () => {
       const json = await res.json();
       const item = json.data;
 
-      console.log("item:",item)
+      console.log("item:", item);
 
       reset({
         name: item?.attributes?.name,
         slug: item?.attributes?.slug,
         description: item?.attributes?.description,
         order: item?.attributes?.order,
+        total_marks: item?.attributes?.total_marks,
         is_active: item?.attributes?.is_active,
         createdAt: item?.attributes?.createdAt,
         updatedAt: item?.attributes?.updatedAt,
@@ -116,13 +119,12 @@ const TestExamCategoriesForm = () => {
 
   const onSubmit = async (data: any) => {
     try {
-
       const isEdit = Boolean(id);
 
       data = {
         ...data,
-        ...getAuditFields(isEdit, user)
-      }
+        ...getAuditFields(isEdit, user),
+      };
 
       const res = await fetch(
         isEdit
@@ -137,7 +139,7 @@ const TestExamCategoriesForm = () => {
           body: JSON.stringify({
             data: data,
           }),
-        }
+        },
       );
 
       const success = await toastResponse(
@@ -145,7 +147,7 @@ const TestExamCategoriesForm = () => {
         id
           ? "Updated Exam Category Successfully!"
           : "Created Exam Category Successfully!",
-        id ? "Update Exam Category Failed!" : "Create Exam Category Failed!"
+        id ? "Update Exam Category Failed!" : "Create Exam Category Failed!",
       );
 
       if (!success) return; // ❌ stop if failed
@@ -154,15 +156,13 @@ const TestExamCategoriesForm = () => {
         reset();
         navigate("/test-exams-category-list");
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
   };
 
-  console.log("loloo:", watch())
-
+  console.log("loloo:", watch());
 
   return (
     <Box
@@ -173,8 +173,6 @@ const TestExamCategoriesForm = () => {
         paddingBlock: 4,
       }}
     >
-
-
       <Grid container size={12} spacing={2} alignItems="center">
         <Grid size={12}>
           <Typography
@@ -187,16 +185,20 @@ const TestExamCategoriesForm = () => {
             }}
           >
             {id ? "Edit Exam Category" : "Add Exam Category"}
-
           </Typography>
         </Grid>
 
-        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+        <Grid
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "flex-start", md: "flex-end" },
+          }}
+        >
           <AuditModalButton
-            createdby={watch('createdby')}
-            createdat={watch('createdAt')}
-            updatedby={watch('updatedby')}
-            updatedat={watch('updatedAt')}
+            createdby={watch("createdby")}
+            createdat={watch("createdAt")}
+            updatedby={watch("updatedby")}
+            updatedat={watch("updatedAt")}
           />
         </Grid>
       </Grid>
@@ -256,7 +258,29 @@ const TestExamCategoriesForm = () => {
               }}
             />
           </Grid>
-
+          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+            {/* <SimpleSelectField /> */}
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Total Marks
+              <Typography
+                variant="subtitle1"
+                component="span"
+                color="error"
+                fontWeight={700}
+                marginLeft={0.2}
+              >
+                *
+              </Typography>
+            </Typography>
+            <SimpleTextField
+              name="total_marks"
+              control={control}
+              type="number"
+              // label="Test Series Topic"
+              // options={difficultyOptions}
+              rules={{ required: "Please select a Topic" }}
+            />
+          </Grid>
           {/* ORDER */}
           <Grid size={{ xs: 12, md: 6 }} sx={{ height: "fit-content" }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>

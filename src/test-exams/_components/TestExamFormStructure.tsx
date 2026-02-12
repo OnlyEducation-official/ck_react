@@ -46,34 +46,32 @@ export default function TestExamFormStructure() {
       slug: null,
       description: "",
       test_series_category: 0,
-      marking_negative: 0,
-      marking_positive: 0,
+      // marking_negative: 0,
+      // marking_positive: 0,
       timer: 0,
       test_series_subjects: [],
       difficulty: "Easy",
-      test_series_topics: []
+      test_series_topics: [],
     },
     resolver: zodResolver(examsSchema),
   });
 
-  const jwt_token = GetJwt()
-  
+  const jwt_token = GetJwt();
+
   const onSubmitt = async (data: ExamsSchemaType) => {
     try {
-
       const isEdit = Boolean(id);
 
       // console.log("audit:", isEdit)
 
       const audit = getAuditFields(isEdit, user);
 
-
       data = {
         ...data,
-        ...audit
-      }
+        ...audit,
+      };
 
-      console.log("submit:", data)
+      console.log("submit:", data);
 
       const res = await fetch(
         isEdit
@@ -88,7 +86,7 @@ export default function TestExamFormStructure() {
           body: JSON.stringify({
             data: data,
           }),
-        }
+        },
       );
 
       const success = await toastResponse(
@@ -96,7 +94,7 @@ export default function TestExamFormStructure() {
         id
           ? "Updated Exam Form Successfully!"
           : "Created Exam Form Successfully!",
-        id ? "Update Exam Form Failed!" : "Create Exam Form Failed!"
+        id ? "Update Exam Form Failed!" : "Create Exam Form Failed!",
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
@@ -104,7 +102,6 @@ export default function TestExamFormStructure() {
         reset();
         navigate("/exams-list");
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -116,28 +113,24 @@ export default function TestExamFormStructure() {
 
     const fetchData = async () => {
       try {
-
         setIsLoading(true);
 
         // let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`
-        let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name&fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=timer&fields[4]=marking_negative&fields[5]=marking_positive&fields[6]=createdAt&fields[7]=updatedAt&fields[8]=difficulty&fields[9]=createdby&fields[10]=updatedby`
+        let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name&fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=timer&fields[4]=marking_negative&fields[5]=marking_positive&fields[6]=createdAt&fields[7]=updatedAt&fields[8]=difficulty&fields[9]=createdby&fields[10]=updatedby`;
 
-        console.log(url)
+        console.log(url);
 
-        const response = await fetch(url,
-          {
-            headers: {
-              "Content-Type": "application/json",
+        const response = await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
 
-              Authorization: `Bearer ${jwt_token}`,
-            },
-          }
-        );
+            Authorization: `Bearer ${jwt_token}`,
+          },
+        });
 
         const { data } = await response.json();
 
-        console.log("data:", data)
-
+        console.log("data:", data);
 
         reset({
           createdby: data?.attributes?.createdby,
@@ -149,22 +142,22 @@ export default function TestExamFormStructure() {
           description: data?.attributes?.description,
           test_series_category:
             data?.attributes?.test_series_category?.data?.id,
-          marking_negative: data?.attributes?.marking_negative,
-          marking_positive: data?.attributes?.marking_positive,
+          // marking_negative: data?.attributes?.marking_negative,
+          // marking_positive: data?.attributes?.marking_positive,
           timer: data?.attributes?.timer,
           test_series_subjects:
             data?.attributes?.test_series_subjects?.data?.map(
               (subject: any) => ({
                 id: subject?.id,
                 name: subject?.attributes?.name,
-              })
+              }),
             ),
           difficulty: data?.attributes?.difficulty,
           test_series_topics: data?.attributes?.test_series_topics?.data?.map(
             (topic: any) => ({
               id: topic?.id,
               name: topic?.attributes?.name,
-            })
+            }),
           ),
         });
       } catch (error) {
@@ -188,14 +181,16 @@ export default function TestExamFormStructure() {
   // console.log("watch:", watch(), errors)
 
   return (
-    <Box sx={{ marginBlockStart: 7, bgcolor: "background.paper", paddingInline: { xs: 2, sm: 3, md: 4 }, paddingBlock: 4 }}>
+    <Box
+      sx={{
+        marginBlockStart: 7,
+        bgcolor: "background.paper",
+        paddingInline: { xs: 2, sm: 3, md: 4 },
+        paddingBlock: 4,
+      }}
+    >
       <Box component={"form"} onSubmit={handleSubmit(onSubmitt)}>
-        <Grid
-          container
-          spacing={2}
-        >
-
-
+        <Grid container spacing={2}>
           <Grid container size={12} spacing={2} alignItems="center">
             <Grid size={12}>
               <Typography
@@ -208,16 +203,20 @@ export default function TestExamFormStructure() {
                 }}
               >
                 {id ? "Edit Exam " : "Add Exam "}
-
               </Typography>
             </Grid>
 
-            <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+            <Grid
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "flex-start", md: "flex-end" },
+              }}
+            >
               <AuditModalButton
-                createdby={watch('createdby')}
-                createdat={watch('createdAt')}
-                updatedby={watch('updatedby')}
-                updatedat={watch('updatedAt')}
+                createdby={watch("createdby")}
+                createdat={watch("createdAt")}
+                updatedby={watch("updatedby")}
+                updatedat={watch("updatedAt")}
               />
             </Grid>
           </Grid>
@@ -260,7 +259,11 @@ export default function TestExamFormStructure() {
               control={control}
               rules={{ required: "Slug is required" }}
               disabled
-              sx={{ pointerEvents: "none", cursor: "not-allowed", opacity: 0.6 }}
+              sx={{
+                pointerEvents: "none",
+                cursor: "not-allowed",
+                opacity: 0.6,
+              }}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -292,43 +295,6 @@ export default function TestExamFormStructure() {
                 })) as Option[]
               }
               rules={{ required: "Please select a subject" }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-            {/* <SimpleSelectField /> */}
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Marking Negative
-            </Typography>
-            <SimpleTextField
-              name="marking_negative"
-              control={control}
-              type="number"
-              // label="Test Series Topic"
-              // options={difficultyOptions}
-              rules={{ required: "Please select a Topic" }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-            {/* <SimpleSelectField /> */}
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Marking Positive
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
-            </Typography>
-            <SimpleTextField
-              name="marking_positive"
-              control={control}
-              type="number"
-              // label="Test Series Topic"
-              // options={difficultyOptions}
-              rules={{ required: "Please select a Topic" }}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -427,3 +393,40 @@ export default function TestExamFormStructure() {
     </Box>
   );
 }
+//  <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+//             {/* <SimpleSelectField /> */}
+//             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+//               Marking Negative
+//             </Typography>
+//             <SimpleTextField
+//               name="marking_negative"
+//               control={control}
+//               type="number"
+//               // label="Test Series Topic"
+//               // options={difficultyOptions}
+//               rules={{ required: "Please select a Topic" }}
+//             />
+//           </Grid>
+//           <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+//             {/* <SimpleSelectField /> */}
+//             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+//               Marking Positive
+//               <Typography
+//                 variant="subtitle1"
+//                 component="span"
+//                 color="error"
+//                 fontWeight={700}
+//                 marginLeft={0.2}
+//               >
+//                 *
+//               </Typography>
+//             </Typography>
+//             <SimpleTextField
+//               name="marking_positive"
+//               control={control}
+//               type="number"
+//               // label="Test Series Topic"
+//               // options={difficultyOptions}
+//               rules={{ required: "Please select a Topic" }}
+//             />
+//           </Grid>
