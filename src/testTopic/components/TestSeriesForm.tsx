@@ -30,6 +30,7 @@ import { GetJwt, GetRoleType } from "@/util/utils";
 
 const TestSeriesForm = () => {
   const { token, logout, user } = useContext(AuthContext);
+
   const navigate = useNavigate();
   const {
     control,
@@ -50,8 +51,8 @@ const TestSeriesForm = () => {
       test_series_chapters: [],
       createdby: "",
       updatedby: "",
-      createdAt:"",
-      updatedAt:""
+      createdAt: "",
+      updatedAt: "",
     },
   });
   const { qid } = useParams(); // qid will be string | undefined
@@ -66,56 +67,62 @@ const TestSeriesForm = () => {
     data: { subjectTagData },
   } = useInitialDataContext();
 
-  const jwt_token = GetJwt()  
+  const jwt_token = GetJwt();
 
   useEffect(() => {
     if (!qid) return; // no qid → create mode → don't fetch data
 
     const fetchData = async () => {
+      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=qid&populate[test_series_chapters][fields]=qid&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedAt`;
 
-      let url = `${import.meta.env.VITE_BASE_URL}t-topics/${qid}?fields[0]=name&fields[1]=slug&fields[2]=is_active&fields[3]=order&populate[test_series_subject][fields]=qid&populate[test_series_subject_category][fields]=qid&populate[test_series_chapters][fields]=qid&fields[4]=createdby&fields[5]=createdAt&fields[6]=updatedby&fields[7]=updatedAt`
-
-      const res = await fetch(url,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt_token}`,
-          },
-        }
-      );
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${jwt_token}`,
+        },
+      });
 
       const json = await res.json();
       const item = json?.data?.attributes;
-      
-      console.log(item)
+
+      console.log(item);
+      console.log(
+        "item.test_series_chapters?.data: ",
+        item.test_series_chapters?.data,
+      );
 
       // Load fetched data into form
       reset({
-        createdAt:item.createdAt,
-        updatedAt:item.updatedAt,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
         createdby: item.createdby,
         updatedby: item.updatedby,
         name: item?.name ?? "",
         order: item?.order ?? 0,
         slug: item?.slug ?? null,
         is_active: item?.is_active ?? true,
-        test_series_subject: item.test_series_subject?.data?.attributes?.name ? [
-          {
-            name: item.test_series_subject?.data?.attributes?.name,
-            id: item.test_series_subject?.data?.id ?? 0,
-          },
-        ] : [],
-        test_series_subject_category: item.test_series_subject_category?.data?.attributes?.name ? [
-          {
-            name: item.test_series_subject_category?.data?.attributes?.name,
-            id: item.test_series_subject_category?.data?.id,
-          },
-        ] : [],
-        test_series_chapters: item.test_series_chapters?.data?.map(
-          (chapter: any) => ({
-            id: chapter.id ?? 0,
-            name: chapter?.attributes?.name ?? "",
-          }),
-        ),
+        test_series_subject: item.test_series_subject?.data?.attributes?.name
+          ? [
+              {
+                name: item.test_series_subject?.data?.attributes?.name,
+                id: item.test_series_subject?.data?.id ?? 0,
+              },
+            ]
+          : [],
+        test_series_subject_category: item.test_series_subject_category?.data
+          ?.attributes?.name
+          ? [
+              {
+                name: item.test_series_subject_category?.data?.attributes?.name,
+                id: item.test_series_subject_category?.data?.id,
+              },
+            ]
+          : [],
+        test_series_chapters: item.test_series_chapters?.data
+          ? item.test_series_chapters?.data?.map((chapter: any) => ({
+              id: chapter.id ?? 0,
+              name: chapter?.attributes?.name ?? "",
+            }))
+          : [],
       });
     };
 
@@ -123,18 +130,18 @@ const TestSeriesForm = () => {
   }, [qid, reset]);
   const isActive = watch("is_active");
 
-  console.log(errors)
+  console.log(errors);
 
   const onSubmit = async (data: TestSeriesSchemaType) => {
     try {
       const isEdit = Boolean(qid);
 
-      console.log(isEdit)
+      console.log(isEdit);
       data = {
         ...data,
-        ...getAuditFields(isEdit, user)
-      }
-
+        ...getAuditFields(isEdit, user),
+      };
+      console.log("data: ", data);
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-topics/${qid}`
@@ -155,7 +162,7 @@ const TestSeriesForm = () => {
       const success = await toastResponse(
         res,
         qid ? "Updated Topic Successfully!" : "Created Topic Successfully!",
-        qid ? "Update Topic Failed!" : "Create Topic Failed!"
+        qid ? "Update Topic Failed!" : "Create Topic Failed!",
       );
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
@@ -163,13 +170,11 @@ const TestSeriesForm = () => {
         reset();
         navigate("/test-topic-list");
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
   };
-
 
   return (
     <Box
@@ -182,8 +187,6 @@ const TestSeriesForm = () => {
       component="form"
       onSubmit={handleSubmit(onSubmit)}
     >
-
-
       <Grid container size={12} spacing={2} alignItems="center">
         <Grid size={12}>
           <Typography
@@ -196,20 +199,23 @@ const TestSeriesForm = () => {
             }}
           >
             {qid ? "Edit Topic" : "Add Topic"}
-
           </Typography>
         </Grid>
 
-        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+        <Grid
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "flex-start", md: "flex-end" },
+          }}
+        >
           <AuditModalButton
-            createdby={watch('createdby')}
-            createdat={watch('createdAt')}
-            updatedby={watch('updatedby')}
-            updatedat={watch('updatedAt')}
+            createdby={watch("createdby")}
+            createdat={watch("createdAt")}
+            updatedby={watch("updatedby")}
+            updatedat={watch("updatedAt")}
           />
         </Grid>
       </Grid>
-
 
       <Grid container spacing={3}>
         {/* NAME */}

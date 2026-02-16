@@ -113,6 +113,7 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
+      console.log('item: ', item);
 
       if (!item) throw new Error("Question not found");
 

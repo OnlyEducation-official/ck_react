@@ -116,7 +116,7 @@ export default function TestExamFormStructure() {
         setIsLoading(true);
 
         // let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`
-        let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name&fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=timer&fields[4]=marking_negative&fields[5]=marking_positive&fields[6]=createdAt&fields[7]=updatedAt&fields[8]=difficulty&fields[9]=createdby&fields[10]=updatedby`;
+        let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name&fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=timer&fields[6]=createdAt&fields[7]=updatedAt&fields[8]=difficulty&fields[9]=createdby&fields[10]=updatedby`;
 
         console.log(url);
 
