@@ -206,11 +206,11 @@ const baseSchema = z.object({
     .string()
     .min(1, "Explanation is required."),
 
-  subject_tag: z
+  test_series_subject: z
     .array(z.object({ id: z.number(), name: z.string() }))
     .min(1, "Subject is required"),
 
-  input_box:z.string(),
+  input_box: z.string(),
 
   hint: z
     .string()
@@ -221,7 +221,7 @@ const baseSchema = z.object({
     .array(z.object({ id: z.number(), title: z.string() }))
     .min(1, "At least one test series exam is required"),
 
-  test_series_topic: z
+  test_series_topics: z
     .array(z.object({ id: z.number(), name: z.string() }))
     .min(1, "At least 1 topic is required"),
 

@@ -34,8 +34,8 @@ export default function FormStructure() {
   } = useForm<QuestionSchemaType>({
     defaultValues: {
       input_box: '',
-      subject_tag: [],
-      test_series_topic: [],
+      test_series_subject: [],
+      test_series_topics: [],
       difficulty: "easy",
       hint: "",
       option_type: "single_select",
@@ -103,7 +103,7 @@ export default function FormStructure() {
       qid: number,
     ): Promise<QuestionSchemaType> => {
       const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[subject_tag]=true&populate[test_series_topic]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
+        }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
       const res = await fetch(url, {
         headers: {
@@ -134,22 +134,18 @@ export default function FormStructure() {
         option_type: attr.option_type ?? "single_select",
         hint: attr.hint ?? "",
         question_title: attr.question_title ?? "",
-        subject_tag: attr.subject_tag?.data
+        test_series_subject: attr.test_series_subject?.data
           ? [
             {
-              id: attr.subject_tag.data.id,
-              name: attr.subject_tag.data.attributes.name,
+              id: attr.test_series_subject.data.id,
+              name: attr.test_series_subject.data.attributes.name,
             },
           ]
           : [],
-        test_series_topic: attr.test_series_topic?.data
-          ? [
-            {
-              id: attr.test_series_topic.data.id,
-              name: attr.test_series_topic.data.attributes.name,
-            },
-          ]
-          : [],
+        test_series_topics: attr.test_series_topics?.data?.map((topic: any) => ({
+          id: topic.id,
+          name: topic.attributes.name,
+        })) ?? [],
         test_series_exams:
           attr.test_series_exams?.data?.map((exam: any) => ({
             id: exam.id,
@@ -310,10 +306,10 @@ export default function FormStructure() {
           <OptimizedTopicSearch
             routeName="test-series-subject"
             dropdownType="single"
-            fieldName="subject_tag"
+            fieldName="test_series_subject"
             setValue={setValue}
             watch={watch}
-            errors={errors?.subject_tag?.message}
+            errors={errors?.test_series_subject?.message}
           />
         </Grid>
 
@@ -382,10 +378,10 @@ export default function FormStructure() {
           <OptimizedTopicSearch
             routeName="t-topic"
             dropdownType="multi"
-            fieldName="test_series_topic"
+            fieldName="test_series_topics"
             setValue={setValue}
             watch={watch}
-            errors={errors?.test_series_topic?.message}
+            errors={errors?.test_series_topics?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>

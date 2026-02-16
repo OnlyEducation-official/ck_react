@@ -102,26 +102,26 @@ const TestSeriesForm = () => {
         is_active: item?.is_active ?? true,
         test_series_subject: item.test_series_subject?.data?.attributes?.name
           ? [
-              {
-                name: item.test_series_subject?.data?.attributes?.name,
-                id: item.test_series_subject?.data?.id ?? 0,
-              },
-            ]
+            {
+              name: item.test_series_subject?.data?.attributes?.name,
+              id: item.test_series_subject?.data?.id ?? 0,
+            },
+          ]
           : [],
         test_series_subject_category: item.test_series_subject_category?.data
           ?.attributes?.name
           ? [
-              {
-                name: item.test_series_subject_category?.data?.attributes?.name,
-                id: item.test_series_subject_category?.data?.id,
-              },
-            ]
+            {
+              name: item.test_series_subject_category?.data?.attributes?.name,
+              id: item.test_series_subject_category?.data?.id,
+            },
+          ]
           : [],
         test_series_chapters: item.test_series_chapters?.data
           ? item.test_series_chapters?.data?.map((chapter: any) => ({
-              id: chapter.id ?? 0,
-              name: chapter?.attributes?.name ?? "",
-            }))
+            id: chapter.id ?? 0,
+            name: chapter?.attributes?.name ?? "",
+          }))
           : [],
       });
     };
