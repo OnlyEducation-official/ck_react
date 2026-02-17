@@ -478,6 +478,18 @@ export default function FormStructure() {
             </Grid>
             :
             <Grid size={12}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                Enter Numeric Value
+                <Typography
+                  variant="subtitle1"
+                  component="span"
+                  color="error"
+                  fontWeight={700}
+                  marginLeft={0.2}
+                >
+                  *
+                </Typography>
+              </Typography>
               <Controller
                 name="input_box"
                 control={control}

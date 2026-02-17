@@ -50,7 +50,7 @@ export default async function fetchQuestions<T = any>(
 
   let jwt_token =  localStorage.getItem("auth_token");
 
-  const url = `${import.meta.env.VITE_BASE_URL}${routeName}?pagination[page]=${page}&pagination[pageSize]=10`;
+  const url = `${import.meta.env.VITE_BASE_URL}${routeName}?pagination[page]=${page}&pagination[pageSize]=10&sort=updatedAt:desc`;
 
   try {
     const response = await fetch(url, {

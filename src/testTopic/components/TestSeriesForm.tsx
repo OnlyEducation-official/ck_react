@@ -290,6 +290,7 @@ const TestSeriesForm = () => {
             fieldName="test_series_subject"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_subject?.message}
           />
           {/* <SimpleSelectField
             name="test_series_subject"
@@ -323,6 +324,7 @@ const TestSeriesForm = () => {
             routeName="test-series-subject-categorie"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_subject_category?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
@@ -345,6 +347,7 @@ const TestSeriesForm = () => {
             routeName="test-series-chapter"
             setValue={setValue}
             watch={watch}
+            errors={errors?.test_series_chapters?.message}
           />
         </Grid>
 

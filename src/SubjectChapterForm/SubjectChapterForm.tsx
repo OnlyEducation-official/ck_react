@@ -34,19 +34,10 @@ const TestSchema = z.object({
   slug: z.string().min(1, "Slug is required"),
   is_active: z.boolean(),
   test_series_subject: z
-    .array(
-      z
-        .object({ id: z.number().optional(), name: z.string().optional() })
-        .optional()
-    )
-    .optional(),
+    .array(z.object({ id: z.number().optional(), name: z.string().optional()})).min(1, "Subject is required"),
   test_series_subject_category: z
     .array(
-      z
-        .object({ id: z.number().optional(), name: z.string().optional() })
-        .optional()
-    )
-    .optional(),
+      z.object({ id: z.number().optional(), name: z.string().optional() })).min(1, "Subject Category is required"),
 });
 
 type TestSchemaType = z.infer<typeof TestSchema>;
@@ -326,6 +317,7 @@ const SubjectChapterForm: React.FC = () => {
             watch={watch}
             setValue={setValue}
             placeholder="Search Category…"
+            errors={errors?.test_series_subject?.message}
           />
         </Grid>
 
@@ -351,6 +343,7 @@ const SubjectChapterForm: React.FC = () => {
             watch={watch}
             setValue={setValue}
             placeholder="Search Category…"
+            errors={errors?.test_series_subject_category?.message}
           />
         </Grid>
 

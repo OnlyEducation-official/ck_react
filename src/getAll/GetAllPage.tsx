@@ -18,6 +18,13 @@ import fetchQuestions from "./fetchQuestions.js";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import HtmlWithMathRenderer from "../GlobalComponent/QuestionRenderer.js";
 import { GetJwt, GetRoleType } from "@/util/utils.js";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 
 export enum RoutesEnum {
   CATEGORIES = "t-categories",
@@ -72,6 +79,9 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const [searchResults, setSearchResults] = useState<TopicHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
 
   const [pageState, setPageState] = useState({
     page: 1,
@@ -208,7 +218,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
         },
       });
 
-      if(response.status === 200){
+      if (response.status === 200) {
         setAfterDelete(!afterDelete)
       }
 
@@ -415,7 +425,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                     </Box>
 
                     {/* RIGHT DELETE BUTTON */}
-                    {
+                    {/* {
                       GetRoleType() &&
                       <IconButton
                         edge="end"
@@ -430,7 +440,23 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                       >
                         <DeleteOutlineIcon />
                       </IconButton>
+                    } */}
+                    {
+                      GetRoleType() &&
+                      <IconButton
+                        edge="end"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedId(item.id);
+                          setOpenDeleteModal(true);
+                        }}
+                        sx={{ mt: 0.5 }}
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
                     }
+
                   </ListItemButton>
                 );
               })
@@ -479,6 +505,38 @@ export default function GetAllList({ routeName, lol, title }: Props) {
           />
         </Box>
       </Box>
+
+      <Dialog
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this item? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteModal(false)}>
+            Cancel
+          </Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => {
+              if (selectedId) {
+                handleDelete(selectedId);
+              }
+              setOpenDeleteModal(false);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

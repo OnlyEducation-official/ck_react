@@ -33,16 +33,7 @@ const TestSchema = z.object({
   is_active: z.boolean(),
 
   test_series_subject: z
-    .array(
-      z
-        .object({
-          id: z.number().optional(),
-          name: z.string().optional(),
-        })
-        .optional()
-    )
-    .optional(),
-
+    .array(z.object({ id: z.number().optional(), name: z.string().optional()})).min(1, "Subject is required"),
   test_series_chapters: z
     .array(
       z
@@ -304,7 +295,7 @@ export default function SubjectCategories() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 Subject
-                {/* <Typography
+                <Typography
                   variant="subtitle1"
                   component="span"
                   color="error"
@@ -312,7 +303,7 @@ export default function SubjectCategories() {
                   marginLeft={0.2}
                 >
                   *
-                </Typography> */}
+                </Typography>
               </Typography>
               <OptimizedTopicSearch
                 label=""
@@ -322,6 +313,7 @@ export default function SubjectCategories() {
                 watch={watch}
                 setValue={setValue}
                 placeholder="Search subject..."
+                errors={errors?.test_series_subject?.message}
               />
             </Grid>
 
