@@ -17,6 +17,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"), // ✅ This now works
     },
   },
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (
+          warning.code === "EVAL" &&
+          warning.id?.includes("@wiris/mathtype-html-integration-devkit")
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {
