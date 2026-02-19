@@ -14,6 +14,7 @@ type Props<T extends FieldValues> = {
   watch?: UseFormWatch<T>;
   value?: string;
   height?: number;
+  debounceMs?: number;
 };
 
 export default function EditorComponent<T extends FieldValues>({
@@ -22,40 +23,49 @@ export default function EditorComponent<T extends FieldValues>({
   watch,
   value,
   height = 500,
+  debounceMs = 400,
 }: Props<T>) {
   const editorRef = useRef<TinyMCEEditor | null>(null);
-  const previousExternalValue = useRef<string>("");
+  const latestValue = useRef<string>("");
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const externalValue = typeof watch === "function" ? watch(name) : value;
+  // Same logic as MainEditor
+  const currentValue = typeof watch === "function" ? watch(name) : value;
 
-  // Only sync when external value truly changes (like reset)
   useEffect(() => {
-    if (!editorRef.current) return;
+    latestValue.current = currentValue ?? "";
 
-    if (
-      externalValue !== undefined &&
-      externalValue !== previousExternalValue.current &&
-      editorRef.current.getContent() !== externalValue
-    ) {
-      editorRef.current.setContent(externalValue || "");
-      previousExternalValue.current = externalValue || "";
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      if (editor.getContent() !== latestValue.current) {
+        editor.setContent(latestValue.current);
+      }
     }
-  }, [externalValue]);
+  }, [currentValue]);
+
+  const handleEditorChange = (html: string) => {
+    latestValue.current = html;
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setValue(name, latestValue.current as any, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }, debounceMs);
+  };
 
   return (
     <Editor
       onInit={(_, editor) => {
         editorRef.current = editor;
-        previousExternalValue.current = externalValue || "";
-        editor.setContent(externalValue || "");
+        editor.setContent(latestValue.current ?? "");
       }}
-      onEditorChange={(html) => {
-        // Direct update — no debounce
-        setValue(name, html as any, {
-          shouldDirty: true,
-          shouldValidate: false,
-        });
-      }}
+      initialValue={currentValue ?? ""}
+      onEditorChange={handleEditorChange}
       licenseKey="gpl"
       tinymceScriptSrc="/tinymce/tinymce.min.js"
       scriptLoading={{ async: false }}
