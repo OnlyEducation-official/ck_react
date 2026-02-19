@@ -5,6 +5,7 @@ import {
   type UseFormSetValue,
   type FieldValues,
   type UseFormTrigger,
+  Path,
 } from "react-hook-form";
 import {
   Box,
@@ -22,12 +23,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import type { QuestionSchemaType } from "../QuestionSchema.js";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionLabel } from "../_components/data.js";
+import { QuestionSchema } from "../QuestionSchema.js";
 import EditorComponent from "@/components/EditorComponent.js";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
-  control: Control<T>;
-  setValue: UseFormSetValue<T>;
-  watch: UseFormWatch<T>;
+  control: Control<QuestionSchemaType>;
+  setValue: UseFormSetValue<QuestionSchemaType>;
+  watch: UseFormWatch<QuestionSchemaType>;
   errors: any;
   trigger: UseFormTrigger<QuestionSchemaType>;
 }
@@ -44,6 +46,7 @@ const OptionsFieldArray = <T extends FieldValues>({
     control,
     name: "options" as any,
   });
+  // console.log("watch: question type ", watch());
 
   const handleAddOption = () => {
     // cast to any to satisfy RHF typing
@@ -139,8 +142,10 @@ const OptionsFieldArray = <T extends FieldValues>({
               /> */}
 
               <EditorComponent
-                name={`options.${index}.option`}
-                value={watch(`options.${index}.option` as any)} // ✅ correct
+                name={`options.${index}.option` as Path<QuestionSchemaType>}
+                setValue={setValue}
+                watch={watch}
+                // value={watch(`options.${index}.option` as any)} // ✅ correct
               />
 
               <FormControlLabel
@@ -157,7 +162,7 @@ const OptionsFieldArray = <T extends FieldValues>({
                           shouldValidate: false,
                           shouldDirty: true,
                           shouldTouch: true,
-                        }
+                        },
                       );
                       trigger("options");
                     }}

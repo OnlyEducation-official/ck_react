@@ -1,4 +1,11 @@
-import { Box, Button, FormHelperText, Grid, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +41,7 @@ export default function FormStructure() {
     formState: { errors },
   } = useForm<QuestionSchemaType>({
     defaultValues: {
-      input_box: '',
+      input_box: "",
       test_series_subject: [],
       test_series_topics: [],
       difficulty: "easy",
@@ -59,6 +66,8 @@ export default function FormStructure() {
     },
     resolver: zodResolver(QuestionSchema),
   });
+  console.log("watch: ", watch());
+  console.log("errors: ", errors);
 
   const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,14 +109,15 @@ export default function FormStructure() {
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
-    console.log(errors)
+    console.log(errors);
     const fetchQuestionById = async (
       qid: number,
     ): Promise<QuestionSchemaType> => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
+      const url = `${
+        import.meta.env.VITE_BASE_URL
+      }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
-        console.log(url)
+      console.log(url);
 
       const res = await fetch(url, {
         headers: {
@@ -122,8 +132,7 @@ export default function FormStructure() {
 
       const attr = item.attributes;
 
-      console.log('item: ', attr);
-
+      console.log("item: ", attr);
 
       return {
         input_box: attr?.input_box,
@@ -142,16 +151,17 @@ export default function FormStructure() {
         question_title: attr.question_title ?? "",
         test_series_subject: attr.test_series_subject?.data
           ? [
-            {
-              id: attr.test_series_subject.data.id,
-              name: attr.test_series_subject.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_subject.data.id,
+                name: attr.test_series_subject.data.attributes.name,
+              },
+            ]
           : [],
-        test_series_topics: attr.test_series_topics?.data?.map((topic: any) => ({
-          id: topic.id,
-          name: topic.attributes.name,
-        })) ?? [],
+        test_series_topics:
+          attr.test_series_topics?.data?.map((topic: any) => ({
+            id: topic.id,
+            name: topic.attributes.name,
+          })) ?? [],
         test_series_exams:
           attr.test_series_exams?.data?.map((exam: any) => ({
             id: exam.id,
@@ -165,11 +175,11 @@ export default function FormStructure() {
         ),
         test_series_subject_category: attr.test_series_subject_category?.data
           ? [
-            {
-              id: attr.test_series_subject_category.data.id,
-              name: attr.test_series_subject_category.data.attributes.name,
-            },
-          ]
+              {
+                id: attr.test_series_subject_category.data.id,
+                name: attr.test_series_subject_category.data.attributes.name,
+              },
+            ]
           : [],
         options:
           attr.options?.map((opt: any) => ({
@@ -194,7 +204,7 @@ export default function FormStructure() {
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
-      console.log(data)
+      console.log(data);
       const isEdit = Boolean(qid);
 
       const audit = getAuditFields(isEdit, user);
@@ -211,7 +221,7 @@ export default function FormStructure() {
         ...wholeData,
         ...audit,
       };
-      console.log(wholeData)
+      console.log(wholeData);
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -241,14 +251,13 @@ export default function FormStructure() {
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
-    }
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  console.log(errors)
-  console.log(watch())
+  console.log(errors);
+  console.log(watch("question_title"));
 
   return (
     <Box
@@ -467,7 +476,10 @@ export default function FormStructure() {
 
           <EditorComponent
             name="question_title"
-            value={watch("question_title")}
+            // control={control}
+            setValue={setValue}
+            watch={watch}
+            // value={watch("question_title")}
           />
 
           {/* {errors?.question_title?.message && (
@@ -478,80 +490,84 @@ export default function FormStructure() {
         </Grid>
 
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        {
-          watch('option_type') !== 'input_box' ?
-            <Grid size={12}>
-              <OptionsFieldArray
-                control={control}
-                setValue={setValue}
-                watch={watch}
-                errors={errors}
-                trigger={trigger}
-              />
-            </Grid>
-            :
-            <Grid size={12}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Enter Numeric Value
-                <Typography
-                  variant="subtitle1"
-                  component="span"
-                  color="error"
-                  fontWeight={700}
-                  marginLeft={0.2}
-                >
-                  *
-                </Typography>
+        {watch("option_type") !== "input_box" ? (
+          <Grid size={12}>
+            <OptionsFieldArray
+              control={control}
+              setValue={setValue}
+              watch={watch}
+              errors={errors}
+              trigger={trigger}
+            />
+          </Grid>
+        ) : (
+          <Grid size={12}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Enter Numeric Value
+              <Typography
+                variant="subtitle1"
+                component="span"
+                color="error"
+                fontWeight={700}
+                marginLeft={0.2}
+              >
+                *
               </Typography>
-              <Controller
-                name="input_box"
-                control={control}
-                rules={{
-                  required: "Please enter a number",
-                  validate: (val) => {
-                    const strVal = String(val);
-                    if (["-", ".", "-."].includes(strVal)) return "Incomplete number";
-                    if (isNaN(Number(strVal))) return "Invalid number";
-                    return true;
-                  }
-                }}
-                render={({ field: { onChange, value, ...field }, fieldState: { error } }) => (
-                  <div style={{ marginBottom: '10px' }}>
-                    <input
-                      {...field}
-                      value={value ?? ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (/^-?\d*\.?\d*$/.test(val) || val === "") {
-                          onChange(val);
-                        }
-                      }}
-                      placeholder="0.00"
+            </Typography>
+            <Controller
+              name="input_box"
+              control={control}
+              rules={{
+                required: "Please enter a number",
+                validate: (val) => {
+                  const strVal = String(val);
+                  if (["-", ".", "-."].includes(strVal))
+                    return "Incomplete number";
+                  if (isNaN(Number(strVal))) return "Invalid number";
+                  return true;
+                },
+              }}
+              render={({
+                field: { onChange, value, ...field },
+                fieldState: { error },
+              }) => (
+                <div style={{ marginBottom: "10px" }}>
+                  <input
+                    {...field}
+                    value={value ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^-?\d*\.?\d*$/.test(val) || val === "") {
+                        onChange(val);
+                      }
+                    }}
+                    placeholder="0.00"
+                    style={{
+                      width: "100%", // Makes it fill the container width
+                      padding: "12px 16px", // Adds internal space (height/girth)
+                      fontSize: "1.2rem", // Makes the text larger
+                      borderRadius: "8px", // Optional: makes it look modern
+                      border: error ? "2px solid red" : "1px solid #ccc",
+                      boxSizing: "border-box", // Prevents width overflow
+                    }}
+                  />
+                  {error && (
+                    <span
                       style={{
-                        width: '100%',         // Makes it fill the container width
-                        padding: '12px 16px',  // Adds internal space (height/girth)
-                        fontSize: '1.2rem',    // Makes the text larger
-                        borderRadius: '8px',   // Optional: makes it look modern
-                        border: error ? '2px solid red' : '1px solid #ccc',
-                        boxSizing: 'border-box' // Prevents width overflow
+                        color: "red",
+                        fontSize: "0.875rem",
+                        display: "block",
+                        marginTop: "4px",
                       }}
-                    />
-                    {error && (
-                      <span style={{
-                        color: 'red',
-                        fontSize: '0.875rem',
-                        display: 'block',
-                        marginTop: '4px'
-                      }}>
-                        {error.message}
-                      </span>
-                    )}
-                  </div>
-                )}
-              />
-            </Grid>
-
-        }
+                    >
+                      {error.message}
+                    </span>
+                  )}
+                </div>
+              )}
+            />
+          </Grid>
+        )}
 
         <Grid size={12}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -576,7 +592,10 @@ export default function FormStructure() {
 
           <EditorComponent
             name="explanation"
-            value={watch("explanation")}
+            // control={control}
+            setValue={setValue}
+            watch={watch}
+            // value={watch("explanation")}
           />
           {errors?.explanation?.message && (
             <FormHelperText error={!!errors?.explanation?.message}>
@@ -607,10 +626,12 @@ export default function FormStructure() {
           /> */}
 
           <EditorComponent
+            // control={control}
             name="hint"
-            value={watch("hint")}
+            setValue={setValue}
+            watch={watch}
+            //  value={watch("hint")}
           />
-
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           {/* <FileUploadSection /> */}
@@ -645,7 +666,6 @@ export default function FormStructure() {
           </Button>
         </Grid>
       </Grid>
-    </Box >
+    </Box>
   );
 }
-
