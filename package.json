@@ -20,7 +20,9 @@
     "@mui/material": "^7.3.5",
     "@mui/x-date-pickers": "^8.27.0",
     "@tailwindcss/vite": "^4.1.16",
+    "@tinymce/tinymce-react": "^6.3.0",
     "@wiris/mathtype-ckeditor5": "^8.14.0",
+    "@wiris/mathtype-tinymce6": "^8.15.2",
     "better-react-mathjax": "^2.4.0-beta-1",
     "ckeditor5": "^47.1.0",
     "date-fns": "^4.1.0",
@@ -44,6 +46,7 @@
     "react-toastify": "^11.0.5",
     "strapi-plugin-meilisearch": "^0.13.4",
     "tailwindcss": "^4.1.16",
+    "tinymce": "^8.3.2",
     "zod": "^4.1.12",
     "zustand": "^5.0.9"
   },

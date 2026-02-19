@@ -22,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import type { QuestionSchemaType } from "../QuestionSchema.js";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionLabel } from "../_components/data.js";
+import EditorComponent from "@/components/EditorComponent.js";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
   control: Control<T>;
@@ -130,10 +131,15 @@ const OptionsFieldArray = <T extends FieldValues>({
                 rules={{ required: "Please select a label" }}
               />
 
-              <MainEditor
+              {/* <MainEditor
                 name={`options.${index}.option`}
                 setValue={setValue as any}
                 watch={watch as any}
+                value={watch(`options.${index}.option` as any)} // ✅ correct
+              /> */}
+
+              <EditorComponent
+                name={`options.${index}.option`}
                 value={watch(`options.${index}.option` as any)} // ✅ correct
               />
 

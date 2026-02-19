@@ -18,6 +18,7 @@ import AuditModalButton from "@/util/AuditInfoCard.js";
 // import FileUploadSection2 from "../components/FileUploadSection2.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
+import EditorComponent from "@/components/EditorComponent.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -99,11 +100,14 @@ export default function FormStructure() {
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
+    console.log(errors)
     const fetchQuestionById = async (
       qid: number,
     ): Promise<QuestionSchemaType> => {
       const url = `${import.meta.env.VITE_BASE_URL
         }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
+
+        console.log(url)
 
       const res = await fetch(url, {
         headers: {
@@ -113,11 +117,13 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
-      console.log('item: ', item);
 
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
+
+      console.log('item: ', attr);
+
 
       return {
         input_box: attr?.input_box,
@@ -188,6 +194,7 @@ export default function FormStructure() {
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
+      console.log(data)
       const isEdit = Boolean(qid);
 
       const audit = getAuditFields(isEdit, user);
@@ -451,12 +458,18 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+          {/* <MainEditor
             name="question_title"
             setValue={setValue}
             watch={watch}
             value={watch("question_title")}
+          /> */}
+
+          <EditorComponent
+            name="question_title"
+            value={watch("question_title")}
           />
+
           {/* {errors?.question_title?.message && (
             <FormHelperText error={!!errors?.question_title?.message}>
               {errors?.question_title?.message}
@@ -553,10 +566,16 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+
+          {/* <MainEditor
             name="explanation"
             setValue={setValue}
             watch={watch}
+            value={watch("explanation")}
+          /> */}
+
+          <EditorComponent
+            name="explanation"
             value={watch("explanation")}
           />
           {errors?.explanation?.message && (
@@ -579,12 +598,19 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+
+          {/* <MainEditor
             name="hint"
             setValue={setValue}
             watch={watch}
             value={watch("hint")}
+          /> */}
+
+          <EditorComponent
+            name="hint"
+            value={watch("hint")}
           />
+
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
           {/* <FileUploadSection /> */}
