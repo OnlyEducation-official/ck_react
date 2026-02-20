@@ -1,23 +1,39 @@
-import React, { useEffect, useRef } from "react";
+import React, { useMemo } from "react";
 import DOMPurify from "dompurify";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 
 type Props = {
   html: string;
+  wordLimit?: number;
 };
 
-export default function HtmlWithMathRenderer({ html }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function HtmlWithMathRenderer({ html, wordLimit = 20 }: Props) {
+  const processedHTML = useMemo(() => {
+    // 1️⃣ Sanitize and REMOVE images
+    const sanitized = DOMPurify.sanitize(html, {
+      ADD_TAGS: ["math", "mrow", "mi", "mo", "mn", "msqrt", "mfrac"],
+      ADD_ATTR: ["xmlns"],
+      FORBID_TAGS: ["img"], // 🚫 Remove images completely
+    });
 
-  // Sanitize full HTML string
-  const cleanedHTML = DOMPurify.sanitize(html, {
-    ADD_TAGS: ["math", "mrow", "mi", "mo", "mn", "msqrt", "mfrac",],
-    ADD_ATTR: ["xmlns"],
-  });
+    // 2️⃣ Convert HTML → plain text for word counting
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = sanitized;
+    const textContent = tempDiv.textContent || "";
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-  }, [html]);
+    const words = textContent.trim().split(/\s+/);
+
+    // 3️⃣ If within limit → return sanitized HTML
+    if (words.length <= wordLimit) {
+      return sanitized;
+    }
+
+    // 4️⃣ If exceeds → truncate text and append ...
+    const truncatedText = words.slice(0, wordLimit).join(" ") + "...";
+
+    // Return plain truncated text (safe)
+    return DOMPurify.sanitize(truncatedText);
+  }, [html, wordLimit]);
 
   return (
     <MathJaxContext
@@ -27,12 +43,9 @@ export default function HtmlWithMathRenderer({ html }: Props) {
       }}
     >
       <div
-        ref={containerRef}
         style={{ fontWeight: 700 }}
-        dangerouslySetInnerHTML={{ __html: cleanedHTML }}
+        dangerouslySetInnerHTML={{ __html: processedHTML }}
       />
-
-      {/* Run MathJax over all inserted content */}
       <MathJax dynamic />
     </MathJaxContext>
   );

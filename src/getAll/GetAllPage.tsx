@@ -15,7 +15,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getResourceByPath } from "../util/resource.js";
 import { searchTopics, type TopicHit } from "../util/topicSearch.js";
 import fetchQuestions from "./fetchQuestions.js";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import HtmlWithMathRenderer from "../GlobalComponent/QuestionRenderer.js";
 import { GetJwt, GetRoleType } from "@/util/utils.js";
 import {
@@ -73,7 +73,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const resource = getResourceByPath(location?.pathname);
-  const jwt_token = GetJwt()
+  const jwt_token = GetJwt();
 
   const [list, setList] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<TopicHit[]>([]);
@@ -81,7 +81,6 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
 
   const [pageState, setPageState] = useState({
     page: 1,
@@ -201,14 +200,13 @@ export default function GetAllList({ routeName, lol, title }: Props) {
   }
 
   const handleDelete = async (id: number) => {
-    console.log(id, routeName)
+    console.log(id, routeName);
 
     try {
-
       // let url = `${import.meta.env.VITE_BASE_URL}t-exams/${id}?populate[test_series_category][fields][0]=name&populate[test_series_subjects][fields][0]=name&populate[test_series_topics][fields][0]=name`
       let url = `${import.meta.env.VITE_BASE_URL}${routeName}/${id}`;
 
-      console.log(url)
+      console.log(url);
 
       const response = await fetch(url, {
         method: "DELETE",
@@ -219,16 +217,15 @@ export default function GetAllList({ routeName, lol, title }: Props) {
       });
 
       if (response.status === 200) {
-        setAfterDelete(!afterDelete)
+        setAfterDelete(!afterDelete);
       }
 
-      console.log("data:", response)
-
+      console.log("data:", response);
     } catch (error) {
       console.error(error);
     }
-
-  }
+  };
+  console.log("displayList: ", displayList);
 
   return (
     <Container maxWidth="md">
@@ -299,7 +296,13 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                 fontWeight: 600,
                 width: { xs: 250 },
               }}
-              disabled={GetRoleType() ? false : routeName === RoutesEnum.QUESTIONS ? false : true}
+              disabled={
+                GetRoleType()
+                  ? false
+                  : routeName === RoutesEnum.QUESTIONS
+                    ? false
+                    : true
+              }
             >
               Add New {resource?.labels?.singular}
             </Button>
@@ -359,7 +362,9 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                       alignItems: "flex-start",
                       gap: 2,
                       borderBottom:
-                        index === displayList.length - 1 ? "none" : "1px solid #eee",
+                        index === displayList.length - 1
+                          ? "none"
+                          : "1px solid #eee",
                       transition: "0.25s ease",
                       "&:hover": {
                         bgcolor: "action.hover",
@@ -418,8 +423,12 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                             fontWeight: 600,
                           }}
                         >
-                          <Typography variant="subtitle2">View details</Typography>
-                          <Box component="span" sx={{ ml: 0.5 }}>→</Box>
+                          <Typography variant="subtitle2">
+                            View details
+                          </Typography>
+                          <Box component="span" sx={{ ml: 0.5 }}>
+                            →
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
@@ -441,8 +450,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                         <DeleteOutlineIcon />
                       </IconButton>
                     } */}
-                    {
-                      GetRoleType() &&
+                    {GetRoleType() && (
                       <IconButton
                         edge="end"
                         color="error"
@@ -455,8 +463,7 @@ export default function GetAllList({ routeName, lol, title }: Props) {
                       >
                         <DeleteOutlineIcon />
                       </IconButton>
-                    }
-
+                    )}
                   </ListItemButton>
                 );
               })
@@ -506,22 +513,18 @@ export default function GetAllList({ routeName, lol, title }: Props) {
         </Box>
       </Box>
 
-      <Dialog
-        open={openDeleteModal}
-        onClose={() => setOpenDeleteModal(false)}
-      >
+      <Dialog open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <DialogTitle>Confirm Delete</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this item? This action cannot be undone.
+            Are you sure you want to delete this item? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpenDeleteModal(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpenDeleteModal(false)}>Cancel</Button>
 
           <Button
             color="error"

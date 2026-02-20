@@ -18,6 +18,7 @@ import AuditModalButton from "@/util/AuditInfoCard.js";
 // import FileUploadSection2 from "../components/FileUploadSection2.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
+import EditorComponent from "@/components/EditorComponent.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -59,43 +60,10 @@ export default function FormStructure() {
     resolver: zodResolver(QuestionSchema),
   });
 
+  // console.log('errors', errors);
+
   const jwt_token = GetJwt();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // console.log("jwt_token: ", jwt_token);
-
-  // function extractImages(html) {
-  //   const doc = new DOMParser().parseFromString(html, "text/html");
-  //   return [...doc.querySelectorAll("img")]
-  //     .map((img) => img.src)
-  //     .filter((src) => src.startsWith("data:image"));
-  // }
-  // function extractImagesWithAlt(html) {
-  //   const doc = new DOMParser().parseFromString(html, "text/html");
-  //   const images = doc.querySelectorAll("img");
-
-  //   const imageMap = {};
-
-  //   images.forEach((img, index) => {
-  //     const alt = img.getAttribute("alt")?.trim();
-  //     const src = img.getAttribute("src");
-
-  //     if (!src?.startsWith("data:image")) return;
-
-  //     // Fallback key if alt is missing
-  //     const key = alt && alt.length > 0 ? alt : `image_${index + 1}`;
-
-  //     imageMap[key] = src;
-  //   });
-
-  //   return imageMap;
-  // }
-  // const dataIOmag = extractImages(watch("question_title"));
-  // const dataIOmag = extractImagesWithAlt(watch("question_title"));
-  // console.log('watch("question_title"): ', watch("question_title"));
-  // const rawBase64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
-
-  // console.log("dataIOmag: ", dataIOmag);
-  // console.log("watch: ", watch("question_title"));
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (!qid) return; // CREATE MODE
@@ -105,6 +73,7 @@ export default function FormStructure() {
       const url = `${import.meta.env.VITE_BASE_URL
         }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
+
       const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${jwt_token}`,
@@ -113,14 +82,13 @@ export default function FormStructure() {
 
       const json = await res.json();
       const item = json.data;
-      console.log('item: ', item);
 
       if (!item) throw new Error("Question not found");
 
       const attr = item.attributes;
 
       return {
-        input_box: attr?.input_box,
+        input_box: attr?.input_box || "",
         question_image:
           attr?.question_image?.map((img: { id: number; url: string }) => {
             return { url: img.url, file: null };
@@ -204,7 +172,6 @@ export default function FormStructure() {
         ...wholeData,
         ...audit,
       };
-      console.log(wholeData)
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
@@ -240,8 +207,7 @@ export default function FormStructure() {
     }
   };
 
-  console.log(errors)
-  console.log(watch())
+  console.log(errors);
 
   return (
     <Box
@@ -451,21 +417,23 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+
+          <EditorComponent
             name="question_title"
+            control={control}
+          />
+        </Grid>
+        <Grid size={12}>
+          <OptionsFieldArray
+            control={control}
             setValue={setValue}
             watch={watch}
-            value={watch("question_title")}
+            errors={errors}
+            trigger={trigger}
           />
-          {/* {errors?.question_title?.message && (
-            <FormHelperText error={!!errors?.question_title?.message}>
-              {errors?.question_title?.message}
-            </FormHelperText>
-          )} */}
         </Grid>
-
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        {
+        {/* {
           watch('option_type') !== 'input_box' ?
             <Grid size={12}>
               <OptionsFieldArray
@@ -537,8 +505,7 @@ export default function FormStructure() {
                 )}
               />
             </Grid>
-
-        }
+        } */}
 
         <Grid size={12}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -553,11 +520,10 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+
+          <EditorComponent
             name="explanation"
-            setValue={setValue}
-            watch={watch}
-            value={watch("explanation")}
+            control={control}
           />
           {errors?.explanation?.message && (
             <FormHelperText error={!!errors?.explanation?.message}>
@@ -566,7 +532,6 @@ export default function FormStructure() {
           )}
         </Grid>
         <Grid size={12}>
-          {/* <SimpleSelectField /> */}
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Hint
             <Typography
@@ -579,15 +544,14 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <MainEditor
+
+          <EditorComponent
             name="hint"
-            setValue={setValue}
-            watch={watch}
-            value={watch("hint")}
+            control={control}
           />
+
         </Grid>
         <Grid size={12} sx={{ textAlign: "center", paddingBlock: 2 }}>
-          {/* <FileUploadSection /> */}
           <FileUploadSection2
             control={control}
             watch={watch}
