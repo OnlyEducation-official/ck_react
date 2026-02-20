@@ -26,6 +26,8 @@ import AuditModalButton from "@/util/AuditInfoCard.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
 import EditorComponent from "@/components/EditorComponent.js";
+import { v4 as uuidV4 } from "uuid";
+import BaseRichTextEditor from "@/components/BaseRichTextEditor.js";
 
 export default function FormStructure() {
   const { user } = useContext(AuthContext);
@@ -477,8 +479,11 @@ export default function FormStructure() {
           <EditorComponent
             name="question_title"
             // control={control}
-            setValue={setValue}
-            watch={watch}
+            // setValue={setValue}
+            control={control}
+            // key={uuidV4()}
+            height={400}
+            // watch={watch}
             // value={watch("question_title")}
           />
 
@@ -593,8 +598,10 @@ export default function FormStructure() {
           <EditorComponent
             name="explanation"
             // control={control}
-            setValue={setValue}
-            watch={watch}
+            // setValue={setValue}
+            // watch={watch}
+            // key={uuidV4()}
+            control={control}
             // value={watch("explanation")}
           />
           {errors?.explanation?.message && (
@@ -628,8 +635,10 @@ export default function FormStructure() {
           <EditorComponent
             // control={control}
             name="hint"
-            setValue={setValue}
-            watch={watch}
+            // setValue={setValue}
+            // watch={watch}
+            control={control}
+            // key={uuidV4()}
             //  value={watch("hint")}
           />
         </Grid>

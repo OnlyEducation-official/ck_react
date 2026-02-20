@@ -57,6 +57,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/react-katex": "^3.0.4",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^5.0.4",
     "baseline-browser-mapping": "^2.9.17",
     "eslint": "^9.36.0",

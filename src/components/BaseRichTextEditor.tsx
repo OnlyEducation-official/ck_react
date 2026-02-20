@@ -1,3 +1,4 @@
+// components/form/BaseRichTextEditor.tsx
 import React, { useMemo } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import {
@@ -11,24 +12,24 @@ type Props<T extends FieldValues> = {
   name: Path<T>;
   control: Control<T>;
   height?: number;
+  label?: string;
 };
 
-function EditorComponentInner<T extends FieldValues>({
+function BaseRichTextEditor<T extends FieldValues>({
   name,
   control,
-  height = 500,
+  height = 300,
 }: Props<T>) {
-  // ✅ Memoize config (CRITICAL FIX)
   const editorConfig = useMemo(
     () => ({
       base_url: "/tinymce",
       suffix: ".min",
       height,
-      promotion: false,
       menubar: true,
-      plugins: ["link", "table", "lists", "code", "tiny_mce_wiris", "image"],
+      promotion: false,
+      plugins: ["link", "table", "lists", "code", "image", "tiny_mce_wiris"],
       toolbar:
-        "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | image | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
+        "undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
       verify_html: false,
       extended_valid_elements:
         "math[*],mrow[*],mi[*],mn[*],mo[*],msup[*],msub[*],msubsup[*],mfrac[*],msqrt[*],mroot[*],munder[*],mover[*],munderover[*],ms[*],mtext[*],mtable[*],mtr[*],mtd[*],mstyle[*],semantics[*],annotation[*]",
@@ -49,9 +50,8 @@ function EditorComponentInner<T extends FieldValues>({
         <Editor
           value={field.value || ""}
           onEditorChange={(content) => field.onChange(content)}
-          licenseKey="gpl"
           tinymceScriptSrc="/tinymce/tinymce.min.js"
-          // scriptLoading={{ async: true, defer: true, delay: 0 }}
+          licenseKey="gpl"
           init={editorConfig}
         />
       )}
@@ -59,5 +59,4 @@ function EditorComponentInner<T extends FieldValues>({
   );
 }
 
-// ✅ Prevent unnecessary re-renders
-export default React.memo(EditorComponentInner) as typeof EditorComponentInner;
+export default React.memo(BaseRichTextEditor) as typeof BaseRichTextEditor;

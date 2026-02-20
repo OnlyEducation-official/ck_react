@@ -25,6 +25,7 @@ import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionLabel } from "../_components/data.js";
 import { QuestionSchema } from "../QuestionSchema.js";
 import EditorComponent from "@/components/EditorComponent.js";
+import { v4 as uuidV4 } from "uuid";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
   control: Control<QuestionSchemaType>;
@@ -143,8 +144,10 @@ const OptionsFieldArray = <T extends FieldValues>({
 
               <EditorComponent
                 name={`options.${index}.option` as Path<QuestionSchemaType>}
-                setValue={setValue}
-                watch={watch}
+                // setValue={setValue}
+                control={control}
+                // watch={watch}
+                // key={uuidV4()}
                 // value={watch(`options.${index}.option` as any)} // ✅ correct
               />
 
