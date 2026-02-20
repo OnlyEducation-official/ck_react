@@ -254,7 +254,7 @@ const baseSchema = z.object({
 
 const inputBoxSchema = z.object({
   option_type: z.literal("input_box"),
-  input_box: z.string().min(1, "Please enter answer."),
+  input_box: z.string().optional(),
 });
 
 const singleSelectSchema = z.object({

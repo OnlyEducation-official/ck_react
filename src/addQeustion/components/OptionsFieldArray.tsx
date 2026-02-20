@@ -45,6 +45,8 @@ const OptionsFieldArray = <T extends FieldValues>({
     name: "options" as any,
   });
 
+  console.log('fields', fields);
+
   const handleAddOption = () => {
     // cast to any to satisfy RHF typing
     append({ option_label: "", option: "", is_correct: false } as any);
@@ -139,8 +141,8 @@ const OptionsFieldArray = <T extends FieldValues>({
               /> */}
 
               <EditorComponent
-                name={`options.${index}.option`}
-                value={watch(`options.${index}.option` as any)} // ✅ correct
+                name={`options.${index}.option` as keyof QuestionSchemaType}
+                control={control as unknown as Control<QuestionSchemaType>}
               />
 
               <FormControlLabel
