@@ -60,7 +60,7 @@ export default function FormStructure() {
     resolver: zodResolver(QuestionSchema),
   });
 
-  console.log('errors', errors);
+  // console.log('errors', errors);
 
   const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false)
