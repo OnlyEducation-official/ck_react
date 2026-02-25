@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import { Controller, Control } from "react-hook-form";
 import type { Editor as TinyMCEEditor } from "tinymce";
 import { QuestionSchemaType } from "@/addQeustion/QuestionSchema";
+import { Box, Skeleton } from "@mui/material";
 
 type Props = {
   name: keyof QuestionSchemaType;
@@ -22,6 +23,7 @@ function TinyEditorField({
   const editorRef = useRef<TinyMCEEditor | null>(null);
   const isInitializedRef = useRef(false);
   const lastInternalValue = useRef<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const convertMathMLToWirisImages = (editor: TinyMCEEditor) => {
     setTimeout(() => {
@@ -58,18 +60,12 @@ function TinyEditorField({
           const img = doc.createElement("img");
           img.setAttribute(
             "src",
-            `/wiris-service/showimage?formula=${encoded}`
+            `/wiris-service/showimage?formula=${encoded}`,
           );
           img.setAttribute("data-mathml", mathML);
-          img.setAttribute(
-            "class",
-            "Wirisformula"
-          );
+          img.setAttribute("class", "Wirisformula");
           img.setAttribute("role", "math");
-          img.setAttribute(
-            "alt",
-            mathEl.textContent || "Math formula"
-          );
+          img.setAttribute("alt", mathEl.textContent || "Math formula");
           img.style.maxWidth = "none";
 
           mathEl.parentNode?.replaceChild(img, mathEl);
@@ -96,52 +92,64 @@ function TinyEditorField({
   }, [value]);
 
   return (
-    <Editor
-      licenseKey="gpl"
-      tinymceScriptSrc="/tinymce/tinymce.min.js"
-      onInit={(_, editor) => {
-        editorRef.current = editor;
-        isInitializedRef.current = true;
+    <Box position="relative">
+      {isLoading && (
+        <Skeleton
+          variant="rectangular"
+          height={height}
+          sx={{ borderRadius: 2 }}
+        />
+      )}
+      <Box sx={{ visibility: isLoading ? "hidden" : "visible" }}>
+        <Editor
+          licenseKey="gpl"
+          tinymceScriptSrc="/tinymce/tinymce.min.js"
+          onInit={(_, editor) => {
+            editorRef.current = editor;
+            isInitializedRef.current = true;
 
-        if (value) {
-          // Slight delay to ensure WIRIS plugin is fully loaded inside TinyMCE
-          setTimeout(() => {
-            setContentAndRender(editor, value);
-          }, 300);
-        }
-      }}
-      onEditorChange={(content) => {
-        lastInternalValue.current = content;
-        onChange(content);
-      }}
-      init={{
-        height,
-        promotion: false,
-        plugins: ["link", "table", "lists", "code", "image"],
-        external_plugins: {
-          tiny_mce_wiris: "/tinymce/plugins/tiny_mce_wiris/plugin.min.js",
-        },
-        toolbar:
-          "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | image | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
-        // Critical: allow all MathML tags through TinyMCE's HTML sanitizer
-        extended_valid_elements:
-          "math[*],mrow[*],mi[*],mo[*],mn[*],msup[*],msub[*]," +
-          "mfrac[*],msqrt[*],mroot[*],munder[*],mover[*],munderover[*]," +
-          "mtable[*],mtr[*],mtd[*],mtext[*],mspace[*],menclose[*]," +
-          "semantics[*],annotation[*],annotation-xml[*]",
-        valid_children: "+body[style],+body[math]",
-        // Prevent TinyMCE from mangling xmlns attributes on <math> tags
-        verify_html: false,
-        setup: (editor) => {
-          editor.on("SetContent", ({ content }) => {
-            // Only trigger if the incoming content actually has MathML
-            if (content?.includes("<math")) {
-              convertMathMLToWirisImages(editor);
-            }
-          });
-        },
-      }}
-    />
+            setTimeout(() => {
+              if (value) {
+                // Slight delay to ensure WIRIS plugin is fully loaded inside TinyMCE
+                setContentAndRender(editor, value);
+              }
+              setIsLoading(false);
+            }, 300);
+          }}
+          onEditorChange={(content) => {
+            lastInternalValue.current = content;
+            onChange(content);
+          }}
+          init={{
+            height,
+            promotion: false,
+            plugins: ["link", "table", "lists", "code", "image"],
+            external_plugins: {
+              tiny_mce_wiris: "/tinymce/plugins/tiny_mce_wiris/plugin.min.js",
+            },
+            toolbar:
+              "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist | image | tiny_mce_wiris_formulaEditor tiny_mce_wiris_formulaEditorChemistry",
+            // Critical: allow all MathML tags through TinyMCE's HTML sanitizer
+            extended_valid_elements:
+              "math[*],mrow[*],mi[*],mo[*],mn[*],msup[*],msub[*]," +
+              "mfrac[*],msqrt[*],mroot[*],munder[*],mover[*],munderover[*]," +
+              "mtable[*],mtr[*],mtd[*],mtext[*],mspace[*],menclose[*]," +
+              "semantics[*],annotation[*],annotation-xml[*]",
+            valid_children: "+body[style],+body[math]",
+            // Prevent TinyMCE from mangling xmlns attributes on <math> tags
+            verify_html: false,
+            setup: (editor) => {
+              editor.on("SetContent", ({ content }) => {
+                // Only trigger if the incoming content actually has MathML
+                if (content?.includes("<math")) {
+                  convertMathMLToWirisImages(editor);
+                }
+              });
+            },
+          }}
+        />
+      </Box>
+    </Box>
   );
 }
 

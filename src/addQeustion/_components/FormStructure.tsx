@@ -433,7 +433,7 @@ export default function FormStructure() {
           />
         </Grid>
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        {/* {
+        {
           watch('option_type') !== 'input_box' ?
             <Grid size={12}>
               <OptionsFieldArray
@@ -505,7 +505,7 @@ export default function FormStructure() {
                 )}
               />
             </Grid>
-        } */}
+        }
 
         <Grid size={12}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
