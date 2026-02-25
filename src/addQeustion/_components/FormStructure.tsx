@@ -423,15 +423,6 @@ export default function FormStructure() {
             control={control}
           />
         </Grid>
-        <Grid size={12}>
-          <OptionsFieldArray
-            control={control}
-            setValue={setValue}
-            watch={watch}
-            errors={errors}
-            trigger={trigger}
-          />
-        </Grid>
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
         {
           watch('option_type') !== 'input_box' ?
