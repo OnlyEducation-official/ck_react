@@ -138,16 +138,13 @@ export default function FileUploadSection2({
   setValue,
 }: FileUploadSection2Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  // console.log("previewImage: ", previewImage);
 
-  // const [files, setFiles] = useState<UploadItem[]>([]);
-  // console.log("files: ", files);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  // console.log("error: ", error);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -200,10 +197,17 @@ export default function FileUploadSection2({
     if (!e.target.files) return;
 
     const invalidFiles: string[] = [];
+    const oversizedFiles: string[] = [];
 
     Array.from(e.target.files).forEach((file) => {
       if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
         invalidFiles.push(file.name);
+        return;
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        oversizedFiles.push(
+          `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`,
+        );
         return;
       }
 
@@ -212,13 +216,28 @@ export default function FileUploadSection2({
         url: URL.createObjectURL(file),
       });
     });
+    // 🚨 Set error state properly
+    if (invalidFiles.length > 0) {
+      setError(
+        `Unsupported image format.\nAllowed: ${ALLOWED_EXTENSIONS_TEXT}\n${invalidFiles.join(", ")}`,
+      );
+      return;
+    }
+
+    if (oversizedFiles.length > 0) {
+      setError(`File size must not exceed 5MB.\n${oversizedFiles.join(", ")}`);
+      return;
+    }
+
+    // Clear error if everything is valid
+    setError(null);
 
     if (invalidFiles.length) {
       setError(
         `Unsupported image format.\nAllowed: ${ALLOWED_EXTENSIONS_TEXT}\n${invalidFiles.join(", ")}`,
       );
     }
-
+    setError(null);
     e.target.value = "";
   };
 
@@ -237,7 +256,7 @@ export default function FileUploadSection2({
       update(index, { ...target, deleting: true });
 
       const key = extractS3KeyFromUrl(target.url!);
-
+      setProgress(0);
       await fetch(`${import.meta.env.VITE_AWS_BASE_URL}s3/delete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -247,6 +266,7 @@ export default function FileUploadSection2({
       remove(index);
       setSuccess("Image deleted");
     } catch {
+      setProgress(0);
       update(index, { ...target, deleting: false });
       setError("Delete failed");
     }
@@ -318,9 +338,13 @@ export default function FileUploadSection2({
           ? `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/single`
           : `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/multiple`;
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
 
       if (!res.ok) throw new Error("Upload failed");
@@ -359,17 +383,29 @@ export default function FileUploadSection2({
       setProgress(100);
       setTimeout(() => setProgress(0), 1000);
       setSuccess("Images uploaded successfully");
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        setError("Upload cancelled");
+      } else {
+        console.error(err);
+        setError("Upload failed");
+      }
       setProgress(0);
-      setError("Upload failed");
     } finally {
+      setProgress(0);
       clearInterval(progressInterval);
 
       setLoading(false);
     }
   };
+  const handleCancelUpload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
+    setLoading(false);
+    setProgress(0);
+  };
   const handleConfirmDelete = async () => {
     if (pendingDeleteId === null) return;
 
@@ -472,7 +508,6 @@ export default function FileUploadSection2({
               <TableBody>
                 {fields.map((field, index) => {
                   const image = images?.[index];
-                  // console.log("image: ", image);
                   if (!image) return null;
 
                   const isUploaded = image.url?.startsWith("http");
@@ -594,18 +629,47 @@ export default function FileUploadSection2({
               }}
             />
 
-            <Typography
-              variant="caption"
-              sx={{
-                mt: 0.5,
-                display: "block",
-                textAlign: "right",
-                fontWeight: 500,
-                transition: "opacity 0.3s ease",
-              }}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mt: 1 }}
             >
-              {progress}%
-            </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
+                {progress}%
+              </Typography>
+
+              <Button
+                size="small"
+                color="error"
+                onClick={handleCancelUpload}
+                startIcon={<CloseIcon />}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 2.5,
+                  boxShadow: "none",
+                  transition: "all 0.2s ease",
+
+                  "&:hover": {
+                    boxShadow: 3,
+                    transform: "translateY(-1px)",
+                  },
+
+                  "&:active": {
+                    transform: "translateY(0)",
+                  },
+                }}
+              >
+                Cancel Upload
+              </Button>
+            </Stack>
           </Box>
         )}
 

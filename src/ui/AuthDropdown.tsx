@@ -16,10 +16,11 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonIcon from "@mui/icons-material/Person";
 import { AuthContext } from "@/context/AuthContext";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function AuthDropdown() {
   const { token, logout, user } = React.useContext(AuthContext);
+  const navigate = useNavigate();
   // console.log("user: ", user);
 
   // Replace these with your real values/functions
@@ -89,7 +90,12 @@ export default function AuthDropdown() {
         }}
       >
         {token ? (
-          <Box>
+          <Box
+            onClick={() => {
+              handleClose();
+              navigate("/profile");
+            }}
+          >
             <MenuItem>
               <ListItemIcon>
                 <PersonIcon fontSize="small" />
@@ -98,8 +104,8 @@ export default function AuthDropdown() {
               <Typography
                 variant="subtitle2"
                 noWrap
-                component={Link}
-                to="/profile"
+                // component={Link}
+                // to="/profile"
                 sx={{
                   fontSize: "15px",
                   // flexGrow: 1,
