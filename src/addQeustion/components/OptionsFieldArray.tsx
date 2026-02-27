@@ -45,8 +45,6 @@ const OptionsFieldArray = <T extends FieldValues>({
     name: "options" as any,
   });
 
-  console.log('fields', fields);
-
   const handleAddOption = () => {
     // cast to any to satisfy RHF typing
     append({ option_label: "", option: "", is_correct: false } as any);
@@ -159,7 +157,7 @@ const OptionsFieldArray = <T extends FieldValues>({
                           shouldValidate: false,
                           shouldDirty: true,
                           shouldTouch: true,
-                        }
+                        },
                       );
                       trigger("options");
                     }}
