@@ -36,89 +36,89 @@ function App() {
         <Route
           path="/test-exams-category-list"
           element={
-            <ProtectedRoute>
-              <GetAllList
-                key="/test-exams-category-list"
-                routeName="t-categories"
-                lol="test-exams-category"
-              />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <GetAllList
+              key="/test-exams-category-list"
+              routeName="t-categories"
+              lol="test-exams-category"
+            />
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-exams-category"
           element={
-            <ProtectedRoute>
-              <InitialDataContextProvider>
-                <TestExamCategoriesForm />
-              </InitialDataContextProvider>
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            <InitialDataContextProvider>
+              <TestExamCategoriesForm />
+            </InitialDataContextProvider>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-chapter-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/test-chapter-list"
                 routeName="test-series-chapters"
                 lol="test-chapter"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-chapter"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <SubjectChapterForm />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-chapter/edit/:qid"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <SubjectChapterForm />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-subject-category-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/test-subject-category-list"
                 routeName="test-series-subject-categories"
                 lol="test-subject-category"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-subject-category"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <SubjectCategories />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-subject-category/edit/:qid"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <SubjectCategories />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-exams-category/edit/:id"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 <TestExamCategoriesForm />
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* t-categories */}
@@ -127,34 +127,34 @@ function App() {
         <Route
           path="/questions-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/questions-list"
                 routeName="t-questions"
                 lol="questions"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/questions"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <MeiliDataContextProvide>
                 <QuestionPreview2 />
               </MeiliDataContextProvide>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
 
         <Route
           path="/questions/edit/:qid"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <MeiliDataContextProvide>
                 <QuestionPreview2 />
               </MeiliDataContextProvide>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* t-questions */}
@@ -163,33 +163,33 @@ function App() {
         <Route
           path="/test-subject-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/test-subject-list"
                 routeName="test-series-subjects"
                 lol="test-subject"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-subject"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 <TestSubjectPage />
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-subject/edit/:qid"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 <TestSubjectPage />
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* t-subjects */}
@@ -198,35 +198,35 @@ function App() {
         <Route
           path="/test-topic-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/test-topic-list"
                 routeName="t-topics"
                 lol="test-topic"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-topic"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 {" "}
                 <TestTopicPage />{" "}
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-topic/edit/:qid"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 {" "}
                 <TestTopicPage />{" "}
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* t-topic */}
@@ -235,35 +235,35 @@ function App() {
         <Route
           path="/exams-list"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GetAllList
                 key="/exams-list"
                 routeName="t-exams"
                 lol="test-exams"
               />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-exams"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 {" "}
                 <TestExamsForm />{" "}
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/test-exams/edit/:id"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 {" "}
                 <TestExamsFormEdit />{" "}
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         {/* t-exams */}
@@ -271,12 +271,12 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <InitialDataContextProvider>
                 {" "}
                 <UserProfilePage />{" "}
               </InitialDataContextProvider>
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
 
