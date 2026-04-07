@@ -94,7 +94,8 @@ function DrawerAppBar() {
 
   return (
     <>
-      {token && (
+      {/* {token && ( */}
+      {(
         <Box sx={{ display: "flex" }}>
           <CssBaseline />
 
