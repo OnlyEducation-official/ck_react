@@ -80,7 +80,7 @@ interface QuestionImage {
 }
 
 interface FormValues {
-  question_image: QuestionImage[];
+  images: QuestionImage[];
 }
 
 export interface UploadImage {
@@ -151,7 +151,7 @@ export default function FileUploadSection2({
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const { fields, append, remove, update } = useFieldArray({
     control,
-    name: "question_image",
+    name: "images",
   });
   const startProgressAnimation = () => {
     setProgress(0);
@@ -169,7 +169,7 @@ export default function FileUploadSection2({
 
     return interval;
   };
-  const images = watch("question_image");
+  const images = watch("images");
   useEffect(() => {
     if (success || error) {
       const timer = setTimeout(() => {

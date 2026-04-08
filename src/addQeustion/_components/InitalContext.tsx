@@ -22,15 +22,12 @@ type InitDataState = {
   tExamsData: genericFetchData[];
 };
 
-
-
 type InitDataContextType = {
   data: InitDataState;
   setSubject: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const InitialDataContext = createContext<InitDataContextType | null>(null);
-
 
 // type InitDataContextType = {
 //   subjectTagData: genericFetchData[];
@@ -40,15 +37,13 @@ const InitialDataContext = createContext<InitDataContextType | null>(null);
 // };
 
 const fetchDataFunc = async (url: string) => {
+  // const jwt_token = localStorage.getItem("auth_token");
 
-  const jwt_token = localStorage.getItem("auth_token");
-
-  
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      Authorization:
-        `Bearer ${jwt_token}`,
+      // Authorization:
+      //   `Bearer ${jwt_token}`,
     },
   });
   const data = await response.json();
@@ -60,7 +55,6 @@ export function InitialDataContextProvider({
 }: {
   children: ReactNode;
 }) {
-
   const [data, setData] = useState<InitDataState>({
     subjectTagData: [],
     topicTagData: [],
@@ -73,16 +67,18 @@ export function InitialDataContextProvider({
   useEffect(() => {
     async function dummy() {
       const subjectData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}test-series-subjects?[fields][0]=name&[fields][1]=slug`
+        `${import.meta.env.VITE_BASE_URL}/subjects`,
       );
+      console.log("subjectData: ", subjectData);
+
       const topicData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}t-topics?[fields][0]=name&[fields][1]=slug&filters[test_series_subject][id][$eq]=${subject}&populate[test_series_subject]=true&pagination[page]=1&pagination[pageSize]=1000`
+        `${import.meta.env.VITE_BASE_URL}/topics`,
       );
       const examCategoryData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}t-categories?populate=*`
+        `${import.meta.env.VITE_BASE_URL}/t-categories?populate=*`,
       );
       const tExamsData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}t-exams?[fields][0]=title&[fields][1]=slug`
+        `${import.meta.env.VITE_BASE_URL}/t-exams?[fields][0]=title&[fields][1]=slug`,
       );
 
       setData({
@@ -105,7 +101,9 @@ export function InitialDataContextProvider({
 const useInitialDataContext = () => {
   const ctx = useContext(InitialDataContext);
   if (!ctx) {
-    throw new Error("useInitialDataContext must be used within InitialDataContextProvider");
+    throw new Error(
+      "useInitialDataContext must be used within InitialDataContextProvider",
+    );
   }
   return ctx;
 };

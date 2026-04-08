@@ -1,15 +1,15 @@
 import { z } from "zod";
 
 export const TestSchema = z.object({
-  createdby: z.string(),
-  updatedby: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  // createdby: z.string(),
+  // updatedby: z.string(),
+  // createdAt: z.string(),
+  // updatedAt: z.string(),
   name: z.string().min(1, "Name is required"),
-  slug: z.string().nullable().optional(),
-  order: z.number().nullable().optional(),
+  // slug: z.string().nullable().optional(),
+  // order: z.number().nullable().optional(),
   // test_series_exams: z.number().nullable().optional(),  
-  isActive: z.boolean(),
+  // isActive: z.boolean(),
 
   //   icon: z
   //     .any()

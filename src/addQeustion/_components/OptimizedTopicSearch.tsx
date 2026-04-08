@@ -1,373 +1,137 @@
-import { useEffect, useMemo, useState } from "react";
 import {
   Autocomplete,
   TextField,
   CircularProgress,
   Chip,
   Typography,
-  Box,
 } from "@mui/material";
-// import { searchTopics } from "../../util/topicSearch.ts";
-import { searchTopics } from "../../util/topicSearch";
-import type { SxProps, Theme } from "@mui/material";
-import type { TextFieldProps, AutocompleteProps } from "@mui/material";
-import { UseFormSetValue } from "react-hook-form";
-export type TopicHit = {
+
+import { useEffect, useMemo, useState } from "react";
+
+type Option = {
   id: number;
   name?: string;
-  title?: string;
-  slug?: string;
 };
 
-interface Props<
-  TSchema extends Record<string, any>,
-  TField extends keyof TSchema
-> {
-  routeName: string;
-  fieldName: TField;
-  dropdownType: "single" | "multi";
+type Props<T> = {
+  name: keyof T;
+  label: string;
+  route: string;
+  watch: any;
   setValue: any;
-  // (field: TField, value: TSchema[TField]) => void;
-  watch: (field: TField) => TSchema[TField];
-  // NEW EXTENDED PROPS
-  sx?: SxProps<Theme>;
-  label?: string;
-  placeholder?: string;
-
-  // allow passing additional Autocomplete props
-  autocompleteProps?: Partial<
-    AutocompleteProps<any, boolean, boolean, boolean>
-  >;
-  required?: boolean;
-  showLabel?: boolean;
-  labelSx?: SxProps<Theme>;
-  // allow passing additional TextField props
-  textFieldProps?: Partial<TextFieldProps>;
   errors?: any;
-}
+  dropdownType?: "single" | "multi";
+  required?: boolean;
+};
 
-const OptimizedTopicSearch = <
-  TSchema extends Record<string, any>,
-  TField extends keyof TSchema
->({
-  routeName,
-  dropdownType,
-  fieldName,
-  setValue,
+const SelectField = <T extends Record<string, any>>({
+  name,
+  label,
+  route,
   watch,
-  sx,
-  label = "",
-  placeholder = "",
-  // label,
-  // placeholder = "Type to search…",
-  autocompleteProps,
-  textFieldProps,
+  setValue,
+  errors,
+  dropdownType = "multi",
   required = false,
-  showLabel = true,
-  labelSx,
-  errors
-}: Props<TSchema, TField>) => {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<TopicHit[]>([]);
+}: Props<T>) => {
+  const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  // will store objects (multi-select)
-  const [selectedOptions, setSelectedOptions] = useState<TopicHit[]>([]);
+  const selectedIds = watch(name);
 
-  // ---------------- DEBOUNCE ----------------
+  /**
+   * debounce helper
+   */
   const debounce = (fn: Function, delay = 400) => {
     let timer: any;
+
     return (...args: any[]) => {
       clearTimeout(timer);
       timer = setTimeout(() => fn(...args), delay);
     };
   };
-  useEffect(() => {
-    if (open) {
-      debouncedFetch(query || "");
-    }
-  }, [open]);
-  const debouncedFetch = useMemo(
-    () =>
-      debounce(async (text: string) => {
-        try {
-          setLoading(true);
-          const results = await searchTopics(text, routeName);
-          // setOptions((prev) => {
-          //   const merged = [...results, ...selectedOptions];
-          //   return Array.from(
-          //     new Map(merged.map((item) => [item.id, item])).values()
-          //   );
-          // });
-          setOptions((prev) => {
-            if (dropdownType === "single") {
-              // single → never re-add removed selected option
-              return results;
-            }
 
-            // multi → keep merge logic
-            const merged = [...results, ...selectedOptions];
-            return Array.from(
-              new Map(merged.map((item) => [item.id, item])).values()
-            );
-          });
-        } finally {
-          setLoading(false);
-        }
-      }, 400),
-    [open, routeName, selectedOptions]
-  );
+  /**
+   * fetch options
+   */
+  const fetchOptions = async () => {
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    debouncedFetch(query);
-  }, [query]);
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}${route}`);
 
-  // // ADD THIS USEEFFECT (for edit mode)
-  const fieldValue = watch(fieldName);
-  useEffect(() => {
-    // if (dropdownType !== "multi") return;
-    // if (dropdownType !== "multi") return;
+      if (!res.ok) {
+        throw new Error("Dropdown fetch failed");
+      }
 
-    const defaultValue = fieldValue as TopicHit[];
+      const data = await res.json();
 
-    if (
-      defaultValue &&
-      Array.isArray(defaultValue) &&
-      defaultValue.length > 0
-    ) {
-      setSelectedOptions(defaultValue);
-      setOptions((prev) => {
-        if (dropdownType !== "multi") {
-          return defaultValue;
-        }
-
-        // multi → keep merge logic
-        const merged = [...defaultValue, ...selectedOptions];
-        return Array.from(
-          new Map(merged.map((item) => [item.id, item])).values()
-        );
-      });
-    }
-  }, [fieldValue]);
-
-  const selected = watch(fieldName);
-  const handleSelect = (_: any, value: TopicHit[] | TopicHit | null) => {
-    if (dropdownType === "multi") {
-      const val = value as TopicHit[];
-      setSelectedOptions(val);
-      setValue(fieldName, val as TSchema[TField], { shouldValidate: true });
-    } else {
-      const obj = (value as TopicHit) ?? null;
-
-      // single → store array of one or empty array
-      const arr = obj ? [obj] : [];
-
-      setSelectedOptions(arr);
-      setValue(fieldName, arr as TSchema[TField], { shouldValidate: true });
+      setOptions(data.data);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const autoValue =
-    dropdownType === "single" ? selectedOptions[0] || null : selectedOptions;
+  const debouncedFetch = useMemo(() => debounce(fetchOptions, 400), []);
+
+  useEffect(() => {
+    if (open) debouncedFetch();
+  }, [open]);
+
+  /**
+   * selected objects from stored ids
+   */
+  const selectedObjects =
+    dropdownType === "single"
+      ? options.find((opt) => opt.id === selectedIds) || null
+      : options.filter((opt) => selectedIds?.includes?.(opt.id));
+
+  /**
+   * change handler
+   */
+  const handleChange = (_: any, value: Option | Option[] | null) => {
+    if (dropdownType === "multi") {
+      const arr = (value as Option[]) ?? [];
+
+      setValue(
+        name,
+        arr.map((v) => v.id),
+        { shouldValidate: true },
+      );
+    } else {
+      const obj = value as Option | null;
+
+      setValue(name, obj?.id ?? null, {
+        shouldValidate: true,
+      });
+    }
+  };
+
   return (
     <>
-      {/* <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}> */}
-      {showLabel && (
-        <Typography
-          variant="subtitle1"
-          sx={{ mb: 1.5, fontWeight: 600, ...labelSx }}
-          component="label"
-        >
-          {label}
-          {required && (
-            <Typography component="span" sx={{ color: "red" }}>
-              *
-            </Typography>
-          )}
-        </Typography>
-      )}
-      {/* </Box> */}
+      <Typography sx={{ mb: 1 }}>
+        {label}
+        {required && <span style={{ color: "red" }}> *</span>}
+      </Typography>
 
-      {/* AUTOCOMPLETE FIELD */}
-      <Autocomplete
-        size="small"
+      <Autocomplete<Option, boolean, false, false>
         multiple={dropdownType === "multi"}
-        open={open}
-        sx={{
-          ...sx,
-          // =========================================
-          // 🎯 MULTI SELECT STYLE (chips)
-          // =========================================
-          ...(dropdownType === "multi" && {
-            width: "100%",
-
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              backgroundColor: "#fafafa",
-              transition: "all 0.25s ease",
-              alignItems: "flex-start",
-              paddingTop: "6px !important",
-              paddingBottom: "6px !important",
-              paddingLeft: "10px !important",
-              // minHeight: "48px",
-
-              "& fieldset": { borderColor: "#D0D5DD" },
-              "&:hover fieldset": { borderColor: "#B8BDC5" },
-              "&.Mui-focused fieldset": {
-                borderColor: "primary.main",
-                boxShadow: "0 0 0 3px rgba(25,118,210,0.25)",
-              },
-            },
-
-            "& .MuiAutocomplete-inputRoot": {
-              flexWrap: "wrap !important",
-            },
-
-            "& .MuiChip-root": {
-              margin: "4px 4px 0 0",
-              borderRadius: "8px",
-              backgroundColor: "rgba(25,118,210,0.08)",
-              fontWeight: 700,
-              fontSize: "0.8rem",
-              // paddingInline: "4px",
-            },
-
-            "& .MuiChip-deleteIcon": {
-              color: "#d32f2f !important",
-              fontSize: "18px",
-              "&:hover": { color: "#b71c1c !important" },
-            },
-
-            "& .MuiAutocomplete-clearIndicator": {
-              color: "#d32f2f !important",
-              "&:hover": {
-                backgroundColor: "rgba(211,47,47,0.08)",
-                color: "#b71c1c !important",
-              },
-            },
-
-            "& .MuiAutocomplete-endAdornment": {
-              top: "20px",
-              right: "18px",
-            },
-
-            "& .MuiAutocomplete-paper": {
-              borderRadius: "12px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-            },
-
-            "& .MuiAutocomplete-option": {
-              padding: "10px 14px",
-              fontSize: "0.9rem",
-              borderBottom: "1px solid #f3f3f3",
-              "&:last-of-type": { borderBottom: "none" },
-
-              "&.Mui-focused": { backgroundColor: "rgba(25,118,210,0.08)" },
-              "&.Mui-selected": {
-                backgroundColor: "rgba(25,118,210,0.15) !important",
-                fontWeight: 600,
-              },
-            },
-          }),
-
-          // =========================================
-          // 🎯 SINGLE SELECT STYLE (NO CHIPS)
-          // =========================================
-          ...(dropdownType === "single" && {
-            width: "100%",
-
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "10px",
-              backgroundColor: "#ffffff",
-              transition: "all 0.25s ease",
-              minHeight: "42px",
-              paddingLeft: "10px !important",
-
-              "& fieldset": { borderColor: "#D0D5DD" },
-              "&:hover fieldset": { borderColor: "#B8BDC5" },
-              "&.Mui-focused fieldset": {
-                borderColor: "primary.main",
-                boxShadow: "0 0 0 3px rgba(25,118,210,0.25)",
-              },
-            },
-
-            "& .MuiAutocomplete-inputRoot": {
-              padding: "6px 8px !important",
-            },
-
-            "& .MuiAutocomplete-endAdornment": {
-              top: "50%",
-              transform: "translateY(-50%)",
-              right: "10px",
-            },
-
-            "& .MuiAutocomplete-option": {
-              padding: "10px 14px",
-              fontSize: "0.9rem",
-              borderBottom: "1px solid #f3f3f3",
-              "&:last-of-type": { borderBottom: "none" },
-              "&.Mui-focused": { backgroundColor: "rgba(25,118,210,0.08)" },
-              "&.Mui-selected": {
-                backgroundColor: "rgba(25,118,210,0.15) !important",
-                fontWeight: 600,
-              },
-            },
-
-            // 🚫 No chips in single select
-            // "& .MuiChip-root": { display: "none" },
-          }),
-        }}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        loading={loading}
         options={options}
-        value={autoValue}
-        onChange={handleSelect}
-        onInputChange={(_, val) => setQuery(val)}
-        filterSelectedOptions
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        getOptionLabel={(o) => o.name || o.title || o.slug || `Topic #${o.id}`}
-        {...autocompleteProps} // ← allow overriding Autocomplete props
-        renderTags={(value, getTagProps) =>
-          // dropdownType === "multi"
-          //   ? value.map((option: TopicHit, index: number) => (
-          //       <Chip
-          //         {...getTagProps({ index })}
-          //         label={option.name || `#${option.id}`}
-          //         size="small"
-          //       />
-          //     ))
-          //   : null
-          dropdownType === "multi"
-            ? value.map((option: TopicHit, index: number) => {
-              const tagProps = getTagProps({ index });
-              const { key, ...rest } = tagProps; // ⬅️ remove key from spread
-
-              return (
-                <Chip
-                  key={key} // ⬅️ pass key explicitly (React requirement)
-                  {...rest}
-                  label={option?.name || option?.title || `#${option.id}`}
-                  size="small"
-                />
-              );
-            })
-            : null
-        }
+        loading={loading}
+        value={selectedObjects}
+        onChange={handleChange}
+        isOptionEqualToValue={(o, v) => o.id === v.id}
+        getOptionLabel={(o) => o.name || `#${o.id}`}
         renderInput={(params) => {
-          const { InputProps, inputProps, InputLabelProps, ...rest } = params;
+          const { InputLabelProps, InputProps, inputProps, ...rest } = params;
 
           return (
             <TextField
-              {...textFieldProps}
-              fullWidth
-              size="medium"
-              label=""
-              // error={Boolean(errorMessage)}
-              placeholder={placeholder}
+              {...rest}
+              size="small"
               error={!!errors}
-              helperText={errors || null}
+              helperText={errors || ""}
               InputProps={{
                 ...InputProps,
                 endAdornment: (
@@ -393,4 +157,4 @@ const OptimizedTopicSearch = <
   );
 };
 
-export default OptimizedTopicSearch;
+export default SelectField;

@@ -53,93 +53,84 @@ const TestSubjectForm = () => {
     resolver: zodResolver(TestSchema),
     defaultValues: {
       name: "",
-      slug: null,
-      order: 0,
-      isActive: true,
-      createdby: "",
-      updatedby: "",
-      createdAt: "",
-      updatedAt: ""
+      // slug: null,
+      // order: 0,
+      // isActive: true,
+      // createdby: "",
+      // updatedby: "",
+      // createdAt: "",
+      // updatedAt: ""
     },
   });
+  console.log("errors: ", errors);
 
   const nameValue = watch("name");
-  const jwt_token = GetJwt()
-  
+  // const jwt_token = GetJwt()
 
-  useEffect(() => {
-    if (!nameValue) return;
-    setValue("slug", slugify(nameValue));
-  }, [nameValue, setValue]);
+  // useEffect(() => {
+  //   if (!nameValue) return;
+  //   setValue("slug", slugify(nameValue));
+  // }, [nameValue, setValue]);
 
+  console.log("qid: ", qid);
   useEffect(() => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }test-series-subjects/${qid}?populate=*`;
+      console.log("qid: ", qid);
+      const url = `${import.meta.env.VITE_BASE_URL}subjects/${qid}`;
 
       const res = await fetch(url, {
         headers: {
-          Authorization: `Bearer ${jwt_token}`,
+          "Content-Type": "application/json",
+          // Authorization: `Bearer ${GetJwt()}`,
         },
+        // headers: {
+        //   Authorization: `Bearer ${jwt_token}`,
+        // },
       });
 
       const json = await res.json();
-      const item = json?.data?.attributes;
       reset({
-        name: item?.name ?? "",
-        order: item?.order ?? 0,
-        slug: item?.slug ?? null,
-        isActive: item?.is_active ?? true,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        createdby: item.createdby,
-        updatedby: item.updatedby,
-        // is_active: item?.isActive ?? true,
+        name: json?.data?.name ?? "",
       });
     };
 
     fetchData();
   }, [qid, reset]);
-  const isActive = watch("isActive");
+  // const isActive = watch("isActive");
 
-
-  console.log(errors)
+  console.log(errors);
   const onSubmit = async (data: TestSchemaType) => {
-
     try {
-
-      console.log("data : ", data)
+      console.log("data : ", data);
 
       const isEdit = Boolean(qid);
 
       const audit = getAuditFields(isEdit, user);
 
-      data = {
-        ...data,
-        ...audit
-      }
+      // data = {
+      //   ...data,
+      //   // ...audit,
+      // };
 
       const url = isEdit
-        ? `${import.meta.env.VITE_BASE_URL}test-series-subjects/${qid}`
-        : `${import.meta.env.VITE_BASE_URL}test-series-subjects`;
+        ? `${import.meta.env.VITE_BASE_URL}subjects/${qid}`
+        : `${import.meta.env.VITE_BASE_URL}subjects`;
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt_token}`,
+          // Authorization: `Bearer ${jwt_token}`,
         },
-        body: JSON.stringify({
-          data: data,
-        }),
+        body: JSON.stringify(data),
       });
 
       const success = await toastResponse(
         res,
         `${qid ? "Updated" : "Created"} subject successfully`,
-        " subject is Failed"
+        " subject is Failed",
       );
       const json = await res.json();
       if (!success) return;
@@ -148,7 +139,6 @@ const TestSubjectForm = () => {
         reset();
         navigate("/test-subject-list");
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
@@ -164,8 +154,6 @@ const TestSubjectForm = () => {
         paddingBlock: 4,
       }}
     >
-
-
       <Grid container size={12} spacing={2} alignItems="center">
         <Grid size={12}>
           <Typography
@@ -178,18 +166,22 @@ const TestSubjectForm = () => {
             }}
           >
             {qid ? "Edit Subject" : "Add Subject"}
-
           </Typography>
         </Grid>
 
-        <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+        {/* <Grid
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "flex-start", md: "flex-end" },
+          }}
+        >
           <AuditModalButton
-            createdby={watch('createdby')}
-            createdat={watch('createdAt')}
-            updatedby={watch('updatedby')}
-            updatedat={watch('updatedAt')}
+            createdby={watch("createdby")}
+            createdat={watch("createdAt")}
+            updatedby={watch("updatedby")}
+            updatedat={watch("updatedAt")}
           />
-        </Grid>
+        </Grid> */}
       </Grid>
 
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -216,7 +208,8 @@ const TestSubjectForm = () => {
               fullWidth
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+
+          {/* <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Slug
               <Typography
@@ -243,10 +236,10 @@ const TestSubjectForm = () => {
                 },
               }}
             />
-          </Grid>
+          </Grid> */}
 
           {/* ORDER */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          {/* <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Order
             </Typography>
@@ -261,10 +254,10 @@ const TestSubjectForm = () => {
               noneOption={false}
               rules={{ required: "Select at least one subject" }}
             />
-          </Grid>
+          </Grid> */}
 
           {/* isActive (toggle) */}
-          <Grid
+          {/* <Grid
             size={{ xs: 12, md: 6 }}
             sx={{ display: "flex", alignItems: "center" }}
           >
@@ -278,20 +271,10 @@ const TestSubjectForm = () => {
               label={
                 <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                   Is Active
-                  {/* <Typography
-                    variant="subtitle1"
-                    component="span"
-                    color="error"
-                    fontWeight={700}
-                    ml={0.3}
-                  >
-                    *
-                  </Typography> */}
                 </Typography>
               }
             />
-          </Grid>
-
+          </Grid> */}
           {/* SUBMIT BUTTON */}
           <Grid size={{ xs: 12 }}>
             <Button

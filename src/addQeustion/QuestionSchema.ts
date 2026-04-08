@@ -190,25 +190,18 @@ import {
 //   multiSelectSchema,
 // ]);
 
-
-
 // export type QuestionSchemaType = z.infer<typeof QuestionSchema>;
 
 const baseSchema = z.object({
-  createdby: z.string(),
-  updatedby: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  difficultyLevel: z.enum(["easy", "moderate", "hard"]),
 
-  difficulty: z.enum(["easy", "medium", "hard"]),
+  explanation: z.string().min(1, "Explanation is required."),
 
-  explanation: z
-    .string()
-    .min(1, "Explanation is required."),
-
-  test_series_subject: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .min(1, "Subject is required"),
+  subjectIds: z.array(z.number()).min(1, "Subject is required"),
+  chapterIds: z.array(z.number()).min(1, "Subject is required"),
+  subjectCategoryIds: z.array(z.number()).min(1, "Subject is required"),
+  examCategoryIds: z.array(z.number()).min(1, "Subject is required"),
+  topicIds: z.array(z.number()).min(1, "Subject is required"),
 
   input_box: z.string(),
 
@@ -217,94 +210,78 @@ const baseSchema = z.object({
     .min(1, "Hint is required.")
     .min(19, "Hint must be at least 19 characters long."),
 
-  test_series_exams: z
-    .array(z.object({ id: z.number(), title: z.string() }))
-    .min(1, "At least one test series exam is required"),
-
-  test_series_topics: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .min(1, "At least 1 topic is required"),
-
-  test_series_chapters: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .min(1, "At least 1 Chapter is required"),
-
-  test_series_subject_category: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .min(1, "At least 1 subject Category is required"),
-
-  question_title: z
+  question: z
     .string()
     .min(1, "Question is required.")
     .min(19, "Question must be at least 19 characters long."),
 
-  question_image: z
+  images: z
     .array(
       z.object({
-        file: z
-          .instanceof(File)
-          .nullable()
-          .optional(),
+        file: z.instanceof(File).nullable().optional(),
         url: z.string().url().optional(),
         deleting: z.boolean().optional(),
-      })
+      }),
     )
     .optional(),
 });
 
 const inputBoxSchema = z.object({
-  option_type: z.literal("input_box"),
+  optionType: z.literal("Numerical"),
   input_box: z.string().optional(),
 });
 
-const singleSelectSchema = z.object({
-  option_type: z.literal("single_select"),
-  options: z
-    .array(
-      z.object({
-        option_label: z.string().min(1, "Option label is required"),
-        option: z.string().min(1, "Option text is required"),
-        is_correct: z.boolean(),
-      })
-    )
-    .min(3, "Please add at least 3 options."),
-}).superRefine((data, ctx) => {
-  const correctCount = data.options.filter(o => o.is_correct).length;
+const singleSelectSchema = z
+  .object({
+    optionType: z.literal("Single"),
+    options: z
+      .array(
+        z.object({
+          // option_label: z.string().min(1, "Option label is required"),
+          name: z.string().min(1, "Option text is required"),
+          isCorrect: z.boolean(),
+        }),
+      )
+      .min(3, "Please add at least 3 options."),
+  })
+  .superRefine((data, ctx) => {
+    const correctCount = data.options.filter((o) => o.isCorrect).length;
 
-  if (correctCount !== 1) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Please mark exactly one option as correct.",
-      path: ["options"],
-    });
-  }
-});
+    if (correctCount !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please mark exactly one option as correct.",
+        path: ["options"],
+      });
+    }
+  });
 
-const multiSelectSchema = z.object({
-  option_type: z.literal("multi_select"),
-  options: z
-    .array(
-      z.object({
-        option_label: z.string().min(1, "Option label is required"),
-        option: z.string().min(1, "Option text is required"),
-        is_correct: z.boolean(),
-      })
-    )
-    .min(3, "Please add at least 3 options."),
-}).superRefine((data, ctx) => {
-  const correctCount = data.options.filter(o => o.is_correct).length;
+const multiSelectSchema = z
+  .object({
+    optionType: z.literal("Multiple"),
+    options: z
+      .array(
+        z.object({
+          // option_label: z.string().min(1, "Option label is required"),
+          name: z.string().min(1, "Option text is required"),
+          isCorrect: z.boolean(),
+        }),
+      )
+      .min(3, "Please add at least 3 options."),
+  })
+  .superRefine((data, ctx) => {
+    const correctCount = data.options.filter((o) => o.isCorrect).length;
 
-  if (correctCount < 2) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Please mark at least two options as correct.",
-      path: ["options"],
-    });
-  }
-});
+    if (correctCount < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please mark at least two options as correct.",
+        path: ["options"],
+      });
+    }
+  });
 
-
-const conditionalSchema = z.discriminatedUnion("option_type", [
+const conditionalSchema = z.discriminatedUnion("optionType", [
   inputBoxSchema,
   singleSelectSchema,
   multiSelectSchema,
@@ -315,7 +292,3 @@ const conditionalSchema = z.discriminatedUnion("option_type", [
 
 export const QuestionSchema = baseSchema.and(conditionalSchema);
 export type QuestionSchemaType = z.infer<typeof QuestionSchema>;
-
-
-
-

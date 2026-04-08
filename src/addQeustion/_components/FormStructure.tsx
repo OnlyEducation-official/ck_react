@@ -26,9 +26,10 @@ import AuditModalButton from "@/util/AuditInfoCard.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
 import EditorComponent from "@/components/EditorComponent.js";
+import SelectField from "@/components/SelectField.js";
 
 export default function FormStructure() {
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -42,32 +43,33 @@ export default function FormStructure() {
   } = useForm<QuestionSchemaType>({
     defaultValues: {
       input_box: "",
-      test_series_subject: [],
-      test_series_topics: [],
-      difficulty: "easy",
+      subjectIds: [],
+      topicIds: [],
+      difficultyLevel: "easy",
       hint: "",
-      option_type: "single_select",
+      optionType: "Single",
       explanation: "",
-      test_series_chapters: [],
-      test_series_subject_category: [],
-      test_series_exams: [],
+      chapterIds: [],
+      subjectCategoryIds: [],
+      examCategoryIds: [],
       options: [
-        { option_label: "A", option: "", is_correct: false },
-        { option_label: "B", option: "", is_correct: false },
-        { option_label: "C", option: "", is_correct: false },
-        { option_label: "D", option: "", is_correct: false },
+        {  name : "", isCorrect : false },
+        {  name : "", isCorrect : false },
+        {  name : "", isCorrect : false },
+        {  name : "", isCorrect : false },
       ],
-      question_title: "",
-      question_image: [],
-      createdby: "",
-      updatedby: "",
-      createdAt: "",
-      updatedAt: "",
+      question: "",
+      images: [],
+      // createdby: "",
+      // updatedby: "",
+      // createdAt: "",
+      // updatedAt: "",
     },
     resolver: zodResolver(QuestionSchema),
   });
 
   // console.log('errors', errors);
+    console.log('watch: ', watch());
 
   const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,55 +93,52 @@ export default function FormStructure() {
       const item = json.data;
 
       if (!item) throw new Error("Question not found");
+      console.log("item: ", item);
 
       const attr = item.attributes;
 
       return {
         input_box: attr?.input_box || "",
-        question_image:
+        images:
           attr?.question_image?.map((img: { id: number; url: string }) => {
             return { url: img.url, file: null };
           }) ?? [],
-        createdAt: attr.createdAt,
-        updatedAt: attr.updatedAt,
-        createdby: attr.createdby,
-        updatedby: attr.updatedby,
-        difficulty: attr.difficulty?.toLowerCase(),
+        // createdAt: attr.createdAt,
+        // updatedAt: attr.updatedAt,
+        // createdby: attr.createdby,
+        // updatedby: attr.updatedby,
+        difficultyLevel: attr.difficulty?.toLowerCase(),
         explanation: attr.explanation ?? "",
-        option_type: attr.option_type ?? "single_select",
+        optionType: attr.optionType ?? "Single",
         hint: attr.hint ?? "",
-        question_title: attr.question_title ?? "",
-        test_series_subject: attr.test_series_subject?.data
-          ? [
-              {
-                id: attr.test_series_subject.data.id,
-                name: attr.test_series_subject.data.attributes.name,
-              },
-            ]
+        question: attr.question ?? "",
+        subjectIds: attr?.test_series_subject?.data
+          ? [attr.test_series_subject?.data.id]
           : [],
-        test_series_topics:
+        // test_series_subject: attr.test_series_subject?.data
+        //   ? [
+        //       {
+        //         id: attr.test_series_subject.data.id,
+        //         name: attr.test_series_subject.data.attributes.name,
+        //       },
+        //     ]
+        //   : [],
+        topicIds:
           attr.test_series_topics?.data?.map((topic: any) => ({
             id: topic.id,
             name: topic.attributes.name,
           })) ?? [],
-        test_series_exams:
+        examCategoryIds:
           attr.test_series_exams?.data?.map((exam: any) => ({
             id: exam.id,
             title: exam.attributes.title,
           })) ?? [],
-        test_series_chapters: attr.test_series_chapters?.data?.map(
-          (chapter: any) => ({
-            id: chapter.id,
-            name: chapter.attributes.name,
-          }),
-        ),
-        test_series_subject_category: attr.test_series_subject_category?.data
-          ? [
-              {
-                id: attr.test_series_subject_category.data.id,
-                name: attr.test_series_subject_category.data.attributes.name,
-              },
-            ]
+        chapterIds: attr.test_series_chapters?.data?.map((chapter: any) => ({
+          id: chapter.id,
+          name: chapter.attributes.name,
+        })),
+        subjectCategoryIds: attr.test_series_subject_category?.data
+          ? [attr.test_series_subject_category.data.id]
           : [],
         options:
           attr.options?.map((opt: any) => ({
@@ -160,13 +159,33 @@ export default function FormStructure() {
 
     loadQuestion();
   }, [qid, reset]);
+  const getData = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}subjects`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      // console.log("data:", data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const subjects = getData();
+  // console.log("subjects: ", subjects);
 
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
       const isEdit = Boolean(qid);
 
-      const audit = getAuditFields(isEdit, user);
+      // const audit = getAuditFields(isEdit, user);
       const question_image = data?.question_image?.map((img: any) => {
         return {
           url: img.url,
@@ -178,19 +197,19 @@ export default function FormStructure() {
       };
       data = {
         ...wholeData,
-        ...audit,
+        // ...audit,
       };
 
       const url = isEdit
-        ? `${import.meta.env.VITE_BASE_URL}t-questions/${qid}`
-        : `${import.meta.env.VITE_BASE_URL}t-questions`;
+        ? `${import.meta.env.VITE_BASE_URL}questions/${qid}`
+        : `${import.meta.env.VITE_BASE_URL}questions`;
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt_token}`,
+          // Authorization: `Bearer ${jwt_token}`,
         },
-        body: JSON.stringify({ data: data }),
+        body: JSON.stringify(data),
       });
       const success = await toastResponse(
         response,
@@ -246,7 +265,7 @@ export default function FormStructure() {
             </Typography>
           </Grid>
 
-          <Grid
+          {/* <Grid
             sx={{
               display: "flex",
               justifyContent: { xs: "flex-start", md: "flex-end" },
@@ -258,7 +277,7 @@ export default function FormStructure() {
               updatedby={watch("updatedby")}
               updatedat={watch("updatedAt")}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -274,14 +293,25 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <OptimizedTopicSearch
+
+          <SelectField
+            name="subjectIds"
+            label="Subjects"
+            control={control}
+            route="subjects"
+            // multiple
+            rules={{
+              required: "At least one subject required",
+            }}
+          />
+          {/* <OptimizedTopicSearch
             routeName="test-series-subject"
             dropdownType="single"
             fieldName="test_series_subject"
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_subject?.message}
-          />
+          /> */}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -298,14 +328,25 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <OptimizedTopicSearch
+
+          <SelectField
+            name="subjectCategoryIds"
+            label=""
+            control={control}
+            route="subject-categories"
+            multiple
+            rules={{
+              required: "At least one subject required",
+            }}
+          />
+          {/* <OptimizedTopicSearch
             dropdownType="single"
             fieldName="test_series_subject_category"
             routeName="test-series-subject-categorie"
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_subject_category?.message}
-          />
+          /> */}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -322,14 +363,25 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <OptimizedTopicSearch
+
+          <SelectField
+            name="chapterIds"
+            label=""
+            control={control}
+            route="chapters"
+            multiple
+            rules={{
+              required: "At least one  subject chapter required",
+            }}
+          />
+          {/* <OptimizedTopicSearch
             dropdownType="multi"
             fieldName="test_series_chapters"
             routeName="test-series-chapter"
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_chapters?.message}
-          />
+          /> */}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -346,14 +398,24 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <OptimizedTopicSearch
+          <SelectField
+            name="topicIds"
+            label=""
+            control={control}
+            route="topics"
+            multiple
+            rules={{
+              required: "At least one topic required",
+            }}
+          />
+          {/* <OptimizedTopicSearch
             routeName="t-topic"
             dropdownType="multi"
             fieldName="test_series_topics"
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_topics?.message}
-          />
+          /> */}
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
@@ -362,7 +424,7 @@ export default function FormStructure() {
           </Typography>
           <SimpleSelectField
             label=""
-            name="option_type"
+            name="optionType"
             control={control}
             // label="Test Series Topic"
             options={optionTypeData}
@@ -377,7 +439,7 @@ export default function FormStructure() {
           </Typography>
           <SimpleSelectField
             label=""
-            name="difficulty"
+            name="difficultyLevel"
             control={control}
             // label="Test Series Topic"
             options={QuestionOptionType}
@@ -399,13 +461,23 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <OptimizedTopicSearch
+          {/* <OptimizedTopicSearch
             dropdownType="multi"
             fieldName="test_series_exams"
             routeName="t-exam"
             setValue={setValue}
             watch={watch}
             errors={errors?.test_series_exams?.message}
+          /> */}
+          <SelectField
+            name="examCategoryIds"
+            label=""
+            control={control}
+            route="exam-category"
+            multiple
+            rules={{
+              required: "At least one exam category required",
+            }}
           />
         </Grid>
         {/* ---------- QUESTION FIELD ---------- */}
@@ -423,10 +495,10 @@ export default function FormStructure() {
             </Typography>
           </Typography>
 
-          <EditorComponent name="question_title" control={control} />
+          <EditorComponent name="question" control={control} />
         </Grid>
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        {watch("option_type") !== "input_box" ? (
+        {watch("optionType") !== "Numerical" ? (
           <Grid size={12}>
             <OptionsFieldArray
               control={control}

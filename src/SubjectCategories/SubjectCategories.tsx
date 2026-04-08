@@ -29,8 +29,8 @@ import { GetJwt, GetRoleType } from "@/util/utils";
 // ----------------------------
 const TestSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
-  is_active: z.boolean(),
+  // slug: z.string().min(1, "Slug is required"),
+  // is_active: z.boolean(),
 
   test_series_subject: z
     .array(z.object({ id: z.number().optional(), name: z.string().optional()})).min(1, "Subject is required"),
@@ -44,10 +44,10 @@ const TestSchema = z.object({
         .optional()
     )
     .optional(),
-  createdby: z.string(),
-  updatedby: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  // createdby: z.string(),
+  // updatedby: z.string(),
+  // createdAt: z.string(),
+  // updatedAt: z.string(),
 
   // test_series_questions: z
   //   .array(
@@ -76,37 +76,37 @@ export default function SubjectCategories() {
     resolver: zodResolver(TestSchema),
     defaultValues: {
       name: "",
-      slug: "",
-      is_active: true,
+      // slug: "",
+      // is_active: true,
       test_series_subject: [],
       test_series_chapters: [],
-      createdby: "",
-      updatedby: "",
-      createdAt: "",
-      updatedAt: ""
+      // createdby: "",
+      // updatedby: "",
+      // createdAt: "",
+      // updatedAt: ""
       // test_series_questions: [],
     },
   });
 
-  const nameValue = watch("name");
-  const jwt_token = GetJwt()
+  // const nameValue = watch("name");
+  // const jwt_token = GetJwt()
   
-  useEffect(() => {
-    if (!nameValue) return;
-    setValue("slug", slugify(nameValue));
-  }, [nameValue, setValue]);
+  // useEffect(() => {
+  //   if (!nameValue) return;
+  //   setValue("slug", slugify(nameValue));
+  // }, [nameValue, setValue]);
 
   useEffect(() => {
     if (!qid) return; // create mode
 
     const fetchData = async () => {
       const url = `${import.meta.env.VITE_BASE_URL
-        }test-series-subject-categories/${qid}?populate=*`;
+        }subject-categories/${qid}`;
 
       const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${jwt_token}`,
-        },
+        // headers: {
+          // Authorization: `Bearer ${jwt_token}`,
+        // },
       });
 
       const json = await res.json();
@@ -114,26 +114,26 @@ export default function SubjectCategories() {
 
       reset({
         name: item?.name ?? "",
-        slug: item?.slug ?? null,
-        is_active: item?.is_active ?? false,
-        test_series_subject: item?.test_series_subject?.data
-          ? [
-            {
-              name: item?.test_series_subject?.data?.attributes?.name,
-              id: item?.test_series_subject?.data.id,
-            },
-          ]
-          : [],
-        test_series_chapters: item?.test_series_chapters?.data.map(
-          (chapter: any) => ({
-            name: chapter?.attributes?.name,
-            id: chapter?.id,
-          })
-        ),
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        createdby: item.createdby,
-        updatedby: item.updatedby,
+        // slug: item?.slug ?? null,
+        // is_active: item?.is_active ?? false,
+        // test_series_subject: item?.test_series_subject?.data
+        //   ? [
+        //     {
+        //       name: item?.test_series_subject?.data?.attributes?.name,
+        //       id: item?.test_series_subject?.data.id,
+        //     },
+        //   ]
+        //   : [],
+        // test_series_chapters: item?.test_series_chapters?.data.map(
+        //   (chapter: any) => ({
+        //     name: chapter?.attributes?.name,
+        //     id: chapter?.id,
+        //   })
+        // ),
+        // createdAt: item.createdAt,
+        // updatedAt: item.updatedAt,
+        // createdby: item.createdby,
+        // updatedby: item.updatedby,
         // {
         //   name: item?.test_series_chapters?.data.map(
         //     (item: any) => item?.attributes?.name
@@ -148,24 +148,24 @@ export default function SubjectCategories() {
     fetchData();
   }, [qid, reset]);
 
-  useSlugGenerator({
-    setValue: setValue,
-    watch: watch,
-    source: "name",
-    target: "slug",
-  });
+  // useSlugGenerator({
+  //   setValue: setValue,
+  //   watch: watch,
+  //   source: "name",
+  //   target: "slug",
+  // });
 
   const onSubmit = async (data: TestSchemaType) => {
     try {
 
       const isEdit = Boolean(qid);
 
-      const audit = getAuditFields(isEdit, user);
+      // const audit = getAuditFields(isEdit, user);
 
-      data = {
-        ...data,
-        ...audit
-      }
+      // data = {
+      //   ...data,
+      //   ...audit
+      // }
 
       const url = isEdit
         ? `${import.meta.env.VITE_BASE_URL
@@ -174,13 +174,11 @@ export default function SubjectCategories() {
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt_token}`,
-        },
-        body: JSON.stringify({
-          data: data,
-        }),
+        // headers: {
+        //   "Content-Type": "application/json",
+        //   // Authorization: `Bearer ${jwt_token}`,
+        // },
+        body: JSON.stringify(data),
       });
 
       const success = await toastResponse(
@@ -188,7 +186,7 @@ export default function SubjectCategories() {
         `${qid ? "Updated" : "Created"} Subject Categories successfully`,
         "Subject categories is Failed"
       );
-      const json = await res.json();
+      // const json = await res.json();
       if (!success) return; // ❌ stop if failed
       // 👉 Your next steps (optional)
       if (!qid) {
@@ -225,14 +223,14 @@ export default function SubjectCategories() {
             </Typography>
           </Grid>
 
-          <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          {/* <Grid sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
             <AuditModalButton
               createdby={watch('createdby')}
               createdat={watch('createdAt')}
               updatedby={watch('updatedby')}
               updatedat={watch('updatedAt')}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
 
 
@@ -262,7 +260,7 @@ export default function SubjectCategories() {
             </Grid>
 
             {/* ---------------- SLUG ---------------- */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                 Slug
                 <Typography
@@ -289,7 +287,7 @@ export default function SubjectCategories() {
                   },
                 }}
               />
-            </Grid>
+            </Grid> */}
 
             {/* ---------------- SUBJECT (single) ---------------- */}
             <Grid size={{ xs: 12, md: 6 }}>
@@ -347,7 +345,7 @@ export default function SubjectCategories() {
             </Grid> */}
 
             {/* ---------------- IS ACTIVE SWITCH ---------------- */}
-            <Grid
+            {/* <Grid
               size={{ xs: 12, md: 6 }}
               sx={{ display: "flex", alignItems: "center" }}
             >
@@ -381,7 +379,7 @@ export default function SubjectCategories() {
                   {errors.is_active.message}
                 </Typography>
               )}
-            </Grid>
+            </Grid> */}
 
             {/* ---------------- SUBMIT ---------------- */}
             <Grid size={12}>

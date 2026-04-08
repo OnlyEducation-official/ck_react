@@ -47,7 +47,7 @@ const OptionsFieldArray = <T extends FieldValues>({
 
   const handleAddOption = () => {
     // cast to any to satisfy RHF typing
-    append({ option_label: "", option: "", is_correct: false } as any);
+    append({ name: "", isCorrect: false } as any);
     trigger("options");
   };
 
@@ -122,14 +122,14 @@ const OptionsFieldArray = <T extends FieldValues>({
             </Stack>
 
             <Stack gap={1} sx={{ paddingInline: 2, paddingBlock: 1 }}>
-              <SimpleSelectField
+              {/* <SimpleSelectField
                 label="Option Label"
                 name={`options.${index}.option_label` as any}
                 control={control}
                 options={optionLabel}
                 noneOption={false}
                 rules={{ required: "Please select a label" }}
-              />
+              /> */}
 
               {/* <MainEditor
                 name={`options.${index}.option`}
@@ -139,7 +139,7 @@ const OptionsFieldArray = <T extends FieldValues>({
               /> */}
 
               <EditorComponent
-                name={`options.${index}.option` as keyof QuestionSchemaType}
+                name={`options.${index}.name` as keyof QuestionSchemaType}
                 control={control as unknown as Control<QuestionSchemaType>}
               />
 
@@ -147,11 +147,11 @@ const OptionsFieldArray = <T extends FieldValues>({
                 control={
                   <Checkbox
                     // watch returns unknown; coerce to boolean
-                    checked={!!watch(`options.${index}.is_correct` as any)}
+                    checked={!!watch(`options.${index}.isCorrect` as any)}
                     onChange={(e) => {
                       // cast value param to any to satisfy setValue typing
                       setValue(
-                        `options.${index}.is_correct` as any,
+                        `options.${index}.isCorrect` as any,
                         e.target.checked as any,
                         {
                           shouldValidate: false,
@@ -159,7 +159,8 @@ const OptionsFieldArray = <T extends FieldValues>({
                           shouldTouch: true,
                         },
                       );
-                      trigger("options");
+                      // trigger("options");
+                      trigger(`options.${index}.isCorrect` as any);
                     }}
                   />
                 }

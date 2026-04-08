@@ -26,9 +26,9 @@ export const difficultyOptions = [
 ];
 
 export const optionTypeData = [
-    { label: "Single Select", value: "single_select" },
-    { label: "Multi Select", value: "multi_select" },
-    { label: "Numericals", value: "input_box" },
+    { label: "Single Select", value: "Single" },
+    { label: "Multi Select", value: "Multiple" },
+    { label: "Numericals", value: "Numerical" },
 ];
 export const QuestionOptionType = [
     { label: "Easy", value: "easy" },
