@@ -64,6 +64,7 @@ interface MultipleUploadResponse {
   success: boolean;
   files: UploadedFile[];
 }
+
 const extractImageNameFromUrl = (url: string): string | null => {
   try {
     const parsedUrl = new URL(url);
@@ -80,6 +81,7 @@ const extractImageNameFromUrl = (url: string): string | null => {
     return null;
   }
 };
+
 const extractS3KeyFromUrl = (url: string): string | null => {
   try {
     const parsedUrl = new URL(url);
