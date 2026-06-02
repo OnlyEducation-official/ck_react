@@ -13,6 +13,7 @@ import {
 export type Subject = {
     id: number;
     name: string;
+    question?: string;
     createdAt: string;
     updatedAt: string;
 };
@@ -28,8 +29,27 @@ export type GetAllSubjectsParams = SubjectFilters & {
     limit: number;
 };
 
+export function getAllTopics(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/topics", params);
+}
+export function getAllChapters(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/chapters", params);
+}
+export function getAllSubjectsCategories(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/subject-categories", params);
+}
 export function getAllSubjects(params: GetAllSubjectsParams) {
     return apiGet<PaginatedResponse<Subject>>("/subjects", params);
+}
+export function getAllExams(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/exams", params);
+}
+export function getAllExamCategories(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/exam-category", params);
+}
+
+export function getAllQuestions(params: GetAllSubjectsParams) {
+    return apiGet<PaginatedResponse<Subject>>("/questions", params);
 }
 
 

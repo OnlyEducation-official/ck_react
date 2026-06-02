@@ -41,6 +41,7 @@ function App() {
               key="/test-exams-category-list"
               routeName="t-categories"
               lol="test-exams-category"
+              syllabus="exam-category"
             />
             // </ProtectedRoute>
           }
@@ -59,11 +60,12 @@ function App() {
           path="/test-chapter-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/test-chapter-list"
-                routeName="test-series-chapters"
-                lol="test-chapter"
-              />
+            <GetAllList
+              key="/test-chapter-list"
+              routeName="test-series-chapters"
+              lol="test-chapter"
+              syllabus="chapter"
+            />
             // </ProtectedRoute>
           }
         />
@@ -71,7 +73,7 @@ function App() {
           path="/test-chapter"
           element={
             // <ProtectedRoute>
-              <SubjectChapterForm />
+            <SubjectChapterForm />
             // </ProtectedRoute>
           }
         />
@@ -79,7 +81,7 @@ function App() {
           path="/test-chapter/edit/:qid"
           element={
             // <ProtectedRoute>
-              <SubjectChapterForm />
+            <SubjectChapterForm />
             // </ProtectedRoute>
           }
         />
@@ -87,11 +89,12 @@ function App() {
           path="/test-subject-category-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/test-subject-category-list"
-                routeName="test-series-subject-categories"
-                lol="test-subject-category"
-              />
+            <GetAllList
+              key="/test-subject-category-list"
+              routeName="test-series-subject-categories"
+              lol="test-subject-category"
+              syllabus="subject-category"
+            />
             // </ProtectedRoute>
           }
         />
@@ -99,7 +102,7 @@ function App() {
           path="/test-subject-category"
           element={
             // <ProtectedRoute>
-              <SubjectCategories />
+            <SubjectCategories />
             // </ProtectedRoute>
           }
         />
@@ -107,7 +110,7 @@ function App() {
           path="/test-subject-category/edit/:qid"
           element={
             // <ProtectedRoute>
-              <SubjectCategories />
+            <SubjectCategories />
             // </ProtectedRoute>
           }
         />
@@ -115,9 +118,9 @@ function App() {
           path="/test-exams-category/edit/:id"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                <TestExamCategoriesForm />
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              <TestExamCategoriesForm />
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -128,11 +131,12 @@ function App() {
           path="/questions-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/questions-list"
-                routeName="t-questions"
-                lol="questions"
-              />
+            <GetAllList
+              key="/questions-list"
+              routeName="t-questions"
+              lol="questions"
+              syllabus="question"
+            />
             // </ProtectedRoute>
           }
         />
@@ -140,9 +144,9 @@ function App() {
           path="/questions"
           element={
             // <ProtectedRoute>
-              <MeiliDataContextProvide>
-                <QuestionPreview2 />
-              </MeiliDataContextProvide>
+            <MeiliDataContextProvide>
+              <QuestionPreview2 />
+            </MeiliDataContextProvide>
             // </ProtectedRoute>
           }
         />
@@ -151,9 +155,9 @@ function App() {
           path="/questions/edit/:qid"
           element={
             // <ProtectedRoute>
-              <MeiliDataContextProvide>
-                <QuestionPreview2 />
-              </MeiliDataContextProvide>
+            <MeiliDataContextProvide>
+              <QuestionPreview2 />
+            </MeiliDataContextProvide>
             // </ProtectedRoute>
           }
         />
@@ -164,11 +168,12 @@ function App() {
           path="/test-subject-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/test-subject-list"
-                routeName="test-series-subjects"
-                lol="test-subject"
-              />
+            <GetAllList
+              key="/test-subject-list"
+              routeName="test-series-subjects"
+              lol="test-subject"
+              syllabus="subject"
+            />
             // </ProtectedRoute>
           }
         />
@@ -176,9 +181,9 @@ function App() {
           path="/test-subject"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                <TestSubjectPage />
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -186,9 +191,9 @@ function App() {
           path="/test-subject/edit/:qid"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                <TestSubjectPage />
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              <TestSubjectPage />
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -199,11 +204,12 @@ function App() {
           path="/test-topic-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/test-topic-list"
-                routeName="t-topics"
-                lol="test-topic"
-              />
+            <GetAllList
+              key="/test-topic-list"
+              routeName="t-topics"
+              lol="test-topic"
+              syllabus="topic"
+            />
             // </ProtectedRoute>
           }
         />
@@ -211,10 +217,10 @@ function App() {
           path="/test-topic"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                {" "}
-                <TestTopicPage />{" "}
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              {" "}
+              <TestTopicPage />{" "}
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -222,10 +228,10 @@ function App() {
           path="/test-topic/edit/:qid"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                {" "}
-                <TestTopicPage />{" "}
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              {" "}
+              <TestTopicPage />{" "}
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -236,11 +242,12 @@ function App() {
           path="/exams-list"
           element={
             // <ProtectedRoute>
-              <GetAllList
-                key="/exams-list"
-                routeName="t-exams"
-                lol="test-exams"
-              />
+            <GetAllList
+              key="/exams-list"
+              routeName="t-exams"
+              lol="test-exams"
+              syllabus="exam"
+            />
             // </ProtectedRoute>
           }
         />
@@ -248,10 +255,10 @@ function App() {
           path="/test-exams"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                {" "}
-                <TestExamsForm />{" "}
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              {" "}
+              <TestExamsForm />{" "}
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -259,10 +266,10 @@ function App() {
           path="/test-exams/edit/:id"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                {" "}
-                <TestExamsFormEdit />{" "}
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              {" "}
+              <TestExamsFormEdit />{" "}
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />
@@ -272,10 +279,10 @@ function App() {
           path="/profile"
           element={
             // <ProtectedRoute>
-              <InitialDataContextProvider>
-                {" "}
-                <UserProfilePage />{" "}
-              </InitialDataContextProvider>
+            <InitialDataContextProvider>
+              {" "}
+              <UserProfilePage />{" "}
+            </InitialDataContextProvider>
             // </ProtectedRoute>
           }
         />

@@ -22,10 +22,11 @@ import { toast } from "react-toastify";
 
 import { GetRoleType } from "@/util/utils";
 import { deleteApi, type SubjectFilters } from "./api/subjectApi";
-import { useSubjects } from "./hooks/getAllSubject";
+import { useSyllabusData } from "./hooks/getAllSubject";
 import SearchFilter from "./components/SearchFilter";
+import { Syllabus } from "./GetAllPage";
 
-export default function GetAllListComp({ pageRoute }: { pageRoute: string }) {
+export default function GetAllListComp({ pageRoute, syllabus }: { pageRoute: string; syllabus: Syllabus }) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -37,10 +38,11 @@ export default function GetAllListComp({ pageRoute }: { pageRoute: string }) {
         null
     );
 
-    const { data, isLoading, pagination, setPage } = useSubjects({
+    const { data, isLoading, pagination, setPage } = useSyllabusData({
         params: filters,
         initialPage: 1,
         initialLimit: 10,
+        syllabus: syllabus
     });
 
     const subjects = data?.data ?? [];
@@ -138,7 +140,7 @@ export default function GetAllListComp({ pageRoute }: { pageRoute: string }) {
                                             fontSize: { xs: "0.9rem", md: "1rem" },
                                         }}
                                     >
-                                        <HtmlWithMathRenderer html={item.name} />
+                                        <HtmlWithMathRenderer html={item.name || item?.question || ""} />
                                     </Typography>
 
                                     <Box
