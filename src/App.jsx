@@ -19,6 +19,8 @@ import PublicRoute from "./GlobalComponent/PublicRoute.js";
 import NotFound from "./pages/NotFound.js";
 import HomePageRedirect from "./pages/HomePageRedirect.js";
 import UserProfilePage from "./profile/UserProfilePage.js"
+import AddUsers from "./Users/AddUsers/AddUsers.js"
+import AllUsers from "./Users/AllUsers/AllUsers.js"
 // import SubjectCategories from './SubjectCategories/'
 
 function App() {
@@ -31,6 +33,9 @@ function App() {
         <Route path="*" element={<NotFound />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<HomePageRedirect />} />
+
+        <Route path="/all-users" element={<AllUsers />} />
+        <Route path="/add-users" element={<AddUsers /> } />
 
         {/* t-categories */}
         <Route

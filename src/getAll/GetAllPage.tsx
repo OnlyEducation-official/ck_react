@@ -51,7 +51,6 @@ function getRouteType(routeName: RoutesEnum): string {
 }
 
 export default function GetAllList({ routeName, lol, title }: Props) {
-  console.log(lol);
   const { isLoading, pagination } = useSubjects();
 
   // ✅ FULL-SCREEN CENTERED LOADER (UPDATED)

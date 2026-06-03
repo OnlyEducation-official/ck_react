@@ -25,6 +25,10 @@ import {
 } from "lucide-react";
 const sidebarData = [
   {
+    label: "All Users",
+    url: "/all-users",
+  },
+  {
     label: "Exams Category",
     url: "/test-exams-category-list",
     icon: FolderTree,
