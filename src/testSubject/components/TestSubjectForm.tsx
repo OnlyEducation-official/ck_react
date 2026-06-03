@@ -103,7 +103,6 @@ const TestSubjectForm = () => {
   console.log(errors);
   const onSubmit = async (data: TestSchemaType) => {
     try {
-      console.log("data : ", data);
 
       const isEdit = Boolean(qid);
 
@@ -115,8 +114,9 @@ const TestSubjectForm = () => {
       // };
 
       const url = isEdit
-        ? `${import.meta.env.VITE_BASE_URL}subjects/${qid}`
-        : `${import.meta.env.VITE_BASE_URL}subjects`;
+      ? `${import.meta.env.VITE_BASE_URL}subjects/${qid}`
+      : `${import.meta.env.VITE_BASE_URL}subjects`;
+      
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
@@ -126,6 +126,9 @@ const TestSubjectForm = () => {
         },
         body: JSON.stringify(data),
       });
+
+      console.log("url : ", res);
+
 
       const success = await toastResponse(
         res,

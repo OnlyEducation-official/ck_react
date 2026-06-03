@@ -62,6 +62,10 @@ function DrawerAppBar() {
   const { token } = useContext(AuthContext);
   const navBtn = [
     {
+      label: "All Users",
+      url: "/all-users",
+    },
+    {
       label: "Exams Category",
       url: "/test-exams-category-list",
     },
