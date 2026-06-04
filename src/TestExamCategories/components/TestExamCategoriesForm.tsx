@@ -1,168 +1,89 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Grid,
-  Box,
-  Typography,
-  Button,
-  FormControlLabel,
-  Switch,
-} from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import SimpleSelectField, {
-  Option,
-} from "../../GlobalComponent/SimpleSelectField";
-import {
-  TestExamSchema,
-  TestSeriesExamType,
-} from "../../validation/testSeriesExamCategorySchema";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import useInitialDataContext from "../../addQeustion/_components/InitalContext";
-import { useContext, useEffect } from "react";
-import { useSlugGenerator } from "../../hooks/useSlugGenerator";
-import { slugify } from "../../testSubject/components/TestSubjectForm";
-import { toastResponse } from "../../util/toastResponse";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { getAuditFields } from "@/util/audit";
-import { AuthContext } from "@/context/AuthContext";
-import AuditModalButton from "@/util/AuditInfoCard";
-import { GetJwt, GetRoleType } from "@/util/utils";
+import { GetRoleType } from "@/util/utils";
+import { api } from "@/lib/api";
+import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types";
+import { useQueryClient } from "@tanstack/react-query";
 
-const iconOptions: Option[] = [
-  { value: "math", label: "Math Icon" },
-  { value: "science", label: "Science Icon" },
-  { value: "geometry", label: "Geometry Icon" },
-];
+const ExamCategorySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+type ExamCategorySchemaType = z.infer<typeof ExamCategorySchema>;
 
 const TestExamCategoriesForm = () => {
-  const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
 
+  const { id } = useParams();
   const navigate = useNavigate();
+
   const {
     control,
-    setValue,
     handleSubmit,
-    watch,
     reset,
-    formState: { errors },
-  } = useForm<TestSeriesExamType>({
-    resolver: zodResolver(TestExamSchema),
+    formState: { isValid, isSubmitted, isSubmitting },
+  } = useForm<ExamCategorySchemaType>({
+    resolver: zodResolver(ExamCategorySchema),
     defaultValues: {
       name: "",
-      slug: null,
-      description: "",
-      order: 0,
-      is_active: true,
-      createdby: "",
-      updatedby: "",
-      total_marks: 0,
-      createdAt: "",
-      updatedAt: "",
     },
   });
 
-  const { id } = useParams(); // id or undefined
-  const jwt_token = GetJwt();
-
-  useSlugGenerator<TestSeriesExamType>({
-    watch,
-    setValue,
-    source: "name",
-    target: "slug",
-  });
-
-  const {
-    data: { tExamsData },
-  } = useInitialDataContext();
-
   useEffect(() => {
-    if (!id) return; // CREATE mode
+    if (!id) return;
 
-    const fetchItem = async () => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-categories/${id}?fields[0]=name&fields[1]=slug&fields[2]=description&fields[3]=order&fields[4]=is_active&populate[test_series_exams]=true&fields[5]=createdAt&fields[6]=updatedAt&fields[7]=createdby&fields[8]=updatedby&fields[9]=total_marks`;
-      console.log("url:", url);
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${jwt_token}`,
-        },
-      });
+    const fetchData = async () => {
+      const response = await api<ApiSuccessResponse<ExamCategorySchemaType> | ApiErrorResponse>(
+        `exam-category/${id}`
+      );
 
-      const json = await res.json();
-      const item = json.data;
+      if (!response.success) {
+        toast.error(response.message);
+        return;
+      }
 
-      console.log("item:", item);
-
-      reset({
-        name: item?.attributes?.name,
-        slug: item?.attributes?.slug,
-        description: item?.attributes?.description,
-        order: item?.attributes?.order,
-        total_marks: item?.attributes?.total_marks,
-        is_active: item?.attributes?.is_active,
-        createdAt: item?.attributes?.createdAt,
-        updatedAt: item?.attributes?.updatedAt,
-        createdby: item?.attributes?.createdby,
-        updatedby: item?.attributes?.updatedby,
-      });
+      reset({ name: response.data?.name ?? "" });
     };
 
-    fetchItem();
+    fetchData();
   }, [id, reset]);
 
-  const nameValue = watch("name");
-  useEffect(() => {
-    if (!nameValue) return;
-    setValue("slug", slugify(nameValue));
-  }, [nameValue, setValue]);
-
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ExamCategorySchemaType) => {
     try {
       const isEdit = Boolean(id);
+      const url = isEdit ? `exam-category/${id}` : `exam-category`;
 
-      data = {
-        ...data,
-        ...getAuditFields(isEdit, user),
-      };
-
-      const res = await fetch(
-        isEdit
-          ? `${import.meta.env.VITE_BASE_URL}t-categories/${id}`
-          : `${import.meta.env.VITE_BASE_URL}t-categories`,
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt_token}`,
-          },
-          body: JSON.stringify({
-            data: data,
-          }),
+      const res = await api<ApiSuccessResponse<ExamCategorySchemaType> | ApiErrorResponse>(url, {
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(data),
+        method: isEdit ? "PUT" : "POST",
+      });
 
-      const success = await toastResponse(
-        res,
-        id
-          ? "Updated Exam Category Successfully!"
-          : "Created Exam Category Successfully!",
-        id ? "Update Exam Category Failed!" : "Create Exam Category Failed!",
-      );
-
-      if (!success) return; // ❌ stop if failed
-      // 👉 Your next steps (optional)
-      if (!id) {
-        reset();
-        navigate("/test-exams-category-list");
+      if (!res.success) {
+        toast.error(res.message);
+      } else {
+        toast.success(res.message);
+        if (!isEdit) {
+          reset();
+          navigate("/test-exams-category-list");
+        }
+        await queryClient.invalidateQueries({
+          queryKey: ["exam-category"],
+        });
       }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");
     }
   };
-
-  console.log("loloo:", watch());
 
   return (
     <Box
@@ -172,193 +93,60 @@ const TestExamCategoriesForm = () => {
         paddingInline: { xs: 2, sm: 3, md: 4 },
         paddingBlock: 4,
       }}
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Grid container size={12} spacing={2} alignItems="center">
         <Grid size={12}>
           <Typography
             variant="h5"
-            sx={{
-              fontWeight: 800,
-              pl: 2,
-              borderLeft: "6px solid",
-              borderColor: "primary.main",
-            }}
+            sx={{ fontWeight: 800, pl: 2, borderLeft: "6px solid", borderColor: "primary.main" }}
           >
             {id ? "Edit Exam Category" : "Add Exam Category"}
           </Typography>
         </Grid>
-
-        <Grid
-          sx={{
-            display: "flex",
-            justifyContent: { xs: "flex-start", md: "flex-end" },
-          }}
-        >
-          <AuditModalButton
-            createdby={watch("createdby")}
-            createdat={watch("createdAt")}
-            updatedby={watch("updatedby")}
-            updatedat={watch("updatedAt")}
-          />
-        </Grid>
       </Grid>
 
-      <Box component={"form"} onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2}>
-          {/* NAME */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Name
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Name
+            <Typography variant="subtitle1" component="span" color="error" fontWeight={700} marginLeft={0.2}>
+              *
             </Typography>
-            <SimpleTextField
-              name="name"
-              control={control}
-              label=""
-              rules={{ required: "Name is required" }}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Slug
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
-            </Typography>
-            <SimpleTextField
-              name="slug"
-              disabled
-              control={control}
-              label=""
-              fullWidth
-              sx={{
-                cursor: "not-allowed",
-                "& .MuiInputBase-root": {
-                  cursor: "not-allowed",
-                },
-                "& .MuiInputBase-input": {
-                  cursor: "not-allowed",
-                },
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-            {/* <SimpleSelectField /> */}
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Total Marks
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
-            </Typography>
-            <SimpleTextField
-              name="total_marks"
-              control={control}
-              type="number"
-              // label="Test Series Topic"
-              // options={difficultyOptions}
-              rules={{ required: "Please select a Topic" }}
-            />
-          </Grid>
-          {/* ORDER */}
-          <Grid size={{ xs: 12, md: 6 }} sx={{ height: "fit-content" }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Order
-            </Typography>
-            <SimpleSelectField
-              name="order"
-              control={control}
-              label=""
-              options={[
-                { value: 0, label: "0" },
-                { label: "1", value: 1 },
-              ]}
-              noneOption={false}
-              rules={{ required: "Select at least one subject" }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Description
-            </Typography>
-            <SimpleTextField
-              name="description"
-              control={control}
-              label=""
-              rules={{ required: "Description is required" }}
-              fullWidth
-              multiline
-              rows={2}
-            />
-          </Grid>
-
-          {/* isActive (toggle) */}
-          <Grid size={{ xs: 12, md: 6 }} display="flex" alignItems="center">
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={watch("is_active")}
-                  onChange={(e) => setValue("is_active", e.target.checked)}
-                />
-              }
-              // label="Is Active"
-              label={
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Is Active
-                </Typography>
-              }
-            />
-          </Grid>
-
-          {/* SUBMIT BUTTON */}
-          <Grid size={{ xs: 12 }}>
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{
-                px: 5,
-                py: 1,
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "18px",
-                borderRadius: "13px",
-                background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
-                color: "#fff",
-                boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
-                "&:hover": {
-                  background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-                },
-              }}
-              disabled={!GetRoleType()}
-            >
-              {id ? "Update" : "Submit"}
-            </Button>
-          </Grid>
+          </Typography>
+          <SimpleTextField
+            name="name"
+            control={control}
+            placeholder="Add name"
+            rules={{ required: "Name is required" }}
+          />
         </Grid>
-        <Grid>{/* <TopicsPage /> */}</Grid>
-      </Box>
+
+        <Grid size={{ xs: 12 }}>
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              px: 5, py: 1,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "18px",
+              borderRadius: "13px",
+              background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+              color: "#fff",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+              },
+            }}
+            disabled={!GetRoleType() || (!isValid && isSubmitted) || isSubmitting}
+          >
+            {id ? "Update" : "Submit"}
+          </Button>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

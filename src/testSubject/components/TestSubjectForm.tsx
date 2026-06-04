@@ -1,146 +1,82 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Grid,
-  Box,
-  Typography,
-  Button,
-  FormControlLabel,
-  Switch,
-} from "@mui/material";
-import {
-  TestSchema,
-  TestSchemaType,
-} from "../../validation/testSeriesSubjectSchema";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import SimpleTextField from "../../GlobalComponent/SimpleTextField";
-import SimpleSelectField from "../../GlobalComponent/SimpleSelectField";
-import useInitialDataContext from "../../addQeustion/_components/InitalContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { toastResponse } from "../../util/toastResponse";
-import AuditModalButton from "@/util/AuditInfoCard";
-import { AuthContext } from "@/context/AuthContext";
-import { getAuditFields } from "@/util/audit";
-import { GetJwt, GetRoleType } from "@/util/utils";
+import { GetRoleType } from "@/util/utils";
+import { api } from "@/lib/api";
+import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const slugify = (text: string): string => {
-  return text
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9\-]/g, "")
-    .replace(/\-\-+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
-};
+const SubjectSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+type SubjectSchemaType = z.infer<typeof SubjectSchema>;
+
 const TestSubjectForm = () => {
-  const {
-    data: { tExamsData },
-  } = useInitialDataContext();
-  const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   const { qid } = useParams();
   const navigate = useNavigate();
+
   const {
     control,
-    setValue,
     handleSubmit,
-    watch,
     reset,
-    formState: { errors },
-  } = useForm<TestSchemaType>({
-    resolver: zodResolver(TestSchema),
+    formState: { isValid, isSubmitted, isSubmitting },
+  } = useForm<SubjectSchemaType>({
+    resolver: zodResolver(SubjectSchema),
     defaultValues: {
       name: "",
-      // slug: null,
-      // order: 0,
-      // isActive: true,
-      // createdby: "",
-      // updatedby: "",
-      // createdAt: "",
-      // updatedAt: ""
     },
   });
-  console.log("errors: ", errors);
 
-  const nameValue = watch("name");
-  // const jwt_token = GetJwt()
-
-  // useEffect(() => {
-  //   if (!nameValue) return;
-  //   setValue("slug", slugify(nameValue));
-  // }, [nameValue, setValue]);
-
-  console.log("qid: ", qid);
   useEffect(() => {
-    if (!qid) return; // create mode
+    if (!qid) return;
 
     const fetchData = async () => {
-      console.log("qid: ", qid);
-      const url = `${import.meta.env.VITE_BASE_URL}subjects/${qid}`;
+      const response = await api<ApiSuccessResponse<SubjectSchemaType> | ApiErrorResponse>(
+        `subjects/${qid}`
+      );
 
-      const res = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-          // Authorization: `Bearer ${GetJwt()}`,
-        },
-        // headers: {
-        //   Authorization: `Bearer ${jwt_token}`,
-        // },
-      });
+      if (!response.success) {
+        toast.error(response.message);
+        return;
+      }
 
-      const json = await res.json();
-      reset({
-        name: json?.data?.name ?? "",
-      });
+      reset({ name: response.data?.name ?? "" });
     };
 
     fetchData();
   }, [qid, reset]);
-  // const isActive = watch("isActive");
 
-  console.log(errors);
-  const onSubmit = async (data: TestSchemaType) => {
+  const onSubmit = async (data: SubjectSchemaType) => {
     try {
-
       const isEdit = Boolean(qid);
+      const url = isEdit ? `subjects/${qid}` : `subjects`;
 
-      const audit = getAuditFields(isEdit, user);
-
-      // data = {
-      //   ...data,
-      //   // ...audit,
-      // };
-
-      const url = isEdit
-      ? `${import.meta.env.VITE_BASE_URL}subjects/${qid}`
-      : `${import.meta.env.VITE_BASE_URL}subjects`;
-      
-
-      const res = await fetch(url, {
-        method: isEdit ? "PUT" : "POST",
+      const res = await api<ApiSuccessResponse<SubjectSchemaType> | ApiErrorResponse>(url, {
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify(data),
+        method: isEdit ? "PUT" : "POST",
       });
 
-      console.log("url : ", res);
-
-
-      const success = await toastResponse(
-        res,
-        `${qid ? "Updated" : "Created"} subject successfully`,
-        " subject is Failed",
-      );
-      const json = await res.json();
-      if (!success) return;
-
-      if (!qid) {
-        reset();
-        navigate("/test-subject-list");
+      if (!res.success) {
+        toast.error(res.message);
+      } else {
+        toast.success(res.message);
+        if (!isEdit) {
+          reset();
+          navigate("/test-subject-list");
+        };
+        await queryClient.invalidateQueries({
+          queryKey: ["subjects"],
+        });
       }
     } catch (error) {
       console.error(error);
@@ -156,155 +92,60 @@ const TestSubjectForm = () => {
         paddingInline: { xs: 2, sm: 3, md: 4 },
         paddingBlock: 4,
       }}
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
     >
       <Grid container size={12} spacing={2} alignItems="center">
         <Grid size={12}>
           <Typography
             variant="h5"
-            sx={{
-              fontWeight: 800,
-              pl: 2,
-              borderLeft: "6px solid",
-              borderColor: "primary.main",
-            }}
+            sx={{ fontWeight: 800, pl: 2, borderLeft: "6px solid", borderColor: "primary.main" }}
           >
             {qid ? "Edit Subject" : "Add Subject"}
           </Typography>
         </Grid>
-
-        {/* <Grid
-          sx={{
-            display: "flex",
-            justifyContent: { xs: "flex-start", md: "flex-end" },
-          }}
-        >
-          <AuditModalButton
-            createdby={watch("createdby")}
-            createdat={watch("createdAt")}
-            updatedby={watch("updatedby")}
-            updatedat={watch("updatedAt")}
-          />
-        </Grid> */}
       </Grid>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={3}>
-          {/* NAME */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Name
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Name
+            <Typography variant="subtitle1" component="span" color="error" fontWeight={700} marginLeft={0.2}>
+              *
             </Typography>
-            <SimpleTextField
-              name="name"
-              control={control}
-              label=""
-              rules={{ required: "Name is required" }}
-              fullWidth
-            />
-          </Grid>
-
-          {/* <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Slug
-              <Typography
-                variant="subtitle1"
-                component="span"
-                color="error"
-                fontWeight={700}
-                marginLeft={0.2}
-              >
-                *
-              </Typography>
-            </Typography>
-            <SimpleTextField
-              name="slug"
-              disabled
-              control={control}
-              label=""
-              fullWidth
-              sx={{
-                pointerEvents: "none", // 🔥 Completely disables field interaction
-                cursor: "not-allowed", // 🔥 Applies on the main element
-                "& *": {
-                  cursor: "not-allowed !important", // 🔥 Ensures cursor stays disabled everywhere
-                },
-              }}
-            />
-          </Grid> */}
-
-          {/* ORDER */}
-          {/* <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Order
-            </Typography>
-            <SimpleSelectField
-              name="order"
-              control={control}
-              label=""
-              options={[
-                { value: 0, label: "0" },
-                { label: "1", value: 1 },
-              ]}
-              noneOption={false}
-              rules={{ required: "Select at least one subject" }}
-            />
-          </Grid> */}
-
-          {/* isActive (toggle) */}
-          {/* <Grid
-            size={{ xs: 12, md: 6 }}
-            sx={{ display: "flex", alignItems: "center" }}
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isActive}
-                  onChange={(e) => setValue("isActive", e.target.checked)}
-                />
-              }
-              label={
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Is Active
-                </Typography>
-              }
-            />
-          </Grid> */}
-          {/* SUBMIT BUTTON */}
-          <Grid size={{ xs: 12 }}>
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{
-                px: 5,
-                py: 1,
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "18px",
-                borderRadius: "13px",
-                background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
-                color: "#fff",
-                boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
-                "&:hover": {
-                  background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-                },
-              }}
-              disabled={!GetRoleType()}
-            >
-              {qid ? "Update" : "Submit"}
-            </Button>
-          </Grid>
+          </Typography>
+          <SimpleTextField
+            name="name"
+            control={control}
+            placeholder="Add name"
+            rules={{ required: "Name is required" }}
+          />
         </Grid>
-      </form>
+
+        <Grid size={{ xs: 12 }}>
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{
+              px: 5, py: 1,
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "18px",
+              borderRadius: "13px",
+              background: "linear-gradient(90deg, #4C6EF5, #15AABF)",
+              color: "#fff",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+              "&:hover": {
+                background: "linear-gradient(90deg, #3B5BDB, #1098AD)",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+              },
+            }}
+            disabled={!GetRoleType() || (!isValid && isSubmitted) || isSubmitting}
+          >
+            {qid ? "Update" : "Submit"}
+          </Button>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

@@ -11,6 +11,9 @@ import {
 
 import { Controller, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { apiGet } from "@/lib/apiClient";
+import { PaginatedResponse } from "@/types/api.types";
+import { Subject } from "@/types/subjects.api";
 
 type Option = {
   id: number;
@@ -53,16 +56,12 @@ const SelectField = ({
   const fetchOptions = async () => {
     try {
       setLoading(true);
+      const response = await apiGet<PaginatedResponse<Subject>>(`/${route}`, {
+        page: 1,
+        limit: 100,
+      });
 
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}${route}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch dropdown data");
-      }
-
-      const result = await response.json();
-
-      setOptions(result.data);
+      setOptions(response.data);
     } catch (error) {
       console.error("Dropdown fetch error:", error);
     } finally {
@@ -94,11 +93,13 @@ const SelectField = ({
             label={label}
             value={field.value ?? (multiple ? [] : "")}
             renderValue={(selected: any) => {
+              console.log('selected: ', selected);
               if (!multiple) {
                 const selectedItem = options.find(
                   (item) => item.id === selected,
                 );
-                return selectedItem?.name ?? "";
+                console.log('selectedItem: ', selectedItem);
+                return selectedItem?.id ?? "";
               }
 
               return selected

@@ -53,10 +53,10 @@ export default function FormStructure() {
       subjectCategoryIds: [],
       examCategoryIds: [],
       options: [
-        {  name : "", isCorrect : false },
-        {  name : "", isCorrect : false },
-        {  name : "", isCorrect : false },
-        {  name : "", isCorrect : false },
+        { name: "", isCorrect: false },
+        { name: "", isCorrect: false },
+        { name: "", isCorrect: false },
+        { name: "", isCorrect: false },
       ],
       question: "",
       images: [],
@@ -69,7 +69,7 @@ export default function FormStructure() {
   });
 
   // console.log('errors', errors);
-    console.log('watch: ', watch());
+  console.log('watch: ', watch());
 
   const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,9 +79,8 @@ export default function FormStructure() {
     const fetchQuestionById = async (
       qid: number,
     ): Promise<QuestionSchemaType> => {
-      const url = `${
-        import.meta.env.VITE_BASE_URL
-      }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
+      const url = `${import.meta.env.VITE_BASE_URL
+        }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
 
       const res = await fetch(url, {
         headers: {

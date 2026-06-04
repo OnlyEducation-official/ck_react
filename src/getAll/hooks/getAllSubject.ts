@@ -37,8 +37,7 @@ function syllabusAsPerPageRoute(syllabus: Syllabus) {
         return ({
             queryFn: getAllSubjectsCategories,
             queryKey: ["subject-category"],
-        }); 0
-        0
+        });
     }
     else if (syllabus === "subject") {
         return ({
