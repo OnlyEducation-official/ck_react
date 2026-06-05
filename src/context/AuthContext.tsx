@@ -89,36 +89,25 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}auth/local`, {
+      const baseURL = `${import.meta.env.VITE_BASE_URL}auth/login`;
+
+      console.log(baseURL, email,password)
+
+      const res = await fetch(`${baseURL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          identifier: email,
+          email,
           password,
         }),
       });
 
       const data = await res.json();
-      const jwt = data.jwt;
+      console.log(data)
+      const jwt = data.accessToken;
       const user = data.user.email;
       const id = data.user.id;
-
-      const res1 = await fetch(
-        `${import.meta.env.VITE_BASE_URL}users/me?populate=role&fields[0]=id`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        }
-      );
-
-      const user1 = await res1.json();
-
-      const role_type = user1.role.type
-
-      if (!jwt) {
-        throw new Error("Login failed: JWT missing in response");
-      }
+      const role_type = data.user.role
 
       Cookies.set("auth_token", jwt, {
         expires: 7, // days

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // Added useNavigate for redirection after saving
 import {
     Box,
     TextField,
@@ -7,7 +8,8 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    Select
+    Select,
+    CircularProgress
 } from '@mui/material';
 
 export default function AddUserForm() {
@@ -17,51 +19,114 @@ export default function AddUserForm() {
         password: '',
         role: ''
     });
+    const [loading, setLoading] = useState(false);
+
+    // 1. Hook up URL search parameter reader and router navigator
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const userId = searchParams.get('id'); // Will return the string ID (e.g., "20") or null
+    const isEditMode = Boolean(userId);   // True if we are editing, False if adding
+
+    const baseURL = `${import.meta.env.VITE_BASE_URL}auth`;
+
+    // 2. Fetch single user data if 'id' exists in the URL
+    useEffect(() => {
+        if (!isEditMode) return;
+
+        const fetchUserData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`${baseURL}/${userId}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch user data');
+                const result = await response.json();
+
+                console.log(result)
+                
+                // Assuming your backend responds with a nested data object like { data: { name, email, role } }
+                // Adjust data mappings if your backend response structure differs
+                const userData = result?.data || result;
+
+                setFormData({
+                    name: userData.name || '',
+                    email: userData.email || '',
+                    password: '', // Standard security practice: leave password field empty during edits
+                    role: userData.role || ''
+                });
+            } catch (error: any) {
+                console.error("Error fetching single user:", error);
+                alert("Could not load user data.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [userId, isEditMode]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
         const { name, value } = e.target;
-
-        // If name is undefined, do nothing
         if (!name) return;
 
         setFormData((prev) => ({
             ...prev,
-            [name]: value // TypeScript is happy now!
+            [name]: value
         }));
     };
 
+    // 3. Handle Form Submission dynamically based on Mode
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Form Data Submitted:', formData);
-
-        const path = `${import.meta.env.VITE_BASE_URL}auth`
-        console.log(path)
+        
+        // Dynamically choose endpoint path and method
+        const submissionURL = isEditMode ? `${baseURL}/${userId}` : baseURL;
+        const HTTPMethod = isEditMode ? 'PUT' : 'POST';
 
         try {
-            const response = await fetch(path, {
-                method: 'POST',
+            // Optional: If password field is blank during edit, don't pass it to prevent overwriting it to empty
+            const payload = { ...formData };
+            console.log(payload)
+            if (isEditMode && !payload.password) {
+                delete (payload as any).password;
+            }
+
+            const response = await fetch(submissionURL, {
+                method: HTTPMethod,
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Something went wrong while creating the user.');
+                throw new Error(data.message || `Something went wrong while processing your request.`);
             }
 
-            console.log('User created successfully:', data);
-            alert('User added successfully!');
-
+            alert(isEditMode ? 'User updated successfully!' : 'User added successfully!');
+            
+            // Clean up state and route back to list screen
             setFormData({ name: '', email: '', password: '', role: '' });
+            navigate(-1); // Redirects back to previous view screen (UserList)
 
         } catch (error: any) {
             console.error('Submission Error:', error);
             alert(error.message || 'Failed to connect to the server.');
         }
     };
+
+    // Loading indicator screen guard while pulling edit profiles
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <Box
@@ -72,18 +137,19 @@ export default function AddUserForm() {
                 flexDirection: 'column',
                 gap: 2,
                 maxWidth: 400,
-                margin: '20px auto', // centers the form and gives it some top margin
+                margin: '20px auto',
                 padding: 3,
                 boxShadow: 3,
                 borderRadius: 2,
                 backgroundColor: 'background.paper'
             }}
         >
+            {/* 4. Conditional UI Heading */}
             <Typography variant="h5" component="h2" textAlign="center" gutterBottom>
-                Add New User
+                {isEditMode ? 'Edit User Details' : 'Add New User'}
             </Typography>
 
-            {/* 1. Name Field */}
+            {/* Name Field */}
             <TextField
                 label="Name"
                 name="name"
@@ -94,7 +160,7 @@ export default function AddUserForm() {
                 onChange={handleChange}
             />
 
-            {/* 2. Email Field */}
+            {/* Email Field */}
             <TextField
                 label="Email"
                 name="email"
@@ -106,19 +172,20 @@ export default function AddUserForm() {
                 onChange={handleChange}
             />
 
-            {/* 3. Password Field */}
+            {/* Password Field — optional during edits */}
             <TextField
                 label="Password"
                 name="password"
                 type="password"
                 variant="outlined"
                 fullWidth
-                required
+                required={!isEditMode} // Required for new users, optional for edits
+                placeholder={isEditMode ? "Leave blank to keep unchanged" : ""}
                 value={formData.password}
                 onChange={handleChange}
             />
 
-            {/* 4. Role Dropdown */}
+            {/* Role Dropdown */}
             <FormControl fullWidth required>
                 <InputLabel id="role-select-label">Role</InputLabel>
                 <Select
@@ -127,7 +194,6 @@ export default function AddUserForm() {
                     name="role"
                     value={formData.role}
                     label="Role"
-                    // Cast your handler to any right here to satisfy the Select component
                     onChange={handleChange as any}
                 >
                     <MenuItem value="admin">Admin</MenuItem>
@@ -135,16 +201,22 @@ export default function AddUserForm() {
                 </Select>
             </FormControl>
 
-            {/* Submit Button */}
+            {/* 5. Conditional Submit Button label and styling adjustments */}
             <Button
                 type="submit"
                 variant="contained"
-                color="primary"
+                color={isEditMode ? "secondary" : "primary"}
                 size="large"
                 sx={{ mt: 1 }}
             >
-                Submit
+                {isEditMode ? 'Update User' : 'Submit'}
             </Button>
+            
+            {isEditMode && (
+                <Button variant="text" color="inherit" onClick={() => navigate(-1)}>
+                    Cancel
+                </Button>
+            )}
         </Box>
     );
 }
