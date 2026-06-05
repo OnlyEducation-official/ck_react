@@ -3,25 +3,18 @@ import {
   Button,
   FormHelperText,
   Grid,
-  TextField,
   Typography,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QuestionSchema, type QuestionSchemaType } from "../QuestionSchema.js";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toastResponse } from "../../util/toastResponse.js";
 import { toast } from "react-toastify";
-import OptimizedTopicSearch from "./OptimizedTopicSearch.js";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionTypeData, QuestionOptionType } from "./data.js";
-import SimpleTextField from "../../GlobalComponent/SimpleTextField.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
-import MainEditor from "../components/MainEditor.jsx";
-import { AuthContext } from "@/context/AuthContext.js";
-import { getAuditFields } from "@/util/audit.js";
-import AuditModalButton from "@/util/AuditInfoCard.js";
 // import FileUploadSection2 from "../components/FileUploadSection2.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
