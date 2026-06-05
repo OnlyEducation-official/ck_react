@@ -5,5 +5,5 @@ export function GetJwt(){
 
 export function GetRoleType(){
     const role_type = localStorage.getItem("role_type");
-    return role_type === `"test_series_super_admin"` ? true : false
+    return role_type === `"admin"` ? true : false
 }

@@ -59,47 +59,60 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function DrawerAppBar() {
-  const { token } = useContext(AuthContext);
+
+  const { token, user } = useContext(AuthContext);
+
+  const rawRole = localStorage.getItem("role_type");
+  const role = rawRole ? JSON.parse(rawRole) : "";
+
   const navBtn = [
     {
       label: "All Users",
       url: "/all-users",
+      role: ["admin"]
     },
     {
       label: "Exams Category",
       url: "/test-exams-category-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Exam",
       url: "/exams-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Subject",
       url: "/test-subject-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Category",
       url: "/test-subject-category-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Chapter",
       url: "/test-chapter-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Topic",
       url: "/test-topic-list",
+      role: ["admin", "teacher"]
     },
     {
       label: "Questions",
       url: "/questions-list",
+      role: ["admin", "teacher"]
     }
   ];
   const location = useLocation();
 
   return (
     <>
-      {/* {token && ( */}
-      {(
+      {/* 2. Short-circuit conditional rendering step */}
+      {token && (
         <Box sx={{ display: "flex" }}>
           <CssBaseline />
 
@@ -138,42 +151,41 @@ function DrawerAppBar() {
                   </Typography>
 
                   <Stack direction="row" sx={{ columnGap: { md: 2, lg: 3 } }}>
-                    {navBtn.map((btn, index) => (
-                      <Typography
-                        key={index}
-                        variant="subtitle2"
-                        component={Link}
-                        to={btn.url}
-                        sx={{
-                          fontSize: "15px",
-                          display: { xs: "none", md: "block" },
-                          fontWeight: 600,
-                          color:
-                            location.pathname === btn.url
-                              ? "common.white"
-                              : "common.black",
-                          textDecoration: "none",
-                          position: "relative",
-                          px: 1,
-                          py: 1,
-                          "&::after": {
-                            content: '""',
-                            position: "absolute",
-                            width: "0%",
-                            height: "2px",
-                            bottom: 0,
-                            left: 0,
-                            backgroundColor: "black",
-                            transition: "width 0.3s ease",
-                          },
-                          "&:hover::after": {
-                            width: "100%",
-                          },
-                        }}
-                      >
-                        {btn.label}
-                      </Typography>
-                    ))}
+                    {navBtn.map((btn, index) =>
+                      btn.role.includes(role) && (
+                        <Typography
+                          key={index}
+                          variant="subtitle2"
+                          component={Link}
+                          to={btn.url}
+                          sx={{
+                            fontSize: "15px",
+                            display: { xs: "none", md: "block" },
+                            fontWeight: 600,
+                            color: location.pathname === btn.url ? "common.white" : "common.black",
+                            textDecoration: "none",
+                            position: "relative",
+                            px: 1,
+                            py: 1,
+                            "&::after": {
+                              content: '""',
+                              position: "absolute",
+                              width: "0%",
+                              height: "2px",
+                              bottom: 0,
+                              left: 0,
+                              backgroundColor: "black",
+                              transition: "width 0.3s ease",
+                            },
+                            "&:hover::after": {
+                              width: "100%",
+                            },
+                          }}
+                        >
+                          {btn.label}
+                        </Typography>
+                      )
+                    )}
                   </Stack>
 
                   <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -188,7 +200,6 @@ function DrawerAppBar() {
         </Box>
       )}
     </>
-
   );
 }
 
