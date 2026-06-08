@@ -8,21 +8,50 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { QuestionSchema, type QuestionSchemaType } from "../QuestionSchema.js";
 import { useEffect, useState } from "react";
 import { toastResponse } from "../../util/toastResponse.js";
 import { toast } from "react-toastify";
 import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionTypeData, QuestionOptionType } from "./data.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
-// import FileUploadSection2 from "../components/FileUploadSection2.js";
 import FileUploadSection2 from "../components/FileUploadThree.js";
 import { GetJwt } from "@/util/utils.js";
 import EditorComponent from "@/components/EditorComponent.js";
 import SelectField from "@/components/SelectField.js";
+import { api } from "@/lib/api.js";
+import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types.js";
+import type { TQuestion, TQuestionRelation } from "@/types/Question.types.js";
+import { questionSchemaCreate, TQuestionSchemaCreate } from "../QuestionSchema.js";
+import { SimpleAutocomplete } from "@/GlobalComponent/SimpleAutocomplete.js";
+import OptimizedSelect from "./OptimizedTopicSearch.js";
+import { AsyncAutocomplete } from "@/GlobalComponent/AsyncAutocomplete.js";
+import { getAllChapters, getAllExamCategories, getAllSubjects, getAllSubjectsCategories, getAllTopics } from "@/getAll/api/subjectApi.js";
+import { AsyncMultiAutocomplete } from "@/GlobalComponent/AsyncMultiAutocomplete.js";
+
+type EditAutocompleteOptions = {
+  subjects: TQuestionRelation[];
+  topics: TQuestionRelation[];
+  chapters: TQuestionRelation[];
+  subjectCategories: TQuestionRelation[];
+  examCategories: TQuestionRelation[];
+};
+
+const emptyEditAutocompleteOptions: EditAutocompleteOptions = {
+  subjects: [],
+  topics: [],
+  chapters: [],
+  subjectCategories: [],
+  examCategories: [],
+};
+
+const getRelationIds = (
+  ids: number[] | null | undefined,
+  fallback: TQuestionRelation[] = [],
+) => (ids?.length ? ids : fallback.map(({ id }) => id));
+
+const getFirstId = (ids: number[] | null | undefined) => ids?.[0];
 
 export default function FormStructure() {
-  // const { user } = useContext(AuthContext);
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -33,10 +62,10 @@ export default function FormStructure() {
     reset,
     trigger,
     formState: { errors },
-  } = useForm<QuestionSchemaType>({
+  } = useForm<TQuestionSchemaCreate>({
     defaultValues: {
-      input_box: "",
-      subjectIds: [],
+      // input_box: "",
+      subjectIds: 0,
       topicIds: [],
       difficultyLevel: "easy",
       hint: "",
@@ -53,97 +82,63 @@ export default function FormStructure() {
       ],
       question: "",
       images: [],
-      // createdby: "",
-      // updatedby: "",
-      // createdAt: "",
-      // updatedAt: "",
-    },
-    resolver: zodResolver(QuestionSchema),
-  });
 
-  // console.log('errors', errors);
+    },
+    resolver: zodResolver(questionSchemaCreate),
+  });
   console.log('watch: ', watch());
 
   const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editAutocompleteOptions, setEditAutocompleteOptions] =
+    useState<EditAutocompleteOptions>(emptyEditAutocompleteOptions);
 
   useEffect(() => {
-    if (!qid) return; // CREATE MODE
+    if (!qid) {
+      setEditAutocompleteOptions(emptyEditAutocompleteOptions);
+      return;
+    }
     const fetchQuestionById = async (
       qid: number,
-    ): Promise<QuestionSchemaType> => {
-      const url = `${import.meta.env.VITE_BASE_URL
-        }t-questions/${qid}?populate[test_series_subject]=true&populate[test_series_topics]=true&populate[options]=true&populate[test_series_exams]=true&populate[test_series_chapters]=true&populate[test_series_subject_category]=true&populate[question_image]=true`;
+    ): Promise<TQuestionSchemaCreate | null> => {
 
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${jwt_token}`,
-        },
+      const res = await api<ApiSuccessResponse<TQuestion> | ApiErrorResponse>(`questions/${qid}`, {
+        method: "GET",
       });
 
-      const json = await res.json();
-      const item = json.data;
 
-      if (!item) throw new Error("Question not found");
-      console.log("item: ", item);
+      if (!res.success) return null;
 
-      const attr = item.attributes;
+      const data = res.data;
+      console.log('data: ', data);
+      setEditAutocompleteOptions({
+        subjects: data.subjects ?? [],
+        topics: data.topics ?? [],
+        chapters: data.chapters ?? [],
+        subjectCategories: data.subjectCategories ?? [],
+        examCategories: data.examCategories ?? [],
+      });
 
       return {
-        input_box: attr?.input_box || "",
-        images:
-          attr?.question_image?.map((img: { id: number; url: string }) => {
-            return { url: img.url, file: null };
-          }) ?? [],
-        // createdAt: attr.createdAt,
-        // updatedAt: attr.updatedAt,
-        // createdby: attr.createdby,
-        // updatedby: attr.updatedby,
-        difficultyLevel: attr.difficulty?.toLowerCase(),
-        explanation: attr.explanation ?? "",
-        optionType: attr.optionType ?? "Single",
-        hint: attr.hint ?? "",
-        question: attr.question ?? "",
-        subjectIds: attr?.test_series_subject?.data
-          ? [attr.test_series_subject?.data.id]
-          : [],
-        // test_series_subject: attr.test_series_subject?.data
-        //   ? [
-        //       {
-        //         id: attr.test_series_subject.data.id,
-        //         name: attr.test_series_subject.data.attributes.name,
-        //       },
-        //     ]
-        //   : [],
-        topicIds:
-          attr.test_series_topics?.data?.map((topic: any) => ({
-            id: topic.id,
-            name: topic.attributes.name,
-          })) ?? [],
-        examCategoryIds:
-          attr.test_series_exams?.data?.map((exam: any) => ({
-            id: exam.id,
-            title: exam.attributes.title,
-          })) ?? [],
-        chapterIds: attr.test_series_chapters?.data?.map((chapter: any) => ({
-          id: chapter.id,
-          name: chapter.attributes.name,
-        })),
-        subjectCategoryIds: attr.test_series_subject_category?.data
-          ? [attr.test_series_subject_category.data.id]
-          : [],
-        options:
-          attr.options?.map((opt: any) => ({
-            option_label: opt.option_label,
-            option: opt.option,
-            is_correct: opt.is_correct,
-          })) ?? [],
+        // input_box: data?.input_box || "",
+        images: data?.images,
+        difficultyLevel: data.difficultyLevel || "easy",
+        explanation: data.explanation ?? "",
+        optionType: data.optionType ?? "Single",
+        hint: data.hint ?? "",
+        question: data.question ?? "",
+        subjectIds: getFirstId(data?.subjectIds) ?? data.subjects?.[0]?.id,
+        topicIds: getRelationIds(data?.topicIds, data.topics),
+        examCategoryIds: getRelationIds(data?.examCategoryIds, data.examCategories),
+        chapterIds: getRelationIds(data?.chapterIds, data.chapters),
+        subjectCategoryIds: getRelationIds(data?.subjectCategoryIds, data.subjectCategories),
+        options: data.options,
       };
     };
     const loadQuestion = async () => {
       try {
         const data = await fetchQuestionById(Number(qid));
-        reset(data); // 🔥 FULLY WORKS WITH ZOD + RHF + CKEDITOR
+        if (data) reset(data);
       } catch (err) {
         console.error("Failed to load question", err);
       }
@@ -162,34 +157,29 @@ export default function FormStructure() {
       }
 
       const data = await response.json();
-
-      // console.log("data:", data);
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
-  const subjects = getData();
-  // console.log("subjects: ", subjects);
-
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: TQuestionSchemaCreate) => {
+    console.log('data: ', data);
     try {
       setIsSubmitting(true);
       const isEdit = Boolean(qid);
 
-      // const audit = getAuditFields(isEdit, user);
-      const question_image = data?.question_image?.map((img: any) => {
-        return {
-          url: img.url,
-        };
-      });
-      const wholeData = {
-        ...data,
-        question_image,
-      };
+      // const question_image = data?.images?.map((img: any) => {
+      //   return {
+      //     url: img.url,
+      //   };
+      // });
+      // const wholeData = {
+      //   ...data,
+      //   question_image,
+      // };
       data = {
-        ...wholeData,
-        // ...audit,
+        ...data,
+        subjectIds: data.subjectIds,
       };
 
       const url = isEdit
@@ -199,7 +189,6 @@ export default function FormStructure() {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${jwt_token}`,
         },
         body: JSON.stringify(data),
       });
@@ -210,9 +199,7 @@ export default function FormStructure() {
           : "Created  Question Form Successfully!",
         qid ? "Update  Question Form Failed!" : "Create Question Form Failed!",
       );
-      // const datas = await response.json();
       if (!success) return; // ❌ stop if failed
-      // 👉 Your next steps (optional)
       if (!qid) {
         reset();
         navigate("/questions-list");
@@ -236,6 +223,7 @@ export default function FormStructure() {
       }}
       component={"form"}
       onSubmit={handleSubmit(onSubmit)}
+      noValidate
     >
       <Grid
         container
@@ -257,19 +245,6 @@ export default function FormStructure() {
             </Typography>
           </Grid>
 
-          {/* <Grid
-            sx={{
-              display: "flex",
-              justifyContent: { xs: "flex-start", md: "flex-end" },
-            }}
-          >
-            <AuditModalButton
-              createdby={watch("createdby")}
-              createdat={watch("createdAt")}
-              updatedby={watch("updatedby")}
-              updatedat={watch("updatedAt")}
-            />
-          </Grid> */}
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -285,25 +260,18 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-
-          <SelectField
+          <AsyncAutocomplete
             name="subjectIds"
-            label="Subjects"
             control={control}
-            route="subjects"
-            // multiple
-            rules={{
-              required: "At least one subject required",
-            }}
+            // label="Subject"
+            placeholder="Search subject…"
+            queryKey={["subjects"]}
+            getOptionLabel={(s) => s.name}
+            queryFn={getAllSubjects}
+            getOptionValue={(s) => s.id}
+            defaultOption={editAutocompleteOptions.subjects[0] ?? null}
           />
-          {/* <OptimizedTopicSearch
-            routeName="test-series-subject"
-            dropdownType="single"
-            fieldName="test_series_subject"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_subject?.message}
-          /> */}
+
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -321,24 +289,19 @@ export default function FormStructure() {
             </Typography>
           </Typography>
 
-          <SelectField
+          <AsyncMultiAutocomplete
             name="subjectCategoryIds"
-            label=""
             control={control}
-            route="subject-categories"
-            multiple
-            rules={{
-              required: "At least one subject required",
-            }}
+            // label="Subject Categories"
+            required
+            placeholder="Search subjects categories…"
+            queryKey={["subject-categorys"]}
+            queryFn={getAllSubjectsCategories}
+            getOptionLabel={(s) => s.name}
+            getOptionValue={(s) => s.id}
+            defaultOptions={editAutocompleteOptions.subjectCategories}
           />
-          {/* <OptimizedTopicSearch
-            dropdownType="single"
-            fieldName="test_series_subject_category"
-            routeName="test-series-subject-categorie"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_subject_category?.message}
-          /> */}
+
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -356,24 +319,19 @@ export default function FormStructure() {
             </Typography>
           </Typography>
 
-          <SelectField
+          <AsyncMultiAutocomplete
             name="chapterIds"
-            label=""
             control={control}
-            route="chapters"
-            multiple
-            rules={{
-              required: "At least one  subject chapter required",
-            }}
+            // label="Chapters"
+            required
+            placeholder="Search Chapters..."
+            queryKey={["chapters"]}
+            queryFn={getAllChapters}
+            getOptionLabel={(s) => s.name}
+            getOptionValue={(s) => s.id}
+            defaultOptions={editAutocompleteOptions.chapters}
           />
-          {/* <OptimizedTopicSearch
-            dropdownType="multi"
-            fieldName="test_series_chapters"
-            routeName="test-series-chapter"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_chapters?.message}
-          /> */}
+
         </Grid>
 
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -390,24 +348,19 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          <SelectField
+          <AsyncMultiAutocomplete
             name="topicIds"
-            label=""
             control={control}
-            route="topics"
-            multiple
-            rules={{
-              required: "At least one topic required",
-            }}
+            // label="Topics"
+            required
+            placeholder="Search Topics..."
+            queryKey={["topics"]}
+            queryFn={getAllTopics}
+            getOptionLabel={(s) => s.name}
+            getOptionValue={(s) => s.id}
+            defaultOptions={editAutocompleteOptions.topics}
           />
-          {/* <OptimizedTopicSearch
-            routeName="t-topic"
-            dropdownType="multi"
-            fieldName="test_series_topics"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_topics?.message}
-          /> */}
+
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           {/* <SimpleSelectField /> */}
@@ -453,15 +406,7 @@ export default function FormStructure() {
               *
             </Typography>
           </Typography>
-          {/* <OptimizedTopicSearch
-            dropdownType="multi"
-            fieldName="test_series_exams"
-            routeName="t-exam"
-            setValue={setValue}
-            watch={watch}
-            errors={errors?.test_series_exams?.message}
-          /> */}
-          <SelectField
+          {/* <SelectField
             name="examCategoryIds"
             label=""
             control={control}
@@ -470,6 +415,18 @@ export default function FormStructure() {
             rules={{
               required: "At least one exam category required",
             }}
+          /> */}
+          <AsyncMultiAutocomplete
+            name="examCategoryIds"
+            control={control}
+            // label="Exam Category"
+            required
+            placeholder="Search Exam Category..."
+            queryKey={["examCategories"]}
+            queryFn={getAllExamCategories}
+            getOptionLabel={(s) => s.name}
+            getOptionValue={(s) => s.id}
+            defaultOptions={editAutocompleteOptions.examCategories}
           />
         </Grid>
         {/* ---------- QUESTION FIELD ---------- */}
@@ -543,12 +500,12 @@ export default function FormStructure() {
                     }}
                     placeholder="0.00"
                     style={{
-                      width: "100%", // Makes it fill the container width
-                      padding: "12px 16px", // Adds internal space (height/girth)
-                      fontSize: "1.2rem", // Makes the text larger
-                      borderRadius: "8px", // Optional: makes it look modern
+                      width: "100%",
+                      padding: "12px 16px",
+                      fontSize: "1.2rem",
+                      borderRadius: "8px",
                       border: error ? "2px solid red" : "1px solid #ccc",
-                      boxSizing: "border-box", // Prevents width overflow
+                      boxSizing: "border-box",
                     }}
                   />
                   {error && (

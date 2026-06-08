@@ -1,0 +1,78 @@
+.aac {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.aac__label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.aac__control {
+    position: relative;
+}
+
+.aac__input {
+    width: 100%;
+    padding: 8px 28px 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.aac__clear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.aac__menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin: 4px 0 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+}
+
+.aac__option {
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.aac__option.is-active {
+    background: #f0f0f0;
+}
+
+.aac__option.is-selected {
+    font-weight: 600;
+}
+
+.aac__msg {
+    padding: 8px 10px;
+    color: #888;
+}
+
+.aac__msg--error {
+    color: #c0392b;
+}
+
+.aac__error {
+    color: #c0392b;
+    font-size: 12px;
+}

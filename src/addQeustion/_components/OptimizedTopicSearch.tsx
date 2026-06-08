@@ -24,7 +24,7 @@ type Props<T> = {
   required?: boolean;
 };
 
-const SelectField = <T extends Record<string, any>>({
+const OptimizedSelect = <T extends Record<string, any>>({
   name,
   label,
   route,
@@ -157,4 +157,4 @@ const SelectField = <T extends Record<string, any>>({
   );
 };
 
-export default SelectField;
+export default OptimizedSelect;
