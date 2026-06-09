@@ -17,11 +17,8 @@ import {
   Typography,
   FormHelperText,
 } from "@mui/material";
-import MainEditor from "./MainEditor.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { QuestionSchemaType } from "../QuestionSchema.js";
-import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
-import { optionLabel } from "../_components/data.js";
+import type { TQuestionSchemaCreate } from "../QuestionSchema.js";
 import EditorComponent from "@/components/EditorComponent.js";
 
 interface OptionFieldArrayProps<T extends FieldValues> {
@@ -29,7 +26,7 @@ interface OptionFieldArrayProps<T extends FieldValues> {
   setValue: UseFormSetValue<T>;
   watch: UseFormWatch<T>;
   errors: any;
-  trigger: UseFormTrigger<QuestionSchemaType>;
+  trigger: UseFormTrigger<TQuestionSchemaCreate>;
 }
 
 const OptionsFieldArray = <T extends FieldValues>({
@@ -139,8 +136,8 @@ const OptionsFieldArray = <T extends FieldValues>({
               /> */}
 
               <EditorComponent
-                name={`options.${index}.name` as keyof QuestionSchemaType}
-                control={control as unknown as Control<QuestionSchemaType>}
+                name={`options.${index}.name` as keyof TQuestionSchemaCreate}
+                control={control as unknown as Control<TQuestionSchemaCreate>}
               />
 
               <FormControlLabel

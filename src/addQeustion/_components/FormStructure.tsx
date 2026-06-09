@@ -15,15 +15,11 @@ import SimpleSelectField from "../../GlobalComponent/SimpleSelectField.js";
 import { optionTypeData, QuestionOptionType } from "./data.js";
 import OptionsFieldArray from "../components/OptionsFieldArray.jsx";
 import FileUploadSection2 from "../components/FileUploadThree.js";
-import { GetJwt } from "@/util/utils.js";
 import EditorComponent from "@/components/EditorComponent.js";
-import SelectField from "@/components/SelectField.js";
 import { api } from "@/lib/api.js";
 import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types.js";
 import type { TQuestion, TQuestionRelation } from "@/types/Question.types.js";
 import { questionSchemaCreate, TQuestionSchemaCreate } from "../QuestionSchema.js";
-import { SimpleAutocomplete } from "@/GlobalComponent/SimpleAutocomplete.js";
-import OptimizedSelect from "./OptimizedTopicSearch.js";
 import { AsyncAutocomplete } from "@/GlobalComponent/AsyncAutocomplete.js";
 import { getAllChapters, getAllExamCategories, getAllSubjects, getAllSubjectsCategories, getAllTopics } from "@/getAll/api/subjectApi.js";
 import { AsyncMultiAutocomplete } from "@/GlobalComponent/AsyncMultiAutocomplete.js";
@@ -49,7 +45,28 @@ const getRelationIds = (
   fallback: TQuestionRelation[] = [],
 ) => (ids?.length ? ids : fallback.map(({ id }) => id));
 
-const getFirstId = (ids: number[] | null | undefined) => ids?.[0];
+const getSubjectId = (
+  ids: number | number[] | null | undefined,
+  fallback: TQuestionRelation[] = [],
+) => {
+  if (typeof ids === "number") return ids;
+  return ids?.[0] ?? fallback[0]?.id ?? 0;
+};
+
+const createDefaultOptions = () => [
+  { name: "", isCorrect: false },
+  { name: "", isCorrect: false },
+  { name: "", isCorrect: false },
+  { name: "", isCorrect: false },
+];
+
+const normalizeImages = (images: TQuestionSchemaCreate["images"] = []) =>
+  images
+    .map(({ imageLink }) => ({ imageLink }))
+    .filter(({ imageLink }) => imageLink && !imageLink.startsWith("blob:"));
+
+const hasPendingImages = (images: TQuestionSchemaCreate["images"] = []) =>
+  images.some(({ imageLink }) => imageLink?.startsWith("blob:"));
 
 export default function FormStructure() {
   const { qid } = useParams();
@@ -58,40 +75,51 @@ export default function FormStructure() {
     control,
     watch,
     setValue,
+    getValues,
     handleSubmit,
     reset,
     trigger,
     formState: { errors },
   } = useForm<TQuestionSchemaCreate>({
     defaultValues: {
-      // input_box: "",
       subjectIds: 0,
       topicIds: [],
       difficultyLevel: "easy",
       hint: "",
       optionType: "Single",
+      inputBox: null,
       explanation: "",
       chapterIds: [],
       subjectCategoryIds: [],
       examCategoryIds: [],
-      options: [
-        { name: "", isCorrect: false },
-        { name: "", isCorrect: false },
-        { name: "", isCorrect: false },
-        { name: "", isCorrect: false },
-      ],
+      options: createDefaultOptions(),
       question: "",
       images: [],
-
     },
     resolver: zodResolver(questionSchemaCreate),
   });
-  console.log('watch: ', watch());
 
-  const jwt_token = GetJwt();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editAutocompleteOptions, setEditAutocompleteOptions] =
     useState<EditAutocompleteOptions>(emptyEditAutocompleteOptions);
+  const optionType = watch("optionType");
+
+  useEffect(() => {
+    if (optionType === "Numerical") {
+      if ((getValues("options") ?? []).length > 0) {
+        setValue("options", [], { shouldValidate: false });
+      }
+      return;
+    }
+
+    if (getValues("inputBox")) {
+      setValue("inputBox", null, { shouldValidate: false });
+    }
+
+    if ((getValues("options") ?? []).length === 0) {
+      setValue("options", createDefaultOptions(), { shouldValidate: false });
+    }
+  }, [getValues, optionType, setValue]);
 
   useEffect(() => {
     if (!qid) {
@@ -110,7 +138,6 @@ export default function FormStructure() {
       if (!res.success) return null;
 
       const data = res.data;
-      console.log('data: ', data);
       setEditAutocompleteOptions({
         subjects: data.subjects ?? [],
         topics: data.topics ?? [],
@@ -120,19 +147,24 @@ export default function FormStructure() {
       });
 
       return {
-        // input_box: data?.input_box || "",
-        images: data?.images,
+        inputBox: data.inputBox ?? null,
+        images: normalizeImages(data.images),
         difficultyLevel: data.difficultyLevel || "easy",
         explanation: data.explanation ?? "",
         optionType: data.optionType ?? "Single",
         hint: data.hint ?? "",
         question: data.question ?? "",
-        subjectIds: getFirstId(data?.subjectIds) ?? data.subjects?.[0]?.id,
+        subjectIds: getSubjectId(data?.subjectIds, data.subjects),
         topicIds: getRelationIds(data?.topicIds, data.topics),
         examCategoryIds: getRelationIds(data?.examCategoryIds, data.examCategories),
         chapterIds: getRelationIds(data?.chapterIds, data.chapters),
         subjectCategoryIds: getRelationIds(data?.subjectCategoryIds, data.subjectCategories),
-        options: data.options,
+        options:
+          data.optionType === "Numerical"
+            ? []
+            : data.options?.length
+              ? data.options
+              : createDefaultOptions(),
       };
     };
     const loadQuestion = async () => {
@@ -146,40 +178,23 @@ export default function FormStructure() {
 
     loadQuestion();
   }, [qid, reset]);
-  const getData = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}subjects`, {
-        method: "GET",
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const data = await response.json();
-    } catch (error) {
-      console.error("Error:", error);
+  const onSubmit = async (formData: TQuestionSchemaCreate) => {
+    if (hasPendingImages(formData.images)) {
+      toast.error("Please upload selected images before submitting.");
+      return;
     }
-  };
 
-  const onSubmit = async (data: TQuestionSchemaCreate) => {
-    console.log('data: ', data);
     try {
       setIsSubmitting(true);
       const isEdit = Boolean(qid);
-
-      // const question_image = data?.images?.map((img: any) => {
-      //   return {
-      //     url: img.url,
-      //   };
-      // });
-      // const wholeData = {
-      //   ...data,
-      //   question_image,
-      // };
-      data = {
-        ...data,
-        subjectIds: data.subjectIds,
+      const isNumerical = formData.optionType === "Numerical";
+      const data = {
+        ...formData,
+        images: normalizeImages(formData.images),
+        inputBox: isNumerical ? formData.inputBox?.trim() || null : null,
+        options: isNumerical ? [] : formData.options ?? [],
+        subjectIds: [formData.subjectIds],
       };
 
       const url = isEdit
@@ -374,7 +389,15 @@ export default function FormStructure() {
             // label="Test Series Topic"
             options={optionTypeData}
             rules={{ required: "Please select a Topic" }}
-            myCallBackFn={() => trigger("options")}
+            myCallBackFn={(value) => {
+              trigger(["options", "inputBox"]);
+              if (value === "Numerical") {
+                setValue("options", []);
+                setValue("inputBox", null);
+              } else {
+                setValue("inputBox", null);
+              }
+            }}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
@@ -445,9 +468,14 @@ export default function FormStructure() {
           </Typography>
 
           <EditorComponent name="question" control={control} />
+          {errors?.question?.message && (
+            <FormHelperText error={!!errors?.question?.message}>
+              {errors?.question?.message}
+            </FormHelperText>
+          )}
         </Grid>
         {/* ---------- OPTIONS FIELD ARRAY ---------- */}
-        {watch("optionType") !== "Numerical" ? (
+        {optionType !== "Numerical" ? (
           <Grid size={12}>
             <OptionsFieldArray
               control={control}
@@ -472,7 +500,7 @@ export default function FormStructure() {
               </Typography>
             </Typography>
             <Controller
-              name="input_box"
+              name="inputBox"
               control={control}
               rules={{
                 required: "Please enter a number",

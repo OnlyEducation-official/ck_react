@@ -25,7 +25,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
 
 /* ===============================
    CONSTANTS
@@ -44,7 +44,7 @@ export const ALLOWED_EXTENSIONS_TEXT = "PNG, JPG, JPEG, WEBP";
 ================================ */
 export interface UploadImage {
   file?: File;
-  url?: string;
+  imageLink?: string;
   previewUrl?: string;
   id?: number | string;
   uploading?: boolean;
@@ -75,7 +75,7 @@ interface MultipleUploadResponse {
 }
 interface QuestionImage {
   file?: File;
-  url?: string;
+  imageLink?: string;
   deleting?: boolean;
 }
 
@@ -83,23 +83,6 @@ interface FormValues {
   images: QuestionImage[];
 }
 
-export interface UploadImage {
-  /** Local file selected from input */
-  file?: File;
-
-  /** S3 or CDN URL after upload */
-  url?: string;
-
-  /** Preview URL (blob or remote) */
-  previewUrl?: string;
-
-  /** Backend identifier (optional) */
-  id?: number | string;
-
-  /** UI state */
-  uploading?: boolean;
-  deleting?: boolean;
-}
 const extractImageNameFromUrl = (url: string): string | null => {
   try {
     const parsedUrl = new URL(url);
@@ -213,7 +196,7 @@ export default function FileUploadSection2({
 
       append({
         file,
-        url: URL.createObjectURL(file),
+        imageLink: URL.createObjectURL(file),
       });
     });
     // 🚨 Set error state properly
@@ -246,8 +229,8 @@ export default function FileUploadSection2({
     if (!target) return;
 
     // Local preview only
-    if (target.url?.startsWith("blob:")) {
-      URL.revokeObjectURL(target.url);
+    if (target.imageLink?.startsWith("blob:")) {
+      URL.revokeObjectURL(target.imageLink);
       remove(index);
       return;
     }
@@ -255,7 +238,7 @@ export default function FileUploadSection2({
     try {
       update(index, { ...target, deleting: true });
 
-      const key = extractS3KeyFromUrl(target.url!);
+      const key = extractS3KeyFromUrl(target.imageLink!);
       setProgress(0);
       await fetch(`${import.meta.env.VITE_AWS_BASE_URL}s3/delete`, {
         method: "DELETE",
@@ -305,7 +288,8 @@ export default function FileUploadSection2({
     const pendingImages: PendingImage[] = (images as UploadImage[])
       .map((img, index) => ({ img, index }))
       .filter(
-        ({ img }) => !!img.file && !!img.url && img.url.startsWith("blob:"),
+        ({ img }) =>
+          !!img.file && !!img.imageLink && img.imageLink.startsWith("blob:"),
       );
 
     if (pendingImages.length === 0) {
@@ -374,7 +358,7 @@ export default function FileUploadSection2({
 
         update(index, {
           ...images[index],
-          url: uploaded.url,
+          imageLink: uploaded.url,
           id: uploaded.id,
           file: undefined, // 🚫 prevents re-upload
         });
@@ -510,7 +494,7 @@ export default function FileUploadSection2({
                   const image = images?.[index];
                   if (!image) return null;
 
-                  const isUploaded = image.url?.startsWith("http");
+                  const isUploaded = image.imageLink?.startsWith("http");
 
                   return (
                     <TableRow key={field.id}>
@@ -523,7 +507,7 @@ export default function FileUploadSection2({
 
                       {/* Image Link */}
                       <TableCell>
-                        {isUploaded && image.url ? (
+                        {isUploaded && image.imageLink ? (
                           <Box
                             sx={{
                               display: "inline-flex",
@@ -531,7 +515,7 @@ export default function FileUploadSection2({
                               gap: 1,
                             }}
                           >
-                            <Link href={image.url} target="_blank">
+                            <Link href={image.imageLink} target="_blank">
                               <RemoveRedEyeIcon fontSize="large" />
                             </Link>
 
@@ -539,7 +523,9 @@ export default function FileUploadSection2({
                               <IconButton
                                 size="small"
                                 onClick={() =>
-                                  handleCopyLink(image.url ? image.url : "")
+                                  handleCopyLink(
+                                    image.imageLink ? image.imageLink : "",
+                                  )
                                 }
                               >
                                 <ContentCopyIcon fontSize="small" />
@@ -555,12 +541,12 @@ export default function FileUploadSection2({
 
                       {/* Preview */}
                       <TableCell>
-                        {image.url && (
+                        {image.imageLink && (
                           <Box
                             component="img"
-                            src={image.url}
+                            src={image.imageLink}
                             alt={image.file?.name ?? "Image"}
-                            onClick={() => handlePreviewOpen(image.url)}
+                            onClick={() => handlePreviewOpen(image.imageLink)}
                             sx={{
                               width: 70,
                               height: 45,

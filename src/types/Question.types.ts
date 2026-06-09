@@ -38,6 +38,7 @@ export type TQuestion = {
     explanation: string;
     hint: string;
     optionType: TOptionType;
+    inputBox?: string | null;
     difficultyLevel: TDifficultyLevel;
     createdAt: string;
     updatedAt: string;

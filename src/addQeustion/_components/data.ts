@@ -32,7 +32,7 @@ export const optionTypeData = [
 ];
 export const QuestionOptionType = [
     { label: "Easy", value: "easy" },
-    { label: "Medium", value: "medium" },
+    { label: "Moderate", value: "moderate" },
     { label: "Hard", value: "hard" },
 ];
 

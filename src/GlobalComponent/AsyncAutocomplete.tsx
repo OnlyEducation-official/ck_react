@@ -16,6 +16,14 @@ import type { PaginatedResponse } from "@/types/api.types";
 
 type OptionValue = string | number;
 
+const isEmptyValue = (value: OptionValue | null | undefined) =>
+    value === undefined || value === null || value === "" || value === 0 || value === "0";
+
+const optionValuesEqual = (
+    first: OptionValue | null | undefined,
+    second: OptionValue | null | undefined,
+) => !isEmptyValue(first) && !isEmptyValue(second) && String(first) === String(second);
+
 type BaseProps<TOption> = {
     label?: string;
     placeholder?: string;
@@ -111,23 +119,26 @@ function AutocompleteField<TOption>({
     const options = query.data?.data ?? [];
     const loading = open && query.isFetching;
 
-    // Resolve the label for a pre-filled id on edit pages
+    // Resolve the label for a pre-filled id on edit pages.
     useEffect(() => {
-        if (
-            defaultOption &&
-            value !== undefined &&
-            getOptionValue(defaultOption) === value
-        ) {
-            setSelectedOption(defaultOption);
+        if (isEmptyValue(value)) {
+            if (selectedOption !== null) setSelectedOption(null);
+            return;
         }
-    }, [defaultOption, value, getOptionValue]);
 
-    // If the form is reset/cleared externally, drop the displayed object too
-    useEffect(() => {
-        if (value === undefined && selectedOption !== null) {
-            setSelectedOption(null);
+        if (defaultOption && optionValuesEqual(getOptionValue(defaultOption), value)) {
+            setSelectedOption(defaultOption);
+            return;
         }
-    }, [value, selectedOption]);
+
+        const optionFromLoadedResults = options.find((option) =>
+            optionValuesEqual(getOptionValue(option), value)
+        );
+
+        if (optionFromLoadedResults) {
+            setSelectedOption(optionFromLoadedResults);
+        }
+    }, [defaultOption, options, value, getOptionValue, selectedOption]);
 
     return (
         <Autocomplete<TOption>

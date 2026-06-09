@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import { Controller, Control } from "react-hook-form";
 import type { Editor as TinyMCEEditor } from "tinymce";
-import { QuestionSchemaType } from "@/addQeustion/QuestionSchema";
+import { TQuestionSchemaCreate } from "@/addQeustion/QuestionSchema";
 import { Box, Skeleton } from "@mui/material";
 
 type Props = {
-  name: keyof QuestionSchemaType;
-  control: Control<QuestionSchemaType>;
+  name: keyof TQuestionSchemaCreate;
+  control: Control<TQuestionSchemaCreate>;
   height?: number;
 };
 
@@ -164,7 +164,7 @@ export default function EditorComponent({
       control={control}
       render={({ field }) => (
         <TinyEditorField
-          value={field.value ?? ""}
+          value={String(field.value) ?? ""}
           onChange={field.onChange}
           height={height}
         />

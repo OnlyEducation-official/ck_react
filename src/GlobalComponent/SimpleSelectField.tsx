@@ -29,7 +29,7 @@ interface SimpleSelectFieldProps<T extends FieldValues> {
   rules?: RegisterOptions; // ✅ support validation rules
   isOptionEqualToValue?: (a: Option, b: Option) => boolean; // ✅ optional prop
   noneOption?: boolean;
-  myCallBackFn?: () => void;
+  myCallBackFn?: (value: "Single" | "Multiple" | "Numerical") => void;
 }
 
 const SimpleSelectField = <T extends FieldValues>({
@@ -160,7 +160,7 @@ const SimpleSelectField = <T extends FieldValues>({
               }
 
               if (myCallBackFn) {
-                myCallBackFn();
+                myCallBackFn(e.target.value as unknown as "Single" | "Multiple" | "Numerical");
               }
             }}
           >
