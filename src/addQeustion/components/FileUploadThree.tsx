@@ -26,6 +26,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useFieldArray } from "react-hook-form";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 /* ===============================
    CONSTANTS
@@ -36,7 +37,8 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/jpg",
   "image/webp",
 ];
-export const MAX_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB
+export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_IMAGES = 20;
 export const ALLOWED_EXTENSIONS_TEXT = "PNG, JPG, JPEG, WEBP";
 
 /* ===============================
@@ -73,6 +75,7 @@ interface MultipleUploadResponse {
   success: boolean;
   files: UploadedFile[];
 }
+
 interface QuestionImage {
   file?: File;
   imageLink?: string;
@@ -136,6 +139,7 @@ export default function FileUploadSection2({
     control,
     name: "images",
   });
+  const { uploadImage, uploadImages, deleteImage } = useImageUpload();
   const startProgressAnimation = () => {
     setProgress(0);
 
@@ -179,8 +183,13 @@ export default function FileUploadSection2({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
+    const currentCount = images?.length ?? 0;
+    const availableSlots = Math.max(0, MAX_IMAGES - currentCount);
+
     const invalidFiles: string[] = [];
     const oversizedFiles: string[] = [];
+    let addedCount = 0;
+    let truncated = false;
 
     Array.from(e.target.files).forEach((file) => {
       if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
@@ -193,11 +202,16 @@ export default function FileUploadSection2({
         );
         return;
       }
+      if (addedCount >= availableSlots) {
+        truncated = true;
+        return;
+      }
 
       append({
         file,
         imageLink: URL.createObjectURL(file),
       });
+      addedCount++;
     });
     // 🚨 Set error state properly
     if (invalidFiles.length > 0) {
@@ -209,6 +223,11 @@ export default function FileUploadSection2({
 
     if (oversizedFiles.length > 0) {
       setError(`File size must not exceed 5MB.\n${oversizedFiles.join(", ")}`);
+      return;
+    }
+
+    if (truncated) {
+      setError(`Maximum ${MAX_IMAGES} images allowed`);
       return;
     }
 
@@ -237,14 +256,8 @@ export default function FileUploadSection2({
 
     try {
       update(index, { ...target, deleting: true });
-
-      const key = extractS3KeyFromUrl(target.imageLink!);
       setProgress(0);
-      await fetch(`${import.meta.env.VITE_AWS_BASE_URL}s3/delete`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
-      });
+      await deleteImage(target.imageLink!);
 
       remove(index);
       setSuccess("Image deleted");
@@ -301,55 +314,32 @@ export default function FileUploadSection2({
     const progressInterval = startProgressAnimation();
 
     try {
-      const formData = new FormData();
-
-      /**
-       * 2️⃣ Build FormData based on pending count
-       */
-      if (pendingImages.length === 1) {
-        formData.append("file", pendingImages[0]?.img.file as File);
-      } else {
-        pendingImages.forEach(({ img }) => {
-          formData.append("files", img.file as File);
-        });
-      }
-
-      /**
-       * 3️⃣ Select API dynamically
-       */
-      const endpoint =
-        pendingImages.length === 1
-          ? `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/single`
-          : `${import.meta.env.VITE_AWS_BASE_URL}s3/upload/multiple`;
-
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-        signal: controller.signal,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-
-      const json = await res.json();
-
       /**
-       * 4️⃣ Normalize backend response
+       * 2️⃣ Call the appropriate upload endpoint via the shared hook
        */
       type UploadedResult = {
         url: string;
-        id?: string;
       };
 
-      const uploadedResults: UploadedResult[] =
-        pendingImages.length === 1
-          ? [{ url: json.url, id: json.id }]
-          : json.files;
+      let uploadedResults: UploadedResult[];
+
+      if (pendingImages.length === 1) {
+        const url = await uploadImage(
+          pendingImages[0]!.img.file as File,
+          controller.signal,
+        );
+        uploadedResults = [{ url }];
+      } else {
+        const files = pendingImages.map(({ img }) => img.file as File);
+        const urls = await uploadImages(files, controller.signal);
+        uploadedResults = urls.map((url) => ({ url }));
+      }
 
       /**
-       * 5️⃣ Map uploaded URLs back to correct form indices
+       * 3️⃣ Map uploaded URLs back to correct form indices
        *    (FIXES bug case 4)
        */
       pendingImages.forEach(({ index }, i) => {
@@ -359,7 +349,6 @@ export default function FileUploadSection2({
         update(index, {
           ...images[index],
           imageLink: uploaded.url,
-          id: uploaded.id,
           file: undefined, // 🚫 prevents re-upload
         });
       });
