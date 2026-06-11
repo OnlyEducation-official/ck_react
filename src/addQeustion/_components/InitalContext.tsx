@@ -37,13 +37,15 @@ const InitialDataContext = createContext<InitDataContextType | null>(null);
 // };
 
 const fetchDataFunc = async (url: string) => {
-  // const jwt_token = localStorage.getItem("auth_token");
+  const jwt_token = localStorage.getItem("auth_token");
+
+  console.log("fetchDataFunc: ",url)
 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
-      // Authorization:
-      //   `Bearer ${jwt_token}`,
+      Authorization:
+        `Bearer ${jwt_token}`,
     },
   });
   const data = await response.json();
@@ -67,18 +69,18 @@ export function InitialDataContextProvider({
   useEffect(() => {
     async function dummy() {
       const subjectData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}/subjects`,
+        `${import.meta.env.VITE_BASE_URL}subjects`,
       );
       console.log("subjectData: ", subjectData);
 
       const topicData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}/topics`,
+        `${import.meta.env.VITE_BASE_URL}topics`,
       );
       const examCategoryData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}/t-categories?populate=*`,
+        `${import.meta.env.VITE_BASE_URL}t-categories?populate=*`,
       );
       const tExamsData = await fetchDataFunc(
-        `${import.meta.env.VITE_BASE_URL}/t-exams?[fields][0]=title&[fields][1]=slug`,
+        `${import.meta.env.VITE_BASE_URL}t-exams?[fields][0]=title&[fields][1]=slug`,
       );
 
       setData({

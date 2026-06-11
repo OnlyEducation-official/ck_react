@@ -10,6 +10,7 @@ import { GetRoleType } from "@/util/utils";
 import { api } from "@/lib/api";
 import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types";
 import { useQueryClient } from "@tanstack/react-query";
+import Cookies from "js-cookie";
 
 const SubjectSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -26,14 +27,17 @@ const TestSubjectForm = () => {
     control,
     handleSubmit,
     reset,
-    formState: { isValid, isSubmitted, isSubmitting },
+    watch,
+    formState: { isValid, isSubmitted, isSubmitting, errors },
   } = useForm<SubjectSchemaType>({
     resolver: zodResolver(SubjectSchema),
     defaultValues: {
       name: "",
     },
   });
+    console.log('errors: ', errors);
 
+  console.log("watch ",watch())
   useEffect(() => {
     if (!qid) return;
 
@@ -48,12 +52,15 @@ const TestSubjectForm = () => {
       }
 
       reset({ name: response.data?.name ?? "" });
+      console.log('response: ', response);
     };
 
     fetchData();
   }, [qid, reset]);
 
   const onSubmit = async (data: SubjectSchemaType) => {
+    console.log('data: ', data);
+    const token = Cookies.get("auth_token");
     try {
       const isEdit = Boolean(qid);
       const url = isEdit ? `subjects/${qid}` : `subjects`;
@@ -61,10 +68,12 @@ const TestSubjectForm = () => {
       const res = await api<ApiSuccessResponse<SubjectSchemaType> | ApiErrorResponse>(url, {
         headers: {
           "Content-Type": "application/json",
+          // 'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(data),
         method: isEdit ? "PUT" : "POST",
       });
+        console.log('res:sd ', res);
 
       if (!res.success) {
         toast.error(res.message);
@@ -73,6 +82,7 @@ const TestSubjectForm = () => {
         if (!isEdit) {
           reset();
           navigate("/test-subject-list");
+
         };
         await queryClient.invalidateQueries({
           queryKey: ["subjects"],
