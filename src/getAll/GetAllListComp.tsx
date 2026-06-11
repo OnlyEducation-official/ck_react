@@ -57,7 +57,7 @@ export default function GetAllListComp({ pageRoute, syllabus }: { pageRoute: str
     };
 
     const handleDelete = async (id: number) => {
-        const res = await deleteApi("subjects", id);
+        const res = await deleteApi(pageRoute, id);
 
         if (!res.success) {
             toast.error(res.message);
@@ -67,7 +67,7 @@ export default function GetAllListComp({ pageRoute, syllabus }: { pageRoute: str
         toast.success(res.message);
 
         await queryClient.invalidateQueries({
-            queryKey: ["subjects"],
+            queryKey: [pageRoute],
         });
     };
 

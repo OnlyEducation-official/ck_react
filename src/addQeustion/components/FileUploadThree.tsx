@@ -2,400 +2,318 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
-  LinearProgress,
-  Stack,
-  Typography,
-  Alert,
+  Dialog,
+  DialogContent,
   IconButton,
+  LinearProgress,
   Link,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import Tooltip from "@mui/material/Tooltip";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { useFieldArray } from "react-hook-form";
-import { useImageUpload } from "@/hooks/useImageUpload";
 
-/* ===============================
-   CONSTANTS
-================================ */
-export const ALLOWED_IMAGE_TYPES = [
+/* ============================================================
+   Config
+============================================================ */
+const ALLOWED_IMAGE_TYPES = [
   "image/png",
   "image/jpeg",
   "image/jpg",
   "image/webp",
 ];
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-export const MAX_IMAGES = 20;
-export const ALLOWED_EXTENSIONS_TEXT = "PNG, JPG, JPEG, WEBP";
+const ALLOWED_EXTENSIONS_TEXT = "PNG, JPG, JPEG, WEBP";
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB — matches backend multer limit
+const MAX_IMAGE_SIZE_TEXT = "5MB";
 
-/* ===============================
-   TYPES
-================================ */
+const API_BASE =
+  "http://localhost:5000/api";
+const UPLOAD_SINGLE_URL = `${API_BASE}/upload/question-image`;
+const UPLOAD_MULTIPLE_URL = `${API_BASE}/upload/multiple/question-images`;
+// const DELETE_URL = `${API_BASE}/upload/delete`; // wire when backend route exists
+
+/* ============================================================
+   Types
+============================================================ */
 export interface UploadImage {
-  file?: File;
-  imageLink?: string;
-  previewUrl?: string;
-  id?: number | string;
-  uploading?: boolean;
-  deleting?: boolean;
-}
-interface UploadItem {
-  id: number;
-  file: File;
-  previewUrl?: string;
-  deleting?: boolean;
+  file?: File;          // local file before upload
+  url?: string;         // blob: URL while local, https: URL after upload
+  id?: number | string; // optional backend id
+  deleting?: boolean;   // UI state
 }
 
-/* ---- Backend responses ---- */
-interface SingleUploadResponse {
-  success: boolean;
-  url: string;
-  key: string;
-}
-
-interface UploadedFile {
-  originalName: string;
-  url: string;
-}
-
-interface MultipleUploadResponse {
-  success: boolean;
-  files: UploadedFile[];
-}
-
-interface QuestionImage {
-  file?: File;
-  imageLink?: string;
-  deleting?: boolean;
-}
-
-interface FormValues {
-  images: QuestionImage[];
-}
-
-const extractImageNameFromUrl = (url: string): string | null => {
-  try {
-    const parsedUrl = new URL(url);
-    const pathname = parsedUrl.pathname; // e.g. "/images/1769261721937.webp"
-    const parts = pathname.split("/").filter(Boolean);
-
-    if (parts.length === 0) {
-      return null;
-    }
-
-    const lastPart = parts.at(-1);
-    return lastPart ?? null;
-  } catch {
-    return null;
-  }
-};
-const extractS3KeyFromUrl = (url: string): string | null => {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.pathname.startsWith("/")
-      ? parsedUrl.pathname.slice(1) // remove leading '/'
-      : parsedUrl.pathname;
-  } catch {
-    return null;
-  }
-};
-interface FileUploadSection2Props {
+interface FileUploadSectionProps {
   control: any;
   watch: any;
-  setValue: any;
+  setValue?: any; // kept for API parity; not used internally
 }
 
-export default function FileUploadSection2({
+// Matches your backend's `{ success, message, data }` envelope
+interface ApiSuccess<T> {
+  success: true;
+  message: string;
+  data: T;
+}
+interface ApiError {
+  success: false;
+  message: string;
+}
+type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+/* ============================================================
+   Helpers
+============================================================ */
+const isBlobUrl = (url?: string) => !!url?.startsWith("blob:");
+const isHttpUrl = (url?: string) => !!url?.startsWith("http");
+
+const validateFile = (file: File): string | null => {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return `${file.name} — unsupported format`;
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    const mb = (file.size / 1024 / 1024).toFixed(2);
+    return `${file.name} — ${mb} MB exceeds ${MAX_IMAGE_SIZE_TEXT}`;
+  }
+  return null;
+};
+
+/* ============================================================
+   Component
+============================================================ */
+export default function FileUploadSection({
   control,
   watch,
-  setValue,
-}: FileUploadSection2Props) {
+}: FileUploadSectionProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(
+    null,
+  );
+
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "images",
   });
-  const { uploadImage, uploadImages, deleteImage } = useImageUpload();
-  const startProgressAnimation = () => {
-    setProgress(0);
+  const images: UploadImage[] = watch("images") ?? [];
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        // Stop at 90% until upload finishes
-        if (prev >= 90) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + Math.floor(Math.random() * 5) + 1;
-      });
-    }, 1000);
-
-    return interval;
-  };
-  const images = watch("images");
+  /* -------- Auto-dismiss alerts -------- */
   useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    if (!success && !error) return;
+    const t = setTimeout(() => {
+      setSuccess(null);
+      setError(null);
+    }, 3000);
+    return () => clearTimeout(t);
   }, [success, error]);
-  /* ===============================
-     HANDLE FILE SELECTION
-  ================================ */
-  const handlePreviewOpen = (url?: string) => {
-    if (!url) return;
-    setPreviewImage(url);
-    setPreviewOpen(true);
-  };
 
-  const handlePreviewClose = () => {
-    setPreviewOpen(false);
-    setPreviewImage(null);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const currentCount = images?.length ?? 0;
-    const availableSlots = Math.max(0, MAX_IMAGES - currentCount);
-
-    const invalidFiles: string[] = [];
-    const oversizedFiles: string[] = [];
-    let addedCount = 0;
-    let truncated = false;
-
-    Array.from(e.target.files).forEach((file) => {
-      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-        invalidFiles.push(file.name);
-        return;
-      }
-      if (file.size > MAX_IMAGE_SIZE) {
-        oversizedFiles.push(
-          `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`,
-        );
-        return;
-      }
-      if (addedCount >= availableSlots) {
-        truncated = true;
-        return;
-      }
-
-      append({
-        file,
-        imageLink: URL.createObjectURL(file),
+  /* -------- Revoke blob URLs on unmount -------- */
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        if (isBlobUrl(img.url)) URL.revokeObjectURL(img.url!);
       });
-      addedCount++;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* -------- Fake progress until backend supports real % -------- */
+  const startProgress = () => {
+    setProgress(0);
+    progressTimerRef.current = setInterval(() => {
+      setProgress((p) =>
+        p >= 90 ? p : p + Math.floor(Math.random() * 5) + 1,
+      );
+    }, 700);
+  };
+  const stopProgress = (final = 0) => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    setProgress(final);
+    if (final === 100) {
+      setTimeout(() => setProgress(0), 800);
+    }
+  };
+
+  /* -------- File selection -------- */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const list = e.target.files;
+    if (!list) return;
+
+    const errors: string[] = [];
+    Array.from(list).forEach((file) => {
+      const err = validateFile(file);
+      if (err) {
+        errors.push(err);
+        return;
+      }
+      append({ file, url: URL.createObjectURL(file) } as UploadImage);
     });
-    // 🚨 Set error state properly
-    if (invalidFiles.length > 0) {
-      setError(
-        `Unsupported image format.\nAllowed: ${ALLOWED_EXTENSIONS_TEXT}\n${invalidFiles.join(", ")}`,
-      );
-      return;
-    }
 
-    if (oversizedFiles.length > 0) {
-      setError(`File size must not exceed 5MB.\n${oversizedFiles.join(", ")}`);
-      return;
+    if (errors.length) {
+      setError(`Some files were skipped:\n${errors.join("\n")}`);
     }
-
-    if (truncated) {
-      setError(`Maximum ${MAX_IMAGES} images allowed`);
-      return;
-    }
-
-    // Clear error if everything is valid
-    setError(null);
-
-    if (invalidFiles.length) {
-      setError(
-        `Unsupported image format.\nAllowed: ${ALLOWED_EXTENSIONS_TEXT}\n${invalidFiles.join(", ")}`,
-      );
-    }
-    setError(null);
     e.target.value = "";
   };
 
-  const handleRemove = async (index: number) => {
-    const target = images[index];
-    if (!target) return;
+  /* -------- Upload -------- */
+  const handleUpload = async () => {
+    const pending = images
+      .map((img, index) => ({ img, index }))
+      .filter(({ img }) => img.file && isBlobUrl(img.url));
 
-    // Local preview only
-    if (target.imageLink?.startsWith("blob:")) {
-      URL.revokeObjectURL(target.imageLink);
-      remove(index);
+    if (pending.length === 0) {
+      setError("Nothing new to upload");
       return;
     }
 
+    setLoading(true);
+    startProgress();
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const isSingle = pending.length === 1;
+      const fieldName = isSingle ? "image" : "images";
+      const endpoint = isSingle ? UPLOAD_SINGLE_URL : UPLOAD_MULTIPLE_URL;
+
+      const formData = new FormData();
+      pending.forEach(({ img }) => formData.append(fieldName, img.file!));
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
+
+      const json = (await response.json()) as ApiResponse<{
+        url?: string;
+        urls?: string[];
+      }>;
+
+      if (!response.ok || !json.success) {
+        throw new Error(
+          "message" in json ? json.message : "Upload failed",
+        );
+      }
+
+      const uploadedUrls = isSingle
+        ? json.data.url
+          ? [json.data.url]
+          : []
+        : json.data.urls ?? [];
+
+      // Map uploaded URLs back to their original indices in the field array
+      pending.forEach(({ index, img }, i) => {
+        const url = uploadedUrls[i];
+        if (!url) return;
+        if (isBlobUrl(img.url)) URL.revokeObjectURL(img.url!);
+        update(index, { ...images[index], url, file: undefined });
+      });
+
+      stopProgress(100);
+      setSuccess(
+        `Uploaded ${uploadedUrls.length} image${uploadedUrls.length > 1 ? "s" : ""
+        }`,
+      );
+    } catch (err: any) {
+      stopProgress(0);
+      if (err?.name === "AbortError") {
+        setError("Upload cancelled");
+      } else {
+        setError(err?.message ?? "Upload failed");
+      }
+    } finally {
+      setLoading(false);
+      abortRef.current = null;
+    }
+  };
+
+  const handleCancelUpload = () => {
+    abortRef.current?.abort();
+    stopProgress(0);
+    setLoading(false);
+  };
+
+  /* -------- Delete -------- */
+  const requestDelete = (index: number) => {
+    const img = images[index];
+    if (!img) return;
+
+    // Local-only entry: drop immediately, no confirmation
+    if (isBlobUrl(img.url)) {
+      URL.revokeObjectURL(img.url!);
+      remove(index);
+      return;
+    }
+    // Server-hosted: ask first
+    setConfirmDeleteIndex(index);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDeleteIndex === null) return;
+    const index = confirmDeleteIndex;
+    const target = images[index];
+    setConfirmDeleteIndex(null);
+    if (!target?.url) return;
+
     try {
       update(index, { ...target, deleting: true });
-      setProgress(0);
-      await deleteImage(target.imageLink!);
+
+      // TODO: wire to your real backend delete route. Example:
+      // await fetch(DELETE_URL, {
+      //   method: "DELETE",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ url: target.url }),
+      // });
 
       remove(index);
       setSuccess("Image deleted");
     } catch {
-      setProgress(0);
       update(index, { ...target, deleting: false });
       setError("Delete failed");
     }
   };
 
-  /* ===============================
-     COPY LINK
-  ================================ */
+  /* -------- Copy link -------- */
   const handleCopyLink = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
-      setSuccess("Link copied to clipboard");
+      setSuccess("Link copied");
     } catch {
-      setError("Failed to copy link");
+      setError("Failed to copy");
     }
   };
 
-  /* ===============================
-     UPLOAD (SINGLE / MULTIPLE)
-  ================================ */
-  const handleUpload = async () => {
-    if (!images?.length) {
-      setError("Please select at least one image");
-      return;
-    }
+  /* ============================================================
+     Render
+  ============================================================ */
+  const hasPending = images.some((i) => isBlobUrl(i.url));
 
-    /**
-     * 1️⃣ Extract pending images with original index
-     *    (ONLY images that still need upload)
-     */
-    type PendingImage = {
-      img: UploadImage;
-      index: number;
-    };
-
-    const pendingImages: PendingImage[] = (images as UploadImage[])
-      .map((img, index) => ({ img, index }))
-      .filter(
-        ({ img }) =>
-          !!img.file && !!img.imageLink && img.imageLink.startsWith("blob:"),
-      );
-
-    if (pendingImages.length === 0) {
-      setError("All images are already uploaded");
-      return;
-    }
-
-    setLoading(true);
-    const progressInterval = startProgressAnimation();
-
-    try {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      /**
-       * 2️⃣ Call the appropriate upload endpoint via the shared hook
-       */
-      type UploadedResult = {
-        url: string;
-      };
-
-      let uploadedResults: UploadedResult[];
-
-      if (pendingImages.length === 1) {
-        const url = await uploadImage(
-          pendingImages[0]!.img.file as File,
-          controller.signal,
-        );
-        uploadedResults = [{ url }];
-      } else {
-        const files = pendingImages.map(({ img }) => img.file as File);
-        const urls = await uploadImages(files, controller.signal);
-        uploadedResults = urls.map((url) => ({ url }));
-      }
-
-      /**
-       * 3️⃣ Map uploaded URLs back to correct form indices
-       *    (FIXES bug case 4)
-       */
-      pendingImages.forEach(({ index }, i) => {
-        const uploaded = uploadedResults[i];
-        if (!uploaded) return;
-
-        update(index, {
-          ...images[index],
-          imageLink: uploaded.url,
-          file: undefined, // 🚫 prevents re-upload
-        });
-      });
-      // ✅ Finish progress cleanly
-      setProgress(100);
-      setTimeout(() => setProgress(0), 1000);
-      setSuccess("Images uploaded successfully");
-    } catch (err: any) {
-      if (err.name === "AbortError") {
-        setError("Upload cancelled");
-      } else {
-        console.error(err);
-        setError("Upload failed");
-      }
-      setProgress(0);
-    } finally {
-      setProgress(0);
-      clearInterval(progressInterval);
-
-      setLoading(false);
-    }
-  };
-  const handleCancelUpload = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    setLoading(false);
-    setProgress(0);
-  };
-  const handleConfirmDelete = async () => {
-    if (pendingDeleteId === null) return;
-
-    await handleRemove(pendingDeleteId);
-
-    setConfirmOpen(false);
-    setPendingDeleteId(null);
-  };
-
-  const handleCancelDelete = () => {
-    setConfirmOpen(false);
-    setPendingDeleteId(null);
-  };
-
-  /* ===============================
-     UI
-  ================================ */
   return (
     <Box
       sx={{
@@ -409,16 +327,18 @@ export default function FileUploadSection2({
       }}
     >
       <Stack spacing={3}>
+        {/* Header */}
         <Stack alignItems="center" spacing={1}>
           <CloudUploadOutlinedIcon sx={{ fontSize: 46 }} />
           <Typography variant="h6" fontWeight={600}>
-            Upload Images three
+            Upload Images
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Allowed formats: {ALLOWED_EXTENSIONS_TEXT}
+            Allowed: {ALLOWED_EXTENSIONS_TEXT} • Max {MAX_IMAGE_SIZE_TEXT}
           </Typography>
         </Stack>
 
+        {/* Hidden file input */}
         <input
           ref={inputRef}
           type="file"
@@ -427,6 +347,8 @@ export default function FileUploadSection2({
           accept=".png,.jpg,.jpeg,.webp"
           onChange={handleFileChange}
         />
+
+        {/* Action buttons */}
         <Stack
           sx={{
             flexDirection: { xs: "column", sm: "row" },
@@ -434,18 +356,14 @@ export default function FileUploadSection2({
           }}
           justifyContent="center"
           alignItems="center"
-          spacing={1}
         >
           <Button
             variant="outlined"
             fullWidth
             size="large"
             onClick={() => inputRef.current?.click()}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: 2,
-            }}
+            disabled={loading}
+            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
           >
             Choose Images
           </Button>
@@ -454,17 +372,14 @@ export default function FileUploadSection2({
             fullWidth
             size="large"
             onClick={handleUpload}
-            disabled={loading}
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: 2,
-            }}
+            disabled={loading || !hasPending}
+            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
           >
-            Upload
+            {loading ? "Uploading…" : "Upload"}
           </Button>
         </Stack>
 
+        {/* Table */}
         {fields.length > 0 && (
           <TableContainer component={Paper} variant="outlined">
             <Table size="small">
@@ -477,26 +392,22 @@ export default function FileUploadSection2({
                   <TableCell align="center">Action</TableCell>
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {fields.map((field, index) => {
-                  const image = images?.[index];
+                  const image = images[index];
                   if (!image) return null;
-
-                  const isUploaded = image.imageLink?.startsWith("http");
+                  const uploaded = isHttpUrl(image.url);
 
                   return (
                     <TableRow key={field.id}>
                       <TableCell>{index + 1}</TableCell>
-
-                      {/* Name */}
                       <TableCell>
-                        {image.file?.name || "Uploaded Image"}
+                        {image.file?.name || "Uploaded image"}
                       </TableCell>
 
-                      {/* Image Link */}
+                      {/* Link / copy */}
                       <TableCell>
-                        {isUploaded && image.imageLink ? (
+                        {uploaded && image.url ? (
                           <Box
                             sx={{
                               display: "inline-flex",
@@ -504,18 +415,17 @@ export default function FileUploadSection2({
                               gap: 1,
                             }}
                           >
-                            <Link href={image.imageLink} target="_blank">
+                            <Link
+                              href={image.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <RemoveRedEyeIcon fontSize="large" />
                             </Link>
-
                             <Tooltip title="Copy link">
                               <IconButton
                                 size="small"
-                                onClick={() =>
-                                  handleCopyLink(
-                                    image.imageLink ? image.imageLink : "",
-                                  )
-                                }
+                                onClick={() => handleCopyLink(image.url!)}
                               >
                                 <ContentCopyIcon fontSize="small" />
                               </IconButton>
@@ -528,14 +438,14 @@ export default function FileUploadSection2({
                         )}
                       </TableCell>
 
-                      {/* Preview */}
+                      {/* Thumbnail */}
                       <TableCell>
-                        {image.imageLink && (
+                        {image.url && (
                           <Box
                             component="img"
-                            src={image.imageLink}
+                            src={image.url}
                             alt={image.file?.name ?? "Image"}
-                            onClick={() => handlePreviewOpen(image.imageLink)}
+                            onClick={() => setPreviewUrl(image.url!)}
                             sx={{
                               width: 70,
                               height: 45,
@@ -549,18 +459,18 @@ export default function FileUploadSection2({
                         )}
                       </TableCell>
 
-                      {/* Action */}
+                      {/* Delete */}
                       <TableCell align="center">
-                        <IconButton
-                          color="error"
-                          onClick={() => handleRemove(index)}
-                        >
-                          {image.deleting ? (
-                            <Typography variant="caption">Deleting…</Typography>
-                          ) : (
+                        {image.deleting ? (
+                          <Typography variant="caption">Deleting…</Typography>
+                        ) : (
+                          <IconButton
+                            color="error"
+                            onClick={() => requestDelete(index)}
+                          >
                             <CloseIcon fontSize="small" />
-                          )}
-                        </IconButton>
+                          </IconButton>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -570,6 +480,7 @@ export default function FileUploadSection2({
           </TableContainer>
         )}
 
+        {/* Progress */}
         {loading && progress > 0 && (
           <Box sx={{ width: "100%" }}>
             <LinearProgress
@@ -580,67 +491,35 @@ export default function FileUploadSection2({
                 borderRadius: 6,
                 overflow: "hidden",
                 backgroundColor: "grey.300",
-
-                // bar animation
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 6,
-                  transition: "width 0.6s ease-in-out",
-
-                  // shimmer animation
+                  transition: "width 0.5s ease-in-out",
                   backgroundImage:
                     "linear-gradient(90deg, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.35) 37%, rgba(255,255,255,0.15) 63%)",
                   backgroundSize: "400% 100%",
                   animation: "shimmer 1.4s ease infinite",
                 },
-
                 "@keyframes shimmer": {
-                  "0%": {
-                    backgroundPosition: "100% 0",
-                  },
-                  "100%": {
-                    backgroundPosition: "0% 0",
-                  },
+                  "0%": { backgroundPosition: "100% 0" },
+                  "100%": { backgroundPosition: "0% 0" },
                 },
               }}
             />
-
             <Stack
               direction="row"
               justifyContent="space-between"
               alignItems="center"
               sx={{ mt: 1 }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 500,
-                }}
-              >
+              <Typography variant="caption" sx={{ fontWeight: 500 }}>
                 {progress}%
               </Typography>
-
               <Button
                 size="small"
                 color="error"
                 onClick={handleCancelUpload}
                 startIcon={<CloseIcon />}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 2.5,
-                  boxShadow: "none",
-                  transition: "all 0.2s ease",
-
-                  "&:hover": {
-                    boxShadow: 3,
-                    transform: "translateY(-1px)",
-                  },
-
-                  "&:active": {
-                    transform: "translateY(0)",
-                  },
-                }}
+                sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
               >
                 Cancel Upload
               </Button>
@@ -648,12 +527,19 @@ export default function FileUploadSection2({
           </Box>
         )}
 
-        {error && <Alert severity="error">{error}</Alert>}
+        {/* Alerts */}
+        {error && (
+          <Alert severity="error" sx={{ whiteSpace: "pre-line" }}>
+            {error}
+          </Alert>
+        )}
         {success && <Alert severity="success">{success}</Alert>}
       </Stack>
+
+      {/* Preview dialog */}
       <Dialog
-        open={previewOpen}
-        onClose={handlePreviewClose}
+        open={!!previewUrl}
+        onClose={() => setPreviewUrl(null)}
         maxWidth="lg"
         fullWidth
       >
@@ -667,9 +553,8 @@ export default function FileUploadSection2({
             backgroundColor: "black",
           }}
         >
-          {/* 🔴 Close Button */}
           <IconButton
-            onClick={handlePreviewClose}
+            onClick={() => setPreviewUrl(null)}
             aria-label="Close preview"
             sx={{
               position: "absolute",
@@ -678,55 +563,49 @@ export default function FileUploadSection2({
               backgroundColor: "white",
               color: "error.main",
               zIndex: 10,
-              "&:hover": {
-                backgroundColor: "#f5f5f5",
-              },
+              "&:hover": { backgroundColor: "#f5f5f5" },
             }}
           >
             <CloseIcon />
           </IconButton>
-
-          {/* 🖼 Image */}
-          {previewImage && (
+          {previewUrl && (
             <Box
               component="img"
-              src={previewImage}
+              src={previewUrl}
               alt="Image preview"
               sx={{
                 maxWidth: "100%",
-                maxHeight: {
-                  xs: "80vh",
-                  sm: "85vh",
-                  md: "90vh",
-                },
+                maxHeight: { xs: "80vh", sm: "85vh", md: "90vh" },
                 objectFit: "contain",
               }}
             />
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirm dialog */}
       <Dialog
-        open={confirmOpen}
-        onClose={handleCancelDelete}
+        open={confirmDeleteIndex !== null}
+        onClose={() => setConfirmDeleteIndex(null)}
         maxWidth="xs"
         fullWidth
       >
         <DialogContent sx={{ p: 3 }}>
           <Stack spacing={2}>
             <Typography variant="h6" fontWeight={600}>
-              Delete Image?
+              Delete image?
             </Typography>
-
             <Typography variant="body2" color="text.secondary">
-              This action will permanently delete the image from the server.
-              This cannot be undone.
+              This permanently removes the image from the server. This cannot
+              be undone.
             </Typography>
-
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button onClick={handleCancelDelete} variant="outlined">
+              <Button
+                onClick={() => setConfirmDeleteIndex(null)}
+                variant="outlined"
+              >
                 Cancel
               </Button>
-
               <Button
                 onClick={handleConfirmDelete}
                 variant="contained"

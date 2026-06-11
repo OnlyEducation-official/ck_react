@@ -31,7 +31,19 @@ export const questionSchemaCreate = z
 
     inputBox: z.string().trim().nullable().optional(),
 
-    images: z.array(imageSchema),
+    // images: z.array(imageSchema),
+    images: z
+      .array(
+        z.object({
+          file: z
+            .instanceof(File)
+            .nullable()
+            .optional(),
+          url: z.string().url().optional(),
+          deleting: z.boolean().optional(),
+        })
+      )
+      .optional(),
 
     subjectIds: z.number().min(1, "Subject is required"),
     subjectCategoryIds: z.array(z.number()).min(1, "Subject Category is required"),

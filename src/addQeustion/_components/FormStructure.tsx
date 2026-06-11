@@ -18,7 +18,7 @@ import FileUploadSection2 from "../components/FileUploadThree.js";
 import EditorComponent from "@/components/EditorComponent.js";
 import { api } from "@/lib/api.js";
 import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types.js";
-import type { TQuestion, TQuestionRelation } from "@/types/Question.types.js";
+import type { TQuestion, TQuestionImage, TQuestionRelation } from "@/types/Question.types.js";
 import { questionSchemaCreate, TQuestionSchemaCreate } from "../QuestionSchema.js";
 import { AsyncAutocomplete } from "@/GlobalComponent/AsyncAutocomplete.js";
 import { getAllChapters, getAllExamCategories, getAllSubjects, getAllSubjectsCategories, getAllTopics } from "@/getAll/api/subjectApi.js";
@@ -60,13 +60,21 @@ const createDefaultOptions = () => [
   { name: "", isCorrect: false },
 ];
 
-const normalizeImages = (images: TQuestionSchemaCreate["images"] = []) =>
-  images
-    .map(({ imageLink }) => ({ imageLink }))
-    .filter(({ imageLink }) => imageLink && !imageLink.startsWith("blob:"));
+const normalizeImageAsPerBackend = (images: TQuestionSchemaCreate["images"] = []) =>
+  images.map((obj) => ({ imageLink: obj.url }));
+const normalizeImageAsPerClient = (images: TQuestionImage[] = []) =>
+  images.map((obj) => ({
+    file: undefined,
+    url: obj.imageLink,
+  }));
+
+// const normalizeImages = (images: TQuestionSchemaCreate["images"] = []) =>
+//   images
+//     .map(({ imageLink }) => ({ imageLink }))
+//     .filter(({ imageLink }) => imageLink && !imageLink.startsWith("blob:"));
 
 const hasPendingImages = (images: TQuestionSchemaCreate["images"] = []) =>
-  images.some(({ imageLink }) => imageLink?.startsWith("blob:"));
+  images.some((obj) => obj.url?.startsWith("blob:"));
 
 export default function FormStructure() {
   const { qid } = useParams();
@@ -98,6 +106,8 @@ export default function FormStructure() {
     },
     resolver: zodResolver(questionSchemaCreate),
   });
+  console.log('errors: ', errors);
+  console.log('watch: ', watch());
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editAutocompleteOptions, setEditAutocompleteOptions] =
@@ -145,10 +155,10 @@ export default function FormStructure() {
         subjectCategories: data.subjectCategories ?? [],
         examCategories: data.examCategories ?? [],
       });
-
+      console.log('data.images: ', data.images);
       return {
         inputBox: data.inputBox ?? null,
-        images: normalizeImages(data.images),
+        images: normalizeImageAsPerClient(data.images),
         difficultyLevel: data.difficultyLevel || "easy",
         explanation: data.explanation ?? "",
         optionType: data.optionType ?? "Single",
@@ -191,7 +201,7 @@ export default function FormStructure() {
       const isNumerical = formData.optionType === "Numerical";
       const data = {
         ...formData,
-        images: normalizeImages(formData.images),
+        images: normalizeImageAsPerBackend(formData.images),
         inputBox: isNumerical ? formData.inputBox?.trim() || null : null,
         options: isNumerical ? [] : formData.options ?? [],
         subjectIds: [formData.subjectIds],
