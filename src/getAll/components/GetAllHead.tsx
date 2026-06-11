@@ -15,8 +15,6 @@ export default function GetAllHead({
     routeName: string;
 }) {
 
-    console.log(totalInteger, to, routeName)
-
     const location = useLocation();
     const resource = getResourceByPath(location?.pathname);
     return (

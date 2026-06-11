@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // Added useNavigate for redirection after saving
+import React, { useState, useEffect, useContext } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
     Box,
     TextField,
@@ -11,8 +11,14 @@ import {
     Select,
     CircularProgress
 } from '@mui/material';
+import { api } from '@/lib/api';
+import z from 'zod';
+import { toast } from "react-toastify";
+import { AuthContext } from '@/context/AuthContext';
 
 export default function AddUserForm() {
+    const { token } = useContext(AuthContext);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -21,44 +27,37 @@ export default function AddUserForm() {
     });
     const [loading, setLoading] = useState(false);
 
-    // 1. Hook up URL search parameter reader and router navigator
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const userId = searchParams.get('id'); // Will return the string ID (e.g., "20") or null
-    const isEditMode = Boolean(userId);   // True if we are editing, False if adding
+    const userId = searchParams.get('id');
+    const isEditMode = Boolean(userId);
 
     const baseURL = `${import.meta.env.VITE_BASE_URL}auth`;
 
-    // 2. Fetch single user data if 'id' exists in the URL
     useEffect(() => {
         if (!isEditMode) return;
 
         const fetchUserData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${baseURL}/${userId}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+
+                const result = await api<any>(`auth/${userId}`,{
+                    method: 'PUT'
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch user data');
-                const result = await response.json();
-
-                console.log(result)
-                
-                // Assuming your backend responds with a nested data object like { data: { name, email, role } }
-                // Adjust data mappings if your backend response structure differs
                 const userData = result?.data || result;
 
                 setFormData({
                     name: userData.name || '',
                     email: userData.email || '',
-                    password: '', // Standard security practice: leave password field empty during edits
+                    password: '',
                     role: userData.role || ''
                 });
+
             } catch (error: any) {
                 console.error("Error fetching single user:", error);
-                alert("Could not load user data.");
+
+                toast.error(error.message || "Could not load user data.");
             } finally {
                 setLoading(false);
             }
@@ -77,49 +76,43 @@ export default function AddUserForm() {
         }));
     };
 
-    // 3. Handle Form Submission dynamically based on Mode
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        // Dynamically choose endpoint path and method
-        const submissionURL = isEditMode ? `${baseURL}/${userId}` : baseURL;
+
+        const url = isEditMode ? `auth/${userId}` : 'auth/register';
         const HTTPMethod = isEditMode ? 'PUT' : 'POST';
 
         try {
-            // Optional: If password field is blank during edit, don't pass it to prevent overwriting it to empty
             const payload = { ...formData };
-            console.log(payload)
             if (isEditMode && !payload.password) {
                 delete (payload as any).password;
             }
 
-            const response = await fetch(submissionURL, {
-                method: HTTPMethod,
+            const response = await api<any>(url, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(payload),
+                method: HTTPMethod,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || `Something went wrong while processing your request.`);
-            }
-
-            alert(isEditMode ? 'User updated successfully!' : 'User added successfully!');
-            
-            // Clean up state and route back to list screen
-            setFormData({ name: '', email: '', password: '', role: '' });
-            navigate(-1); // Redirects back to previous view screen (UserList)
+            toast.success(response.message || "User created successfully");
+            navigate(-1);
 
         } catch (error: any) {
-            console.error('Submission Error:', error);
-            alert(error.message || 'Failed to connect to the server.');
+            console.log("Caught Error Payload inside handleSubmit:", error);
+
+            const toastMessage =
+                error.response?.data?.message ||
+                error.data?.message ||
+                error.message ||
+                "User Already Exist!";
+
+            toast.error(toastMessage);
         }
     };
 
-    // Loading indicator screen guard while pulling edit profiles
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
@@ -144,12 +137,10 @@ export default function AddUserForm() {
                 backgroundColor: 'background.paper'
             }}
         >
-            {/* 4. Conditional UI Heading */}
             <Typography variant="h5" component="h2" textAlign="center" gutterBottom>
                 {isEditMode ? 'Edit User Details' : 'Add New User'}
             </Typography>
 
-            {/* Name Field */}
             <TextField
                 label="Name"
                 name="name"
@@ -160,7 +151,6 @@ export default function AddUserForm() {
                 onChange={handleChange}
             />
 
-            {/* Email Field */}
             <TextField
                 label="Email"
                 name="email"
@@ -172,20 +162,18 @@ export default function AddUserForm() {
                 onChange={handleChange}
             />
 
-            {/* Password Field — optional during edits */}
             <TextField
                 label="Password"
                 name="password"
                 type="password"
                 variant="outlined"
                 fullWidth
-                required={!isEditMode} // Required for new users, optional for edits
+                required={!isEditMode}
                 placeholder={isEditMode ? "Leave blank to keep unchanged" : ""}
                 value={formData.password}
                 onChange={handleChange}
             />
 
-            {/* Role Dropdown */}
             <FormControl fullWidth required>
                 <InputLabel id="role-select-label">Role</InputLabel>
                 <Select
@@ -201,7 +189,6 @@ export default function AddUserForm() {
                 </Select>
             </FormControl>
 
-            {/* 5. Conditional Submit Button label and styling adjustments */}
             <Button
                 type="submit"
                 variant="contained"
@@ -211,7 +198,7 @@ export default function AddUserForm() {
             >
                 {isEditMode ? 'Update User' : 'Submit'}
             </Button>
-            
+
             {isEditMode && (
                 <Button variant="text" color="inherit" onClick={() => navigate(-1)}>
                     Cancel

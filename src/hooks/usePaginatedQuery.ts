@@ -46,7 +46,6 @@ export function usePaginatedQuery<
 }: UsePaginatedQueryProps<TItem, TParams>) {
     const [page, setPageState] = useState(initialPage);
     const [limit, setLimitState] = useState(initialLimit);
-    console.log('params: ', params);
 
     const query = useQuery({
         queryKey: [...queryKey, page, limit, params],

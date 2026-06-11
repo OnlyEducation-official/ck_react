@@ -130,8 +130,6 @@ export default function ProfileForm() {
   // }, [photoFile]);
 
   const onSubmit = async (data: ProfileFormValues) => {
-    console.log("FORM DATA", jwt_token);
-    console.log("FORM DATA", data);
 
     const payload = {
       teacher_name: data.teacher_name || null,
@@ -160,8 +158,6 @@ export default function ProfileForm() {
         },
         body: JSON.stringify(payload), // ✅ FIXED
       });
-
-      console.log("response: ", response);
 
       if (!response.ok) {
         const err = await response.json();

@@ -91,8 +91,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const baseURL = `${import.meta.env.VITE_BASE_URL}auth/login`;
 
-      console.log(baseURL, email,password)
-
       const res = await fetch(`${baseURL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -103,7 +101,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const data = await res.json();
-      console.log(data)
+
       const jwt = data.accessToken;
       const user = data.user.email;
       const id = data.user.id;

@@ -14,6 +14,8 @@ import {
     CircularProgress,
     Pagination
 } from '@mui/material';
+import { api } from '@/lib/api';
+import { toast } from "react-toastify";
 
 interface User {
     id: number;
@@ -33,23 +35,29 @@ export default function UserList() {
     const [searchParams, setSearchParams] = useSearchParams();
     const page = parseInt(searchParams.get('page') || '1', 10);
 
-    // 2. Initialize the navigation engine hook
     const navigate = useNavigate();
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${baseURL}?page=${page}&limit=${rowsPerPage}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
+            setError(null); // Clear any previous errors before fetching
+
+            // 1. Call your custom api utility passing the relative endpoint string with query parameters
+            // (Assuming your base path is 'auth', change to 'users' if that's your route)
+            const data = await api<any>(`auth/all-users?page=${page}&limit=${rowsPerPage}`, {
+                method: 'GET'
             });
 
-            if (!response.ok) throw new Error('Failed to fetch users');
-            const data = await response.json();
+            console.log("Fetched users data package:", data);
 
+            // 2. Map the state parameters directly from the parsed response object
             setUsers(data?.data || []);
             setTotalPages(data?.meta?.pagination?.totalPages || 1);
+
         } catch (err: any) {
+            console.error('Fetch Users Error:', err);
+
+            // 3. Your api wrapper now hands down the exact backend string to err.message
             setError(err.message || 'Something went wrong');
         } finally {
             setLoading(false);
@@ -64,30 +72,22 @@ export default function UserList() {
         setSearchParams({ page: value.toString() });
     };
 
-    // 3. Updated Edit handler to pass the user ID as a query param
     const handleEdit = (id: number) => {
         navigate(`/add-users?id=${id}`);
     };
 
     const handleDelete = async (id: number) => {
-        const deleteURL = `${import.meta.env.VITE_BASE_URL}auth`;
-
         const confirmDelete = window.confirm("Are you sure you want to delete this user?");
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch(`${deleteURL}/${id}`, {
+            const response = await api<any>(`auth/${id}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'Failed to delete the user.');
-            }
-
             setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-            alert('User deleted successfully.');
+
+            toast.success(response?.message || 'User deleted successfully.');
 
             if (users.length === 1 && page > 1) {
                 setSearchParams({ page: (page - 1).toString() });
@@ -97,7 +97,7 @@ export default function UserList() {
 
         } catch (err: any) {
             console.error('Delete Error:', err);
-            alert(err.message || 'An error occurred while trying to delete the user.');
+            toast.error(err.message || 'An error occurred while trying to delete the user.');
         }
     };
 
