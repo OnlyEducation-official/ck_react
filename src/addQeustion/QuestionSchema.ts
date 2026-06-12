@@ -5,10 +5,6 @@ const optionSchema = z.object({
   isCorrect: z.boolean({ error: "isCorrect must be true or false" }),
 });
 
-const imageSchema = z.object({
-  imageLink: z.string().url("Image link must be a valid URL"),
-});
-
 export const questionSchemaCreate = z
   .object({
     question: z.string().min(1, "Question is required"),
@@ -31,14 +27,10 @@ export const questionSchemaCreate = z
 
     inputBox: z.string().trim().nullable().optional(),
 
-    // images: z.array(imageSchema),
     images: z
       .array(
         z.object({
-          file: z
-            .instanceof(File)
-            .nullable()
-            .optional(),
+          file: z.instanceof(File).nullable().optional(),
           url: z.string().url().optional(),
           deleting: z.boolean().optional(),
         })
@@ -46,12 +38,17 @@ export const questionSchemaCreate = z
       .optional(),
 
     subjectIds: z.number().min(1, "Subject is required"),
-    subjectCategoryIds: z.array(z.number()).min(1, "Subject Category is required"),
+    subjectCategoryIds: z
+      .array(z.number())
+      .min(1, "Subject Category is required"),
     chapterIds: z.array(z.number()).min(1, "Chapter is required"),
     topicIds: z.array(z.number()).min(1, "Topic is required"),
     examCategoryIds: z.array(z.number()).min(1, "Exam Category is required"),
   })
   .superRefine((data, ctx) => {
+    // ─────────────────────────────────────────────
+    // NUMERICAL: inputBox required, options forbidden
+    // ─────────────────────────────────────────────
     if (data.optionType === "Numerical") {
       if (!data.inputBox) {
         ctx.addIssue({
@@ -65,11 +62,22 @@ export const questionSchemaCreate = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["options"],
-          message: "options must be empty for Numerical questions",
+          message: "Options must be empty for Numerical questions",
         });
       }
 
       return;
+    }
+
+    // ─────────────────────────────────────────────
+    // SINGLE / MULTIPLE: inputBox forbidden, options required
+    // ─────────────────────────────────────────────
+    if (data.inputBox) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["inputBox"],
+        message: "inputBox must be empty for non-Numerical questions",
+      });
     }
 
     if (!data.options || data.options.length < 2) {
@@ -78,13 +86,29 @@ export const questionSchemaCreate = z
         path: ["options"],
         message: "At least 2 options are required",
       });
+      // Skip the correctness-count check until the user has enough options
+      return;
     }
 
-    if (data.inputBox) {
+    const correctCount = data.options.filter((opt) => opt.isCorrect).length;
+
+    // Single → exactly one option marked correct
+    if (data.optionType === "Single" && correctCount !== 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["inputBox"],
-        message: "inputBox must be empty for non-Numerical questions",
+        path: ["options"],
+        message:
+          "Exactly one option must be marked as correct for Single type",
+      });
+    }
+
+    // Multiple → two or more options marked correct
+    if (data.optionType === "Multiple" && correctCount < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["options"],
+        message:
+          "At least two options must be marked as correct for Multiple type",
       });
     }
   });
