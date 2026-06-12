@@ -8,8 +8,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { api } from "@/lib/api";
 import { ApiErrorResponse, ApiSuccessResponse } from "@/types/generic.api.types";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TestSeriesForm = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const {
@@ -68,7 +70,10 @@ const TestSeriesForm = () => {
         if (!isEdit) {
           reset();
           navigate("/test-topic-list");
-        }
+        };
+        await queryClient.invalidateQueries({
+          queryKey: ["topics"],
+        });
       }
 
 
