@@ -92,7 +92,7 @@ export default function FormStructure() {
     handleSubmit,
     reset,
     trigger,
-    formState: { errors },
+    formState: { errors, isSubmitted, isValid },
   } = useForm<TQuestionSchemaCreate>({
     defaultValues: {
       subjectIds: 0,
@@ -621,6 +621,7 @@ export default function FormStructure() {
             type="submit"
             sx={{
               px: 5,
+
               py: 1,
               textTransform: "none",
               fontWeight: 600,
@@ -634,7 +635,7 @@ export default function FormStructure() {
                 boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
               },
             }}
-            disabled={isSubmitting}
+            disabled={isSubmitting || (!isValid && isSubmitted)}
           >
             {isSubmitting ? "Submitting..." : qid ? "Update" : "Submit"}
           </Button>
