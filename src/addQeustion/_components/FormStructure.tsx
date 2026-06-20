@@ -23,6 +23,8 @@ import { questionSchemaCreate, TQuestionSchemaCreate } from "../QuestionSchema.j
 import { AsyncAutocomplete } from "@/GlobalComponent/AsyncAutocomplete.js";
 import { getAllChapters, getAllExamCategories, getAllSubjects, getAllSubjectsCategories, getAllTopics } from "@/getAll/api/subjectApi.js";
 import { AsyncMultiAutocomplete } from "@/GlobalComponent/AsyncMultiAutocomplete.js";
+import Cookies from "js-cookie";
+import { useQueryClient } from "@tanstack/react-query";
 
 type EditAutocompleteOptions = {
   subjects: TQuestionRelation[];
@@ -77,6 +79,9 @@ const hasPendingImages = (images: TQuestionSchemaCreate["images"] = []) =>
   images.some((obj) => obj.url?.startsWith("blob:"));
 
 export default function FormStructure() {
+  const accessToken = Cookies.get("auth_token");
+  const queryClient = useQueryClient();
+
   const { qid } = useParams();
   const navigate = useNavigate();
   const {
@@ -214,6 +219,7 @@ export default function FormStructure() {
         method: isEdit ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify(data),
       });
@@ -225,6 +231,7 @@ export default function FormStructure() {
         qid ? "Update  Question Form Failed!" : "Create Question Form Failed!",
       );
       if (!success) return; // ❌ stop if failed
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
       if (!qid) {
         reset();
         navigate("/questions-list");
